@@ -1,0 +1,16 @@
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: sosyolobi-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: sosyolobi
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: "123"
+    ports:
+      - "5433:5432"
+    volumes:
+      - sosyolobi-pgdata:/var/lib/postgresql/data
+
+volumes:
+  sosyolobi-pgdata:
