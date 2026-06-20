@@ -6,5 +6,7 @@ public class AuthResponse
     public string RefreshToken { get; set; } = null!;
     public DateTime ExpiresAt { get; set; }
     public Guid UserId { get; set; }
+    public string Role { get; set; } = null!;
+    public string? DisplayName { get; set; }
     public bool IsNewUser { get; set; }
 }

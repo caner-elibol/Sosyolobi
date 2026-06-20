@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Sosyolobi.Api.Data;
+using Sosyolobi.Api.DTOs.Admin;
 using Sosyolobi.Api.DTOs.Common;
 using Sosyolobi.Api.DTOs.Reviews;
 using Sosyolobi.Api.Entities;
@@ -101,5 +102,51 @@ public class ReviewService : IReviewService
             Page = paged.Page,
             PageSize = paged.PageSize
         };
+    }
+
+    public async Task<PagedResponse<AdminReviewResponse>> GetAllAsync(PagedRequest paged)
+    {
+        var query = _db.Reviews
+            .Include(r => r.ReviewerUser).ThenInclude(u => u.Profile)
+            .Include(r => r.ReviewedUser).ThenInclude(u => u.Profile)
+            .Include(r => r.Activity)
+            .OrderByDescending(r => r.CreatedAt);
+
+        var total = await query.CountAsync();
+        var items = await query
+            .Skip((paged.Page - 1) * paged.PageSize)
+            .Take(paged.PageSize)
+            .ToListAsync();
+
+        return new PagedResponse<AdminReviewResponse>
+        {
+            Items = items.Select(r => new AdminReviewResponse
+            {
+                Id = r.Id,
+                ActivityId = r.ActivityId,
+                ActivityTitle = r.Activity?.Title ?? string.Empty,
+                ReviewerUserId = r.ReviewerUserId,
+                ReviewerDisplayName = r.ReviewerUser?.Profile?.DisplayName ?? string.Empty,
+                ReviewerAvatarUrl = r.ReviewerUser?.Profile?.AvatarUrl,
+                ReviewedUserId = r.ReviewedUserId,
+                ReviewedDisplayName = r.ReviewedUser?.Profile?.DisplayName ?? string.Empty,
+                Rating = r.Rating,
+                Comment = r.Comment,
+                IsHidden = r.IsHidden,
+                CreatedAt = r.CreatedAt
+            }).ToList(),
+            TotalCount = total,
+            Page = paged.Page,
+            PageSize = paged.PageSize
+        };
+    }
+
+    public async Task UpdateVisibilityAsync(Guid reviewId, bool isHidden)
+    {
+        var review = await _db.Reviews.FindAsync(reviewId)
+            ?? throw new KeyNotFoundException("Yorum bulunamadı.");
+
+        review.IsHidden = isHidden;
+        await _db.SaveChangesAsync();
     }
 }

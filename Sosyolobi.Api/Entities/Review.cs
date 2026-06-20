@@ -8,6 +8,7 @@ public class Review
     public Guid ReviewedUserId { get; set; }
     public int Rating { get; set; }
     public string? Comment { get; set; }
+    public bool IsHidden { get; set; } = false;
     public DateTime CreatedAt { get; set; }
 
     public Activity Activity { get; set; } = null!;

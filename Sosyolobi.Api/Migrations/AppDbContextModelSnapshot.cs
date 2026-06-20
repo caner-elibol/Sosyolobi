@@ -423,6 +423,10 @@ namespace Sosyolobi.Api.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
+                    b.Property<bool>("IsHidden")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_hidden");
+
                     b.Property<int>("Rating")
                         .HasColumnType("integer")
                         .HasColumnName("rating");
@@ -473,10 +477,19 @@ namespace Sosyolobi.Api.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("last_login_at");
 
+                    b.Property<string>("PasswordHash")
+                        .HasColumnType("text")
+                        .HasColumnName("password_hash");
+
                     b.Property<string>("PhoneNumber")
                         .IsRequired()
                         .HasColumnType("text")
                         .HasColumnName("phone_number");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasColumnType("text")
+                        .HasColumnName("role");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer")

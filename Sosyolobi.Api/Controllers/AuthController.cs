@@ -29,6 +29,13 @@ public class AuthController : ControllerBase
         return Ok(ApiResponse<AuthResponse>.Ok(result));
     }
 
+    [HttpPost("login")]
+    public async Task<IActionResult> Login([FromBody] AdminLoginRequest request)
+    {
+        var result = await _authService.LoginAsync(request);
+        return Ok(ApiResponse<AuthResponse>.Ok(result));
+    }
+
     [HttpPost("refresh-token")]
     public async Task<IActionResult> RefreshToken([FromBody] RefreshTokenRequest request)
     {

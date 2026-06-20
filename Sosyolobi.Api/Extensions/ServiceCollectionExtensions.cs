@@ -1,6 +1,7 @@
 using System.Text;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using System.Security.Claims;
 using Sosyolobi.Api.Options;
 using Sosyolobi.Api.Services;
 using Sosyolobi.Api.Services.Interfaces;
@@ -25,7 +26,8 @@ public static class ServiceCollectionExtensions
                     ValidIssuer = jwtOptions.Issuer,
                     ValidAudience = jwtOptions.Audience,
                     IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtOptions.Secret)),
-                    ClockSkew = TimeSpan.Zero
+                    ClockSkew = TimeSpan.Zero,
+                    RoleClaimType = ClaimTypes.Role
                 };
 
                 options.Events = new JwtBearerEvents

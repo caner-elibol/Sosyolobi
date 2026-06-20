@@ -1,0 +1,32 @@
+@import "tailwindcss";
+
+:root {
+  --purple: #5b5fe9;
+  --purple-light: #eef0ff;
+  --page-bg: #f4f5f9;
+  --card-bg: #ffffff;
+  --card-border: #f0f1f5;
+  --text-dark: #1b1d29;
+  --text-muted: #9498a6;
+  --sidebar-w: 240px;
+  --topbar-h: 64px;
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  background-color: var(--page-bg);
+  color: var(--text-dark);
+  font-family: var(--font-inter, "Inter", sans-serif);
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.4;
+  }
+}

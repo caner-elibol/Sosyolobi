@@ -9,7 +9,7 @@ namespace Sosyolobi.Api.Helpers;
 
 public static class JwtHelper
 {
-    public static string GenerateAccessToken(Guid userId, string phoneNumber, JwtOptions options)
+    public static string GenerateAccessToken(Guid userId, string phoneNumber, string role, JwtOptions options)
     {
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(options.Secret));
         var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -18,7 +18,9 @@ public static class JwtHelper
         {
             new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim("phone", phoneNumber)
+            new Claim("phone", phoneNumber),
+            new Claim("role", role),
+            new Claim(ClaimTypes.Role, role)
         };
 
         var token = new JwtSecurityToken(

@@ -48,7 +48,7 @@ public class ActivityRequestService : IActivityRequestService
         await _db.SaveChangesAsync();
 
         await _notifications.SendAsync(activity.CreatedByUserId, NotificationType.ActivityRequest,
-            "Yeni katılım isteği", null, activityId);
+            "Yeni katılım isteği", request.Message, activityId);
 
         var user = await _db.Users.Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == userId);
         return MapToResponse(entity, user);
@@ -121,7 +121,7 @@ public class ActivityRequestService : IActivityRequestService
         await _db.SaveChangesAsync();
 
         await _notifications.SendAsync(request.UserId, NotificationType.RequestRejected,
-            "Katılım isteğiniz reddedildi", null, request.ActivityId);
+            "Katılım isteğiniz reddedildi", request.Message, request.ActivityId);
     }
 
     public async Task CancelAsync(Guid requestId, Guid userId)

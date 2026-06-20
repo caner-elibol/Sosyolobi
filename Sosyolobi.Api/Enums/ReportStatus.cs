@@ -3,6 +3,7 @@ namespace Sosyolobi.Api.Enums;
 public enum ReportStatus
 {
     Pending = 1,
-    Resolved = 2,
-    Dismissed = 3
+    Reviewing = 2,
+    Resolved = 3,
+    Dismissed = 4
 }

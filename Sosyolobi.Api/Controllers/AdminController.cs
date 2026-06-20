@@ -1,8 +1,8 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sosyolobi.Api.DTOs.Activities;
+using Sosyolobi.Api.DTOs.Admin;
 using Sosyolobi.Api.DTOs.Common;
-using Sosyolobi.Api.DTOs.Profiles;
 using Sosyolobi.Api.DTOs.Reports;
 using Sosyolobi.Api.Services.Interfaces;
 
@@ -15,25 +15,38 @@ public class AdminController : ControllerBase
 {
     private readonly IAdminService _adminService;
     private readonly IReportService _reportService;
+    private readonly IReviewService _reviewService;
 
-    public AdminController(IAdminService adminService, IReportService reportService)
+    public AdminController(IAdminService adminService, IReportService reportService, IReviewService reviewService)
     {
         _adminService = adminService;
         _reportService = reportService;
+        _reviewService = reviewService;
     }
+
+    // ── Dashboard ──────────────────────────────────────────────────────────
+
+    [HttpGet("dashboard/stats")]
+    public async Task<IActionResult> GetDashboardStats()
+    {
+        var result = await _adminService.GetDashboardStatsAsync();
+        return Ok(ApiResponse<DashboardStatsResponse>.Ok(result));
+    }
+
+    // ── Users ──────────────────────────────────────────────────────────────
 
     [HttpGet("users")]
-    public async Task<IActionResult> GetUsers([FromQuery] PagedRequest paged)
+    public async Task<IActionResult> GetUsers([FromQuery] AdminUserFilterRequest filter)
     {
-        var result = await _adminService.GetUsersAsync(paged);
-        return Ok(ApiResponse<PagedResponse<ProfileResponse>>.Ok(result));
+        var result = await _adminService.GetUsersAsync(filter);
+        return Ok(ApiResponse<PagedResponse<AdminUserListItem>>.Ok(result));
     }
 
-    [HttpGet("activities")]
-    public async Task<IActionResult> GetActivities([FromQuery] PagedRequest paged)
+    [HttpGet("users/{id:guid}")]
+    public async Task<IActionResult> GetUser(Guid id)
     {
-        var result = await _adminService.GetActivitiesAsync(paged);
-        return Ok(ApiResponse<PagedResponse<ActivityResponse>>.Ok(result));
+        var result = await _adminService.GetUserDetailAsync(id);
+        return Ok(ApiResponse<AdminUserDetailResponse>.Ok(result));
     }
 
     [HttpPost("users/{id:guid}/suspend")]
@@ -50,11 +63,57 @@ public class AdminController : ControllerBase
         return Ok(ApiResponse<object>.Ok(null, "Kullanıcı aktifleştirildi."));
     }
 
-    [HttpGet("reports")]
-    public async Task<IActionResult> GetReports([FromQuery] PagedRequest paged)
+    [HttpPost("users/{id:guid}/ban")]
+    public async Task<IActionResult> Ban(Guid id)
     {
-        var result = await _reportService.GetAllAsync(paged);
+        await _adminService.BanUserAsync(id);
+        return Ok(ApiResponse<object>.Ok(null, "Kullanıcı banlandı."));
+    }
+
+    // ── Activities ─────────────────────────────────────────────────────────
+
+    [HttpGet("activities")]
+    public async Task<IActionResult> GetActivities([FromQuery] AdminActivityFilterRequest filter)
+    {
+        var result = await _adminService.GetActivitiesAsync(filter);
+        return Ok(ApiResponse<PagedResponse<ActivityResponse>>.Ok(result));
+    }
+
+    [HttpGet("activities/{id:guid}")]
+    public async Task<IActionResult> GetActivity(Guid id)
+    {
+        var result = await _adminService.GetActivityDetailAsync(id);
+        return Ok(ApiResponse<AdminActivityDetailResponse>.Ok(result));
+    }
+
+    [HttpPatch("activities/{id:guid}/status")]
+    public async Task<IActionResult> UpdateActivityStatus(Guid id, [FromBody] UpdateActivityStatusRequest request)
+    {
+        await _adminService.UpdateActivityStatusAsync(id, request.Status);
+        return Ok(ApiResponse<object>.Ok(null, "Etkinlik durumu güncellendi."));
+    }
+
+    // ── Reports ────────────────────────────────────────────────────────────
+
+    [HttpGet("reports")]
+    public async Task<IActionResult> GetReports([FromQuery] AdminReportFilterRequest filter)
+    {
+        var result = await _reportService.GetAllAsync(filter);
         return Ok(ApiResponse<PagedResponse<ReportResponse>>.Ok(result));
+    }
+
+    [HttpGet("reports/{id:guid}")]
+    public async Task<IActionResult> GetReport(Guid id)
+    {
+        var result = await _reportService.GetByIdAsync(id);
+        return Ok(ApiResponse<ReportResponse>.Ok(result));
+    }
+
+    [HttpPatch("reports/{id:guid}/status")]
+    public async Task<IActionResult> UpdateReportStatus(Guid id, [FromBody] UpdateReportStatusRequest request)
+    {
+        await _reportService.UpdateStatusAsync(id, request.Status, request.AdminNote);
+        return Ok(ApiResponse<object>.Ok(null, "Rapor durumu güncellendi."));
     }
 
     [HttpPost("reports/{id:guid}/resolve")]
@@ -62,5 +121,51 @@ public class AdminController : ControllerBase
     {
         await _reportService.ResolveAsync(id);
         return Ok(ApiResponse<object>.Ok(null, "Rapor çözüldü."));
+    }
+
+    // ── Reviews ────────────────────────────────────────────────────────────
+
+    [HttpGet("reviews")]
+    public async Task<IActionResult> GetReviews([FromQuery] PagedRequest paged)
+    {
+        var result = await _reviewService.GetAllAsync(paged);
+        return Ok(ApiResponse<PagedResponse<AdminReviewResponse>>.Ok(result));
+    }
+
+    [HttpPatch("reviews/{id:guid}/visibility")]
+    public async Task<IActionResult> UpdateReviewVisibility(Guid id, [FromBody] UpdateReviewVisibilityRequest request)
+    {
+        await _reviewService.UpdateVisibilityAsync(id, request.IsHidden);
+        return Ok(ApiResponse<object>.Ok(null, "Yorum görünürlüğü güncellendi."));
+    }
+
+    // ── Categories ─────────────────────────────────────────────────────────
+
+    [HttpGet("categories")]
+    public async Task<IActionResult> GetCategories()
+    {
+        var result = await _adminService.GetCategoriesAsync();
+        return Ok(ApiResponse<List<AdminCategoryResponse>>.Ok(result));
+    }
+
+    [HttpPost("categories")]
+    public async Task<IActionResult> CreateCategory([FromBody] AdminCategoryRequest request)
+    {
+        var result = await _adminService.CreateCategoryAsync(request);
+        return CreatedAtAction(nameof(GetCategories), ApiResponse<AdminCategoryResponse>.Ok(result, "Kategori oluşturuldu."));
+    }
+
+    [HttpPut("categories/{id:guid}")]
+    public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] AdminCategoryRequest request)
+    {
+        await _adminService.UpdateCategoryAsync(id, request);
+        return Ok(ApiResponse<object>.Ok(null, "Kategori güncellendi."));
+    }
+
+    [HttpPatch("categories/{id:guid}/status")]
+    public async Task<IActionResult> UpdateCategoryStatus(Guid id, [FromBody] bool isActive)
+    {
+        await _adminService.UpdateCategoryStatusAsync(id, isActive);
+        return Ok(ApiResponse<object>.Ok(null, "Kategori durumu güncellendi."));
     }
 }

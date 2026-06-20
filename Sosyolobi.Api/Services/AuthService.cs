@@ -101,7 +101,7 @@ public class AuthService : IAuthService
 
         await _db.SaveChangesAsync();
 
-        var accessToken = JwtHelper.GenerateAccessToken(user.Id, user.PhoneNumber, _jwtOptions);
+        var accessToken = JwtHelper.GenerateAccessToken(user.Id, user.PhoneNumber, user.Role, _jwtOptions);
 
         return new AuthResponse
         {
@@ -109,14 +109,64 @@ public class AuthService : IAuthService
             RefreshToken = refreshTokenValue,
             ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenExpirationMinutes),
             UserId = user.Id,
+            Role = user.Role,
+            DisplayName = user.Profile?.DisplayName,
             IsNewUser = isNewUser
+        };
+    }
+
+    public async Task<AuthResponse> LoginAsync(AdminLoginRequest request)
+    {
+        var phone = PhoneNumberHelper.Normalize(request.PhoneNumber);
+
+        var user = await _db.Users
+            .Include(u => u.Profile)
+            .FirstOrDefaultAsync(u => u.PhoneNumber == phone)
+            ?? throw new UnauthorizedAccessException("Kullanıcı bulunamadı.");
+
+        if (string.IsNullOrEmpty(user.PasswordHash))
+            throw new UnauthorizedAccessException("Parola tabanlı giriş bu hesap için etkin değil.");
+
+        if (!BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+            throw new UnauthorizedAccessException("Telefon numarası veya parola yanlış.");
+
+        if (user.Role is not ("Admin" or "SuperAdmin"))
+            throw new UnauthorizedAccessException("Bu panele erişim yetkiniz yok.");
+
+        if (user.Status == Enums.UserStatus.Suspended || user.Status == Enums.UserStatus.Banned)
+            throw new UnauthorizedAccessException("Hesap askıya alınmış veya banlı.");
+
+        user.LastLoginAt = DateTime.UtcNow;
+
+        var refreshTokenValue = JwtHelper.GenerateRefreshToken();
+        _db.RefreshTokens.Add(new RefreshToken
+        {
+            Id = Guid.CreateVersion7(),
+            UserId = user.Id,
+            Token = refreshTokenValue,
+            ExpiresAt = DateTime.UtcNow.AddDays(_jwtOptions.RefreshTokenExpirationDays),
+            CreatedAt = DateTime.UtcNow
+        });
+        await _db.SaveChangesAsync();
+
+        var accessToken = JwtHelper.GenerateAccessToken(user.Id, user.PhoneNumber, user.Role, _jwtOptions);
+
+        return new AuthResponse
+        {
+            AccessToken = accessToken,
+            RefreshToken = refreshTokenValue,
+            ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenExpirationMinutes),
+            UserId = user.Id,
+            Role = user.Role,
+            DisplayName = user.Profile?.DisplayName,
+            IsNewUser = false
         };
     }
 
     public async Task<AuthResponse> RefreshTokenAsync(RefreshTokenRequest request)
     {
         var token = await _db.RefreshTokens
-            .Include(t => t.User)
+            .Include(t => t.User).ThenInclude(u => u.Profile)
             .FirstOrDefaultAsync(t => t.Token == request.RefreshToken && !t.IsRevoked && t.ExpiresAt > DateTime.UtcNow)
             ?? throw new UnauthorizedAccessException("Geçersiz refresh token.");
 
@@ -134,7 +184,7 @@ public class AuthService : IAuthService
         _db.RefreshTokens.Add(newTokenEntity);
         await _db.SaveChangesAsync();
 
-        var accessToken = JwtHelper.GenerateAccessToken(token.User.Id, token.User.PhoneNumber, _jwtOptions);
+        var accessToken = JwtHelper.GenerateAccessToken(token.User.Id, token.User.PhoneNumber, token.User.Role, _jwtOptions);
 
         return new AuthResponse
         {
@@ -142,6 +192,8 @@ public class AuthService : IAuthService
             RefreshToken = newRefreshToken,
             ExpiresAt = DateTime.UtcNow.AddMinutes(_jwtOptions.AccessTokenExpirationMinutes),
             UserId = token.UserId,
+            Role = token.User.Role,
+            DisplayName = token.User.Profile?.DisplayName,
             IsNewUser = false
         };
     }

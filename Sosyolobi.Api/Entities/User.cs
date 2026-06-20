@@ -8,6 +8,8 @@ public class User
     public string PhoneNumber { get; set; } = null!;
     public bool IsPhoneVerified { get; set; }
     public string? Email { get; set; }
+    public string? PasswordHash { get; set; }
+    public string Role { get; set; } = "User";
     public UserStatus Status { get; set; } = UserStatus.Active;
     public DateTime CreatedAt { get; set; }
     public DateTime? LastLoginAt { get; set; }
