@@ -1,0 +1,168 @@
+// ── Enums ──────────────────────────────────────────────────────────────────
+
+export enum ActivityStatus {
+  Open = 1,
+  Full = 2,
+  Completed = 3,
+  Cancelled = 4,
+}
+
+export enum ActivityRequestStatus {
+  Pending = 1,
+  Approved = 2,
+  Rejected = 3,
+  Cancelled = 4,
+}
+
+export enum SkillLevel {
+  Any = 0,
+  Beginner = 1,
+  Intermediate = 2,
+  Advanced = 3,
+}
+
+export enum GenderPreference {
+  Any = 0,
+  Male = 1,
+  Female = 2,
+  Mixed = 3,
+}
+
+// ── Common ─────────────────────────────────────────────────────────────────
+
+export interface ApiResponse<T> {
+  success: boolean;
+  data: T;
+  message?: string;
+}
+
+export interface PagedResponse<T> {
+  items: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPreviousPage: boolean;
+}
+
+// ── Auth ───────────────────────────────────────────────────────────────────
+
+export interface UserAuthResponse {
+  accessToken: string;
+  refreshToken: string;
+  expiresAt: string;
+  userId: string;
+  role: string;
+  displayName?: string;
+  isNewUser: boolean;
+}
+
+export interface UserTokenPayload {
+  sub: string;
+  role: string;
+  displayName?: string;
+  exp: number;
+}
+
+// ── Categories ─────────────────────────────────────────────────────────────
+
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  iconName?: string;
+  color?: string;
+  sortOrder: number;
+}
+
+// ── Activities ─────────────────────────────────────────────────────────────
+
+export interface Activity {
+  id: string;
+  createdByUserId: string;
+  createdByDisplayName: string;
+  createdByAvatarUrl?: string;
+  categoryId: string;
+  categoryName: string;
+  title: string;
+  description?: string;
+  eventDate: string;
+  neededPeopleCount: number;
+  currentPeopleCount: number;
+  pricePerPerson?: number;
+  skillLevel: SkillLevel;
+  genderPreference: GenderPreference;
+  status: ActivityStatus;
+  latitude: number;
+  longitude: number;
+  addressText: string;
+  distanceMeters?: number;
+  createdAt: string;
+}
+
+export interface ActivityDetail extends Activity {
+  addressDetailPrivate?: string;
+  participants: PublicProfile[];
+}
+
+export interface ActivityMapItem {
+  id: string;
+  title: string;
+  categoryName: string;
+  latitude: number;
+  longitude: number;
+  eventDate: string;
+  neededPeopleCount: number;
+  pricePerPerson?: number;
+  distanceMeters: number;
+}
+
+// ── Profile ────────────────────────────────────────────────────────────────
+
+export interface UserProfile {
+  userId: string;
+  displayName: string;
+  bio?: string;
+  avatarUrl?: string;
+  birthDate?: string;
+  averageRating: number;
+  reviewCount: number;
+  completedActivityCount: number;
+  isPhoneVerified: boolean;
+  createdAt: string;
+}
+
+export interface PublicProfile {
+  userId: string;
+  displayName: string;
+  bio?: string;
+  avatarUrl?: string;
+  averageRating: number;
+  reviewCount: number;
+  completedActivityCount: number;
+}
+
+// ── Activity Requests ──────────────────────────────────────────────────────
+
+export interface ActivityJoinRequest {
+  id: string;
+  activityId: string;
+  user: PublicProfile;
+  message?: string;
+  status: ActivityRequestStatus;
+  createdAt: string;
+  respondedAt?: string;
+}
+
+// ── Notifications ──────────────────────────────────────────────────────────
+
+export interface Notification {
+  id: string;
+  type: number;
+  title: string;
+  message?: string;
+  activityId?: string;
+  isRead: boolean;
+  createdAt: string;
+}

@@ -31,6 +31,22 @@ public class ActivityRequestsController : ControllerBase
         return Ok(ApiResponse<IList<ActivityJoinRequestResponse>>.Ok(result));
     }
 
+    [HttpGet("api/activity-requests/sent")]
+    public async Task<IActionResult> GetSent()
+    {
+        var userId = User.GetUserId();
+        var result = await _requestService.GetSentRequestsAsync(userId);
+        return Ok(ApiResponse<IList<ActivityJoinRequestResponse>>.Ok(result));
+    }
+
+    [HttpGet("api/activity-requests/incoming")]
+    public async Task<IActionResult> GetIncoming()
+    {
+        var userId = User.GetUserId();
+        var result = await _requestService.GetIncomingRequestsAsync(userId);
+        return Ok(ApiResponse<IList<ActivityJoinRequestResponse>>.Ok(result));
+    }
+
     [HttpPost("api/activity-requests/{requestId:guid}/approve")]
     public async Task<IActionResult> Approve(Guid requestId)
     {

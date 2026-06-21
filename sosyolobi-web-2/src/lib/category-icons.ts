@@ -1,0 +1,15 @@
+export const CATEGORY_ICONS: Record<string, string> = {
+  "Futbol": "⚽",
+  "Basketbol": "🏀",
+  "Voleybol": "🏐",
+  "Tenis": "🎾",
+  "Koşu": "🏃",
+  "Bisiklet": "🚴",
+  "Yürüyüş": "🥾",
+  "Kamp": "🏕️",
+  "Kayak": "⛷️",
+  "Masa Oyunu": "🎲",
+  "Konser": "🎵",
+  "Kahve & Sosyal Buluşma": "☕",
+  "Diğer": "📍",
+};

@@ -71,6 +71,29 @@ public class ActivityRequestService : IActivityRequestService
         return requests.Select(r => MapToResponse(r, r.User)).ToList();
     }
 
+    public async Task<IList<ActivityJoinRequestResponse>> GetSentRequestsAsync(Guid userId)
+    {
+        var requests = await _db.ActivityRequests
+            .Include(r => r.User).ThenInclude(u => u.Profile)
+            .Where(r => r.UserId == userId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        return requests.Select(r => MapToResponse(r, r.User)).ToList();
+    }
+
+    public async Task<IList<ActivityJoinRequestResponse>> GetIncomingRequestsAsync(Guid userId)
+    {
+        var requests = await _db.ActivityRequests
+            .Include(r => r.User).ThenInclude(u => u.Profile)
+            .Include(r => r.Activity)
+            .Where(r => r.Activity.CreatedByUserId == userId)
+            .OrderByDescending(r => r.CreatedAt)
+            .ToListAsync();
+
+        return requests.Select(r => MapToResponse(r, r.User)).ToList();
+    }
+
     public async Task ApproveAsync(Guid requestId, Guid userId)
     {
         var request = await _db.ActivityRequests.Include(r => r.Activity)
