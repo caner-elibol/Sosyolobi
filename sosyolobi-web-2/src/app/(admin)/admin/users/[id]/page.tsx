@@ -20,7 +20,7 @@ const C = {
   cardBg: "#FFFFFF",
   cardBorder: "#F0F1F5",
   textDark: "#1B1D29",
-  textMuted: "#9498A6",
+  textMuted: "#6B7280",
 };
 
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
@@ -167,7 +167,7 @@ export default function UserDetailPage() {
             {user.status === UserStatus.Suspended && (
               <button
                 onClick={() => setConfirm("activate")}
-                style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", borderRadius: 8, border: `1px solid ${C.cardBorder}`, backgroundColor: "#fff", color: "#22C55E", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", borderRadius: 8, border: `1px solid ${C.cardBorder}`, backgroundColor: "#fff", color: "#15803D", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
               >
                 <ShieldCheck style={{ width: 14, height: 14 }} /> Aktifleştir
               </button>
@@ -175,7 +175,7 @@ export default function UserDetailPage() {
             {user.status !== UserStatus.Banned && (
               <button
                 onClick={() => setConfirm("ban")}
-                style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", borderRadius: 8, border: "1px solid #FEE2E2", backgroundColor: "#FEF2F2", color: "#EF4444", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", borderRadius: 8, border: "1px solid #FEE2E2", backgroundColor: "#FEF2F2", color: "#B91C1C", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
               >
                 <ShieldAlert style={{ width: 14, height: 14 }} /> Banla
               </button>
@@ -183,7 +183,7 @@ export default function UserDetailPage() {
             {user.status === UserStatus.Banned && (
               <button
                 onClick={() => setConfirm("activate")}
-                style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", borderRadius: 8, border: `1px solid ${C.cardBorder}`, backgroundColor: "#fff", color: "#22C55E", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                style={{ display: "flex", alignItems: "center", gap: 6, height: 36, padding: "0 14px", borderRadius: 8, border: `1px solid ${C.cardBorder}`, backgroundColor: "#fff", color: "#15803D", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
               >
                 <ShieldCheck style={{ width: 14, height: 14 }} /> Banı Kaldır
               </button>
@@ -196,15 +196,15 @@ export default function UserDetailPage() {
           display: "flex", borderTop: `1px solid ${C.cardBorder}`,
           padding: "16px 24px",
         }}>
-          <StatBubble label="Ort. Puan" value={`★ ${user.averageRating.toFixed(1)}`} color="#F59E0B" />
+          <StatBubble label="Ort. Puan" value={`★ ${user.averageRating.toFixed(1)}`} color="#B45309" />
           <div style={{ width: 1, backgroundColor: C.cardBorder }} />
           <StatBubble label="Yorum Sayısı" value={user.reviewCount} />
           <div style={{ width: 1, backgroundColor: C.cardBorder }} />
-          <StatBubble label="Tamamlanan Etkinlik" value={user.completedActivityCount} color="#22C55E" />
+          <StatBubble label="Tamamlanan Etkinlik" value={user.completedActivityCount} color="#15803D" />
           <div style={{ width: 1, backgroundColor: C.cardBorder }} />
           <StatBubble label="Oluşturulan Etkinlik" value={user.createdActivityCount} color={C.purple} />
           <div style={{ width: 1, backgroundColor: C.cardBorder }} />
-          <StatBubble label="Şikayet Sayısı" value={user.reportCount} color={user.reportCount > 0 ? "#EF4444" : C.textMuted} />
+          <StatBubble label="Şikayet Sayısı" value={user.reportCount} color={user.reportCount > 0 ? "#B91C1C" : C.textMuted} />
         </div>
       </Card>
 

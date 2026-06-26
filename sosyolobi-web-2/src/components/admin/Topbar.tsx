@@ -22,7 +22,7 @@ export function Topbar({ title }: { title?: string }) {
 
       {/* Search */}
       <div style={{ position: "relative", marginLeft: title ? 0 : "auto" }}>
-        <Search style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 15, height: 15, color: "#9498A6" }} />
+        <Search style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 15, height: 15, color: "#6B7280" }} />
         <input
           placeholder="Ara…"
           style={{
@@ -40,7 +40,7 @@ export function Topbar({ title }: { title?: string }) {
           width: 38, height: 38, borderRadius: 10,
           border: "1px solid #F0F1F5", backgroundColor: "#F8F9FF",
           display: "flex", alignItems: "center", justifyContent: "center",
-          cursor: "pointer", color: "#9498A6",
+          cursor: "pointer", color: "#6B7280",
         }}>
           <Bell size={17} />
         </button>
@@ -67,7 +67,7 @@ export function Topbar({ title }: { title?: string }) {
           <p style={{ fontSize: 13, fontWeight: 600, color: "#1B1D29", lineHeight: 1 }}>
             {admin?.displayName || "Admin"}
           </p>
-          <p style={{ fontSize: 11, color: "#9498A6", marginTop: 2 }}>{admin?.role || "Admin"}</p>
+          <p style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{admin?.role || "Admin"}</p>
         </div>
       </div>
     </header>

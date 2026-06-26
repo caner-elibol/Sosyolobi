@@ -1,5 +1,5 @@
 import type { ActivityMapItem } from "@/types/user";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 interface ActivityMarkerProps {
   activity: ActivityMapItem;
@@ -8,14 +8,14 @@ interface ActivityMarkerProps {
 }
 
 export function ActivityMarker({ activity, onClick, selected = false }: ActivityMarkerProps) {
-  const icon = CATEGORY_ICONS[activity.categoryName] ?? "📍";
+  const Icon = getCategoryIcon(activity.categoryName);
 
   return (
     <button
       onClick={() => onClick(activity)}
       style={{
-        background: selected ? "#081B4B" : "#FF9D23",
-        border: "none",
+        background: selected ? "var(--color-navy)" : "var(--color-accent)",
+        border: "2px solid #fff",
         borderRadius: "50% 50% 50% 0",
         transform: "rotate(-45deg) translate(-50%, -50%)",
         width: selected ? 44 : 36,
@@ -24,12 +24,17 @@ export function ActivityMarker({ activity, onClick, selected = false }: Activity
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        boxShadow: "0 2px 8px rgba(0,0,0,0.25)",
-        transition: "all 0.15s ease",
+        boxShadow: "var(--shadow-md)",
+        transition: "transform 0.15s var(--ease-out), background 0.15s ease",
         padding: 0,
       }}
     >
-      <span style={{ transform: "rotate(45deg)", fontSize: selected ? 20 : 16 }}>{icon}</span>
+      <Icon
+        size={selected ? 20 : 16}
+        color="#fff"
+        strokeWidth={2.25}
+        style={{ transform: "rotate(45deg)" }}
+      />
     </button>
   );
 }

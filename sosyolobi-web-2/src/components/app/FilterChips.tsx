@@ -1,5 +1,6 @@
 import type { Category } from "@/types/user";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { getCategoryIcon } from "@/lib/category-icons";
+import { Globe, type LucideIcon } from "lucide-react";
 
 interface FilterChipsProps {
   categories: Category[];
@@ -9,19 +10,17 @@ interface FilterChipsProps {
 
 export function FilterChips({ categories, selected, onSelect }: FilterChipsProps) {
   return (
-    <div style={{
+    <div className="no-scrollbar" style={{
       display: "flex",
       gap: 8,
       overflowX: "auto",
       padding: "12px 16px",
-      scrollbarWidth: "none",
     }}>
-      <style>{`.filter-chips-scroll::-webkit-scrollbar { display: none }`}</style>
       <Chip
         active={selected === null}
         onClick={() => onSelect(null)}
         label="Tümü"
-        icon="🌍"
+        icon={Globe}
       />
       {categories.map((cat) => (
         <Chip
@@ -29,35 +28,36 @@ export function FilterChips({ categories, selected, onSelect }: FilterChipsProps
           active={selected === cat.id}
           onClick={() => onSelect(selected === cat.id ? null : cat.id)}
           label={cat.name}
-          icon={CATEGORY_ICONS[cat.name] ?? "📍"}
+          icon={getCategoryIcon(cat.name)}
         />
       ))}
     </div>
   );
 }
 
-function Chip({ active, onClick, label, icon }: { active: boolean; onClick: () => void; label: string; icon: string }) {
+function Chip({ active, onClick, label, icon: Icon }: { active: boolean; onClick: () => void; label: string; icon: LucideIcon }) {
   return (
     <button
       onClick={onClick}
       style={{
         display: "inline-flex",
         alignItems: "center",
-        gap: 5,
+        gap: 6,
         padding: "7px 14px",
-        borderRadius: 20,
-        border: `1.5px solid ${active ? "#FF9D23" : "#EEF2F7"}`,
-        background: active ? "#FFF7ED" : "#fff",
-        color: active ? "#FF9D23" : "#374151",
+        borderRadius: "var(--radius-full)",
+        border: `1.5px solid ${active ? "var(--color-accent)" : "var(--color-border)"}`,
+        background: active ? "var(--color-accent-soft-bg)" : "var(--color-surface)",
+        color: active ? "var(--color-accent-soft-fg)" : "#374151",
         fontSize: 13,
-        fontWeight: active ? 600 : 400,
+        fontWeight: active ? 600 : 500,
         cursor: "pointer",
         whiteSpace: "nowrap",
         flexShrink: 0,
-        transition: "all 0.15s ease",
+        transition: "all 0.15s var(--ease-out)",
       }}
     >
-      {icon} {label}
+      <Icon size={14} strokeWidth={2.25} />
+      {label}
     </button>
   );
 }

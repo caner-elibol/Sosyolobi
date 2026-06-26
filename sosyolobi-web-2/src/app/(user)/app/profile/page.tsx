@@ -12,6 +12,7 @@ import { LoadingState } from "@/components/app/LoadingState";
 import { useProfile } from "@/hooks/useProfile";
 import { clearUserToken } from "@/lib/user-auth";
 import { useRouter } from "next/navigation";
+import { Camera, CheckCircle2, LogOut, MessageSquare, Star, type LucideIcon } from "lucide-react";
 
 const schema = z.object({
   displayName: z.string().min(2, "En az 2 karakter"),
@@ -58,17 +59,23 @@ export default function ProfilePage() {
   }
 
   if (isLoading) return <AppShell><LoadingState /></AppShell>;
-  if (!profile) return <AppShell><div style={{ padding: 24, color: "#EF4444" }}>Profil yüklenemedi.</div></AppShell>;
+  if (!profile) return <AppShell><div style={{ padding: 24, color: "var(--color-destructive)" }}>Profil yüklenemedi.</div></AppShell>;
+
+  const stats: { label: string; value: string | number; icon: LucideIcon }[] = [
+    { label: "Tamamlanan", value: profile.completedActivityCount, icon: CheckCircle2 },
+    { label: "Değerlendirme", value: profile.averageRating.toFixed(1), icon: Star },
+    { label: "Yorum Sayısı", value: profile.reviewCount, icon: MessageSquare },
+  ];
 
   return (
     <AppShell>
       <div style={{ maxWidth: 640, margin: "0 auto", padding: "24px 16px 40px" }}>
         {/* Header card */}
         <div style={{
-          background: "#fff",
-          borderRadius: 20,
+          background: "var(--color-surface)",
+          borderRadius: "var(--radius-xl)",
           padding: 24,
-          border: "1px solid #EEF2F7",
+          border: "1px solid var(--color-border)",
           marginBottom: 16,
           display: "flex",
           alignItems: "flex-start",
@@ -83,13 +90,12 @@ export default function ProfilePage() {
                 position: "absolute",
                 bottom: -2,
                 right: -2,
-                width: 26,
-                height: 26,
+                width: 28,
+                height: 28,
                 borderRadius: "50%",
-                background: "#FF9D23",
+                background: "var(--color-accent)",
                 border: "2px solid #fff",
                 color: "#fff",
-                fontSize: 13,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
@@ -97,7 +103,7 @@ export default function ProfilePage() {
               }}
               aria-label="Fotoğrafı değiştir"
             >
-              {uploadAvatar.isPending ? "…" : "📷"}
+              {uploadAvatar.isPending ? "…" : <Camera size={14} />}
             </button>
             <input
               ref={fileInputRef}
@@ -108,10 +114,10 @@ export default function ProfilePage() {
             />
           </div>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
+            <h1 style={{ fontSize: 20, fontWeight: 700, color: "var(--color-foreground)", margin: "0 0 4px" }}>
               {profile.displayName}
             </h1>
-            {profile.bio && <p style={{ fontSize: 14, color: "#6B7280", margin: "0 0 8px" }}>{profile.bio}</p>}
+            {profile.bio && <p style={{ fontSize: 14, color: "var(--color-muted-foreground)", margin: "0 0 8px" }}>{profile.bio}</p>}
             <TrustBadge isPhoneVerified={profile.isPhoneVerified} rating={profile.averageRating} />
           </div>
           <button
@@ -120,7 +126,7 @@ export default function ProfilePage() {
               padding: "8px 14px",
               background: "#F3F4F6",
               border: "none",
-              borderRadius: 10,
+              borderRadius: "var(--radius-sm)",
               fontSize: 13,
               cursor: "pointer",
               color: "#374151",
@@ -137,21 +143,17 @@ export default function ProfilePage() {
           gap: 12,
           marginBottom: 16,
         }}>
-          {[
-            { label: "Tamamlanan", value: profile.completedActivityCount, icon: "✅" },
-            { label: "Değerlendirme", value: `${profile.averageRating.toFixed(1)} ⭐`, icon: "⭐" },
-            { label: "Yorum Sayısı", value: profile.reviewCount, icon: "💬" },
-          ].map((stat) => (
+          {stats.map((stat) => (
             <div key={stat.label} style={{
-              background: "#fff",
-              border: "1px solid #EEF2F7",
-              borderRadius: 16,
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-lg)",
               padding: "16px",
               textAlign: "center",
             }}>
-              <div style={{ fontSize: 22, marginBottom: 4 }}>{stat.icon}</div>
-              <div style={{ fontSize: 18, fontWeight: 700, color: "#111827" }}>{stat.value}</div>
-              <div style={{ fontSize: 11, color: "#6B7280", marginTop: 2 }}>{stat.label}</div>
+              <stat.icon size={20} color="var(--color-accent)" style={{ marginBottom: 6 }} />
+              <div style={{ fontSize: 18, fontWeight: 700, color: "var(--color-foreground)" }}>{stat.value}</div>
+              <div style={{ fontSize: 11, color: "var(--color-muted-foreground)", marginTop: 2 }}>{stat.label}</div>
             </div>
           ))}
         </div>
@@ -159,13 +161,13 @@ export default function ProfilePage() {
         {/* Edit form */}
         {editing && (
           <div style={{
-            background: "#fff",
-            borderRadius: 20,
+            background: "var(--color-surface)",
+            borderRadius: "var(--radius-xl)",
             padding: 24,
-            border: "1px solid #EEF2F7",
+            border: "1px solid var(--color-border)",
             marginBottom: 16,
           }}>
-            <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px" }}>Profili Düzenle</h3>
+            <h3 style={{ fontSize: 16, fontWeight: 700, margin: "0 0 16px", color: "var(--color-foreground)" }}>Profili Düzenle</h3>
             <form onSubmit={handleSubmit(onSubmit)}>
               <div style={{ marginBottom: 14 }}>
                 <label style={{ fontSize: 13, fontWeight: 500, color: "#374151", display: "block", marginBottom: 5 }}>
@@ -176,14 +178,15 @@ export default function ProfilePage() {
                   style={{
                     width: "100%",
                     padding: "11px 14px",
-                    border: `1px solid ${errors.displayName ? "#EF4444" : "#EEF2F7"}`,
-                    borderRadius: 10,
+                    border: `1px solid ${errors.displayName ? "var(--color-destructive)" : "var(--color-border)"}`,
+                    borderRadius: "var(--radius-sm)",
                     fontSize: 14,
                     outline: "none",
                     boxSizing: "border-box",
+                    fontFamily: "inherit",
                   }}
                 />
-                {errors.displayName && <p style={{ fontSize: 12, color: "#EF4444", marginTop: 3 }}>{errors.displayName.message}</p>}
+                {errors.displayName && <p style={{ fontSize: 12, color: "var(--color-destructive)", marginTop: 3 }}>{errors.displayName.message}</p>}
               </div>
               <div style={{ marginBottom: 16 }}>
                 <label style={{ fontSize: 13, fontWeight: 500, color: "#374151", display: "block", marginBottom: 5 }}>
@@ -195,12 +198,13 @@ export default function ProfilePage() {
                   style={{
                     width: "100%",
                     padding: "11px 14px",
-                    border: "1px solid #EEF2F7",
-                    borderRadius: 10,
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-sm)",
                     fontSize: 14,
                     outline: "none",
                     resize: "vertical",
                     boxSizing: "border-box",
+                    fontFamily: "inherit",
                   }}
                 />
               </div>
@@ -210,13 +214,14 @@ export default function ProfilePage() {
                 style={{
                   width: "100%",
                   padding: "12px",
-                  background: "#FF9D23",
+                  background: "var(--color-accent)",
                   color: "#fff",
                   border: "none",
-                  borderRadius: 10,
+                  borderRadius: "var(--radius-sm)",
                   fontSize: 14,
                   fontWeight: 600,
                   cursor: "pointer",
+                  opacity: isSubmitting ? 0.7 : 1,
                 }}
               >
                 {isSubmitting ? "Kaydediliyor..." : "Kaydet"}
@@ -232,15 +237,19 @@ export default function ProfilePage() {
             width: "100%",
             padding: "12px",
             background: "none",
-            border: "1px solid #EEF2F7",
-            borderRadius: 12,
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-md)",
             fontSize: 14,
-            color: "#EF4444",
+            color: "var(--color-destructive)",
             cursor: "pointer",
             fontWeight: 500,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 8,
           }}
         >
-          Çıkış Yap
+          <LogOut size={15} /> Çıkış Yap
         </button>
       </div>
     </AppShell>

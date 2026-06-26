@@ -101,7 +101,7 @@ export function ActionMenu({ items }: ActionMenuProps) {
           alignItems: "center",
           justifyContent: "center",
           cursor: "pointer",
-          color: "#9498A6",
+          color: "#6B7280",
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = "#F8F9FF";
@@ -160,7 +160,7 @@ export function ActionMenu({ items }: ActionMenuProps) {
 
                 cursor: "pointer",
 
-                color: danger ? "#EF4444" : "#1B1D29",
+                color: danger ? "#B91C1C" : "#1B1D29",
 
                 display: "flex",
 

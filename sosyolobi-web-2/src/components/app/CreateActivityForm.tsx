@@ -14,6 +14,7 @@ import { silenceMissingStyleImages } from "@/lib/map-utils";
 import { useCreateActivity } from "@/hooks/useCreateActivity";
 import { SkillLevel, GenderPreference } from "@/types/user";
 import type { Category } from "@/types/user";
+import { MapPin } from "lucide-react";
 
 const schema = z.object({
   categoryId: z.string().min(1, "Kategori seçin"),
@@ -144,7 +145,7 @@ export function CreateActivityForm() {
 
         {/* Map pin */}
         <Field label="Konum Seç (haritaya tıklayın)" error={pin ? undefined : "Konum zorunlu"}>
-          <div style={{ height: 300, borderRadius: 12, overflow: "hidden", border: "1px solid #EEF2F7" }}>
+          <div style={{ height: 300, borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--color-border)" }}>
             <Map
               reuseMaps
               onLoad={silenceMissingStyleImages}
@@ -156,13 +157,13 @@ export function CreateActivityForm() {
             >
               {pin && (
                 <Marker longitude={pin.lng} latitude={pin.lat} anchor="bottom">
-                  <div style={{ fontSize: 28, lineHeight: 1 }}>📍</div>
+                  <MapPin size={28} color="var(--color-accent)" fill="var(--color-accent-soft-bg)" strokeWidth={2} />
                 </Marker>
               )}
             </Map>
           </div>
           {pin && (
-            <p style={{ fontSize: 12, color: "#6B7280", marginTop: 4 }}>
+            <p style={{ fontSize: 12, color: "var(--color-muted-foreground)", marginTop: 4 }}>
               {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
             </p>
           )}
@@ -174,13 +175,14 @@ export function CreateActivityForm() {
           style={{
             width: "100%",
             padding: "14px",
-            background: "#FF9D23",
+            background: "var(--color-accent)",
             color: "#fff",
             border: "none",
-            borderRadius: 12,
+            borderRadius: "var(--radius-md)",
             fontSize: 15,
             fontWeight: 600,
             cursor: "pointer",
+            opacity: isSubmitting || create.isPending ? 0.7 : 1,
           }}
         >
           {isSubmitting || create.isPending ? "Oluşturuluyor..." : "Etkinliği Oluştur"}
@@ -193,12 +195,13 @@ export function CreateActivityForm() {
 const inputStyle: React.CSSProperties = {
   width: "100%",
   padding: "11px 14px",
-  border: "1px solid #EEF2F7",
-  borderRadius: 10,
+  border: "1px solid var(--color-border)",
+  borderRadius: "var(--radius-sm)",
   fontSize: 14,
   outline: "none",
-  background: "#fff",
+  background: "var(--color-surface)",
   boxSizing: "border-box",
+  fontFamily: "inherit",
 };
 
 function Field({ label, error, children, style }: {
@@ -213,7 +216,7 @@ function Field({ label, error, children, style }: {
         {label}
       </label>
       {children}
-      {error && <p style={{ fontSize: 12, color: "#EF4444", marginTop: 4 }}>{error}</p>}
+      {error && <p style={{ fontSize: 12, color: "var(--color-destructive)", marginTop: 4 }}>{error}</p>}
     </div>
   );
 }

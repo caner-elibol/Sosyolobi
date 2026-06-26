@@ -72,7 +72,7 @@ export default function LoginPage() {
             <span style={{ color: "#fff", fontSize: 24, fontWeight: 800 }}>S</span>
           </div>
           <h1 style={{ fontSize: 24, fontWeight: 700, color: "#1B1D29" }}>Giriş Yap</h1>
-          <p style={{ fontSize: 13, color: "#9498A6", marginTop: 6 }}>Admin paneline hoş geldiniz</p>
+          <p style={{ fontSize: 13, color: "#6B7280", marginTop: 6 }}>Admin paneline hoş geldiniz</p>
         </div>
 
         <form onSubmit={handleSubmit(onSubmit)} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -83,9 +83,9 @@ export default function LoginPage() {
             <input
               {...register("phoneNumber")}
               placeholder="+905XXXXXXXXX"
-              style={{ ...inputStyle, borderColor: errors.phoneNumber ? "#EF4444" : "#EBEBF0" }}
+              style={{ ...inputStyle, borderColor: errors.phoneNumber ? "#B91C1C" : "#EBEBF0" }}
             />
-            {errors.phoneNumber && <p style={{ fontSize: 12, color: "#EF4444", marginTop: 4 }}>{errors.phoneNumber.message}</p>}
+            {errors.phoneNumber && <p style={{ fontSize: 12, color: "#B91C1C", marginTop: 4 }}>{errors.phoneNumber.message}</p>}
           </div>
 
           <div>
@@ -96,9 +96,9 @@ export default function LoginPage() {
               {...register("password")}
               type="password"
               placeholder="••••••••"
-              style={{ ...inputStyle, borderColor: errors.password ? "#EF4444" : "#EBEBF0" }}
+              style={{ ...inputStyle, borderColor: errors.password ? "#B91C1C" : "#EBEBF0" }}
             />
-            {errors.password && <p style={{ fontSize: 12, color: "#EF4444", marginTop: 4 }}>{errors.password.message}</p>}
+            {errors.password && <p style={{ fontSize: 12, color: "#B91C1C", marginTop: 4 }}>{errors.password.message}</p>}
           </div>
 
           <button
@@ -133,7 +133,7 @@ export default function LoginPage() {
             <span style={{ color: "#fff", fontSize: 48, fontWeight: 800 }}>S</span>
           </div>
           <h2 style={{ fontSize: 28, fontWeight: 700, color: "#1B1D29" }}>Sosyolobi</h2>
-          <p style={{ fontSize: 15, color: "#9498A6", marginTop: 8 }}>Operations Center</p>
+          <p style={{ fontSize: 15, color: "#6B7280", marginTop: 8 }}>Operations Center</p>
         </div>
       </div>
     </div>

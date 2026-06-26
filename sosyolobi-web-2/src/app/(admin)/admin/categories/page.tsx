@@ -75,7 +75,7 @@ export default function CategoriesPage() {
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 24 }}>
           <div>
             <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1B1D29" }}>Kategoriler</h2>
-            <p style={{ fontSize: 13, color: "#9498A6", marginTop: 4 }}>{cats.length} kategori</p>
+            <p style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>{cats.length} kategori</p>
           </div>
           <button onClick={openCreate} style={{ display: "flex", alignItems: "center", gap: 6, height: 40, padding: "0 18px", borderRadius: 10, border: "none", backgroundColor: "#5B5FE9", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
             <Plus size={14} /> Kategori Ekle
@@ -87,7 +87,7 @@ export default function CategoriesPage() {
             <thead>
               <tr style={{ borderBottom: "1px solid #F0F1F5" }}>
                 {["Sıra", "Ad", "Slug", "Renk", "Etkinlik", "Durum", ""].map((h) => (
-                  <th key={h} style={{ textAlign: "left", padding: "13px 18px", fontSize: 12, fontWeight: 600, color: "#9498A6", backgroundColor: "#FAFBFF" }}>{h}</th>
+                  <th key={h} style={{ textAlign: "left", padding: "13px 18px", fontSize: 12, fontWeight: 600, color: "#6B7280", backgroundColor: "#FAFBFF" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -104,7 +104,7 @@ export default function CategoriesPage() {
                 <tr key={cat.id} style={{ borderBottom: idx < cats.length - 1 ? "1px solid #F8F9FF" : "none" }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FAFBFF")}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}>
-                  <td style={{ padding: "13px 18px", fontSize: 13, color: "#9498A6" }}>{cat.sortOrder}</td>
+                  <td style={{ padding: "13px 18px", fontSize: 13, color: "#6B7280" }}>{cat.sortOrder}</td>
                   <td style={{ padding: "13px 18px" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                       {cat.color && <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: cat.color }} />}
@@ -112,13 +112,13 @@ export default function CategoriesPage() {
                     </div>
                   </td>
                   <td style={{ padding: "13px 18px" }}>
-                    <code style={{ fontSize: 11, color: "#9498A6", backgroundColor: "#F4F5F9", padding: "2px 8px", borderRadius: 6 }}>{cat.slug}</code>
+                    <code style={{ fontSize: 11, color: "#6B7280", backgroundColor: "#F4F5F9", padding: "2px 8px", borderRadius: 6 }}>{cat.slug}</code>
                   </td>
                   <td style={{ padding: "13px 18px" }}>
                     {cat.color ? (
                       <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                         <div style={{ width: 20, height: 20, borderRadius: 6, backgroundColor: cat.color, border: "1px solid rgba(0,0,0,0.1)" }} />
-                        <span style={{ fontSize: 11, color: "#9498A6", fontFamily: "monospace" }}>{cat.color}</span>
+                        <span style={{ fontSize: 11, color: "#6B7280", fontFamily: "monospace" }}>{cat.color}</span>
                       </div>
                     ) : <span style={{ color: "#D1D5DB" }}>—</span>}
                   </td>
@@ -126,10 +126,10 @@ export default function CategoriesPage() {
                   <td style={{ padding: "13px 18px" }}><BooleanBadge value={cat.isActive} trueLabel="Aktif" falseLabel="Pasif" /></td>
                   <td style={{ padding: "13px 18px" }}>
                     <div style={{ display: "flex", gap: 6 }}>
-                      <button onClick={() => openEdit(cat)} style={{ width: 30, height: 30, borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#9498A6" }}>
+                      <button onClick={() => openEdit(cat)} style={{ width: 30, height: 30, borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer", color: "#6B7280" }}>
                         <Pencil size={13} />
                       </button>
-                      <button onClick={() => toggleStatus(cat)} style={{ height: 30, padding: "0 10px", borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff", fontSize: 11, fontWeight: 500, cursor: "pointer", color: cat.isActive ? "#9498A6" : "#22C55E" }}>
+                      <button onClick={() => toggleStatus(cat)} style={{ height: 30, padding: "0 10px", borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff", fontSize: 11, fontWeight: 500, cursor: "pointer", color: cat.isActive ? "#6B7280" : "#15803D" }}>
                         {cat.isActive ? "Pasife Al" : "Aktife Al"}
                       </button>
                     </div>
@@ -158,23 +158,23 @@ export default function CategoriesPage() {
                 { label: "Renk (hex)", name: "color" as const, placeholder: "#5B5FE9" },
               ].map(({ label, name, placeholder }) => (
                 <div key={name}>
-                  <label style={{ fontSize: 12, fontWeight: 500, color: "#9498A6", display: "block", marginBottom: 5 }}>{label}</label>
+                  <label style={{ fontSize: 12, fontWeight: 500, color: "#6B7280", display: "block", marginBottom: 5 }}>{label}</label>
                   <input {...form.register(name)} placeholder={placeholder} style={INPUT} />
                 </div>
               ))}
               <div>
-                <label style={{ fontSize: 12, fontWeight: 500, color: "#9498A6", display: "block", marginBottom: 5 }}>Sıralama</label>
+                <label style={{ fontSize: 12, fontWeight: 500, color: "#6B7280", display: "block", marginBottom: 5 }}>Sıralama</label>
                 <input type="number" {...form.register("sortOrder", { valueAsNumber: true })} style={INPUT} />
               </div>
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                <label style={{ fontSize: 12, fontWeight: 500, color: "#9498A6" }}>Aktif</label>
+                <label style={{ fontSize: 12, fontWeight: 500, color: "#6B7280" }}>Aktif</label>
                 <button type="button" onClick={() => form.setValue("isActive", !form.watch("isActive"))}
                   style={{ width: 44, height: 24, borderRadius: 99, border: "none", backgroundColor: form.watch("isActive") ? "#5B5FE9" : "#E5E7EB", cursor: "pointer", position: "relative" }}>
                   <div style={{ width: 18, height: 18, borderRadius: "50%", backgroundColor: "#fff", position: "absolute", top: 3, left: form.watch("isActive") ? 23 : 3, transition: "left 0.15s", boxShadow: "0 1px 3px rgba(0,0,0,0.2)" }} />
                 </button>
               </div>
               <div style={{ display: "flex", gap: 8, paddingTop: 4 }}>
-                <button type="button" onClick={() => setPanelOpen(false)} style={{ flex: 1, height: 40, borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff", fontSize: 13, fontWeight: 500, color: "#9498A6", cursor: "pointer" }}>Vazgeç</button>
+                <button type="button" onClick={() => setPanelOpen(false)} style={{ flex: 1, height: 40, borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff", fontSize: 13, fontWeight: 500, color: "#6B7280", cursor: "pointer" }}>Vazgeç</button>
                 <button type="submit" disabled={form.formState.isSubmitting} style={{ flex: 1, height: 40, borderRadius: 8, border: "none", backgroundColor: "#5B5FE9", color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer" }}>
                   {editing ? "Güncelle" : "Oluştur"}
                 </button>

@@ -8,6 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { setUserToken } from "@/lib/user-auth";
 import type { ApiResponse, UserAuthResponse } from "@/types/user";
+import { ArrowLeft, Smartphone } from "lucide-react";
 
 const schema = z.object({
   code: z.string().length(6, "Kod 6 haneli olmalı"),
@@ -64,28 +65,39 @@ export default function VerifyPage() {
 
   return (
     <div style={{
-      minHeight: "100vh",
+      minHeight: "100dvh",
       background: "linear-gradient(160deg, #fff8ee 0%, #fff3e0 40%, #fafbfd 100%)",
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
       padding: 24,
-      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
+      fontFamily: "var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif",
     }}>
       <div style={{ width: "100%", maxWidth: 400 }}>
         <div style={{ textAlign: "center", marginBottom: 40 }}>
-          <div style={{ fontSize: 40, marginBottom: 8 }}>📱</div>
-          <h1 style={{ fontSize: 22, fontWeight: 700, color: "#081B4B", margin: "0 0 4px" }}>Kodu Gir</h1>
-          <p style={{ color: "#6B7280", fontSize: 15, margin: 0 }}>
+          <div style={{
+            width: 56,
+            height: 56,
+            borderRadius: "var(--radius-md)",
+            background: "var(--color-accent-soft-bg)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            margin: "0 auto 12px",
+          }}>
+            <Smartphone size={26} color="var(--color-accent-soft-fg)" />
+          </div>
+          <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--color-navy)", margin: "0 0 4px" }}>Kodu Gir</h1>
+          <p style={{ color: "var(--color-muted-foreground)", fontSize: 15, margin: 0 }}>
             Telefon numaranıza gönderilen 6 haneli kodu girin
           </p>
         </div>
 
         <div style={{
-          background: "#fff",
-          borderRadius: 20,
+          background: "var(--color-surface)",
+          borderRadius: "var(--radius-xl)",
           padding: 32,
-          boxShadow: "0 4px 24px rgba(8,27,75,0.08)",
+          boxShadow: "var(--shadow-lg)",
         }}>
           <form onSubmit={handleSubmit(onSubmit)}>
             <div style={{ marginBottom: 20 }}>
@@ -98,18 +110,19 @@ export default function VerifyPage() {
                 style={{
                   width: "100%",
                   padding: "16px",
-                  border: `1px solid ${errors.code ? "#EF4444" : "#EEF2F7"}`,
-                  borderRadius: 12,
+                  border: `1px solid ${errors.code ? "var(--color-destructive)" : "var(--color-border)"}`,
+                  borderRadius: "var(--radius-md)",
                   fontSize: 28,
                   fontWeight: 700,
                   letterSpacing: 12,
                   textAlign: "center",
                   outline: "none",
                   boxSizing: "border-box",
+                  fontFamily: "inherit",
                 }}
               />
               {errors.code && (
-                <p style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{errors.code.message}</p>
+                <p style={{ color: "var(--color-destructive)", fontSize: 12, marginTop: 4 }}>{errors.code.message}</p>
               )}
             </div>
 
@@ -119,13 +132,14 @@ export default function VerifyPage() {
               style={{
                 width: "100%",
                 padding: "13px",
-                background: isSubmitting ? "#fb923c" : "#FF9D23",
+                background: "var(--color-accent)",
                 color: "#fff",
                 border: "none",
-                borderRadius: 12,
+                borderRadius: "var(--radius-md)",
                 fontSize: 15,
                 fontWeight: 600,
                 cursor: isSubmitting ? "not-allowed" : "pointer",
+                opacity: isSubmitting ? 0.7 : 1,
               }}
             >
               {isSubmitting ? "Doğrulanıyor..." : "Onayla"}
@@ -141,7 +155,7 @@ export default function VerifyPage() {
               padding: "10px",
               background: "none",
               border: "none",
-              color: "#6B7280",
+              color: "var(--color-muted-foreground)",
               fontSize: 13,
               cursor: "pointer",
             }}
@@ -152,18 +166,21 @@ export default function VerifyPage() {
           <button
             onClick={() => router.push("/auth/login")}
             style={{
-              display: "block",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: 6,
               width: "100%",
               marginTop: 4,
               padding: "10px",
               background: "none",
               border: "none",
-              color: "#9CA3AF",
+              color: "var(--color-subtle-foreground)",
               fontSize: 13,
               cursor: "pointer",
             }}
           >
-            ← Telefon numarasını değiştir
+            <ArrowLeft size={13} /> Telefon numarasını değiştir
           </button>
         </div>
       </div>

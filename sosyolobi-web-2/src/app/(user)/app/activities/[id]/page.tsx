@@ -11,10 +11,23 @@ import { ChatPanel } from "@/components/app/ChatPanel";
 import { ParticipantActionsMenu } from "@/components/app/ParticipantActionsMenu";
 import { useActivity } from "@/hooks/useCreateActivity";
 import { useJoinRequest } from "@/hooks/useJoinRequest";
-import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { getCategoryIcon } from "@/lib/category-icons";
 import { formatDistanceMeters } from "@/lib/format";
 import { ActivityStatus } from "@/types/user";
 import { getUserFromToken } from "@/lib/user-auth";
+import {
+  Calendar,
+  CircleDot,
+  Gift,
+  Key,
+  MapPin,
+  Target,
+  Users,
+  VenusAndMars,
+  Wallet,
+  XCircle,
+  type LucideIcon,
+} from "lucide-react";
 
 const SKILL_LABELS: Record<number, string> = {
   0: "Herkes", 1: "Başlangıç", 2: "Orta", 3: "İleri",
@@ -37,9 +50,9 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
   const [showMessageInput, setShowMessageInput] = useState(false);
 
   if (isLoading) return <AppShell><LoadingState message="Etkinlik yükleniyor..." /></AppShell>;
-  if (error || !activity) return <AppShell><EmptyState icon="❌" title="Etkinlik bulunamadı" /></AppShell>;
+  if (error || !activity) return <AppShell><EmptyState icon={XCircle} title="Etkinlik bulunamadı" /></AppShell>;
 
-  const icon = CATEGORY_ICONS[activity.categoryName] ?? "📍";
+  const CategoryIcon = getCategoryIcon(activity.categoryName);
   // currentPeopleCount organizatörü de içerir; neededPeopleCount organizatör HARİÇ ihtiyaçtır.
   const missing = activity.neededPeopleCount - (activity.currentPeopleCount - 1);
   const dist = formatDistanceMeters(activity.distanceMeters);
@@ -64,58 +77,59 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "16px 16px 32px" }}>
         {/* Header */}
         <div style={{
-          background: "#fff",
-          borderRadius: 16,
+          background: "var(--color-surface)",
+          borderRadius: "var(--radius-lg)",
           padding: 18,
-          border: "1px solid #EEF2F7",
+          border: "1px solid var(--color-border)",
           marginBottom: 12,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
             <div style={{
               width: 44,
               height: 44,
-              background: "#FFF7ED",
-              borderRadius: 12,
+              background: "var(--color-accent-soft-bg)",
+              borderRadius: "var(--radius-md)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              fontSize: 22,
               flexShrink: 0,
             }}>
-              {icon}
+              <CategoryIcon size={22} color="var(--color-accent-soft-fg)" strokeWidth={2} />
             </div>
             <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 11, color: "#6B7280", marginBottom: 1 }}>{activity.categoryName}</div>
-              <h1 style={{ fontSize: 18, fontWeight: 700, color: "#111827", margin: 0 }}>{activity.title}</h1>
+              <div style={{ fontSize: 11, color: "var(--color-muted-foreground)", marginBottom: 1 }}>{activity.categoryName}</div>
+              <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>{activity.title}</h1>
             </div>
           </div>
 
           {/* Info chips */}
           <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-            {isFull ? <InfoChip icon="🔵">Dolu</InfoChip> : <InfoChip icon="🟢">Aktif</InfoChip>}
-            <InfoChip icon="📅">{formatDate(activity.eventDate)}</InfoChip>
-            {dist && <InfoChip icon="📍">{dist} uzakta</InfoChip>}
-            <InfoChip icon="👥">{missing > 0 ? `${missing} kişi eksik` : "Kontenjan doldu"}</InfoChip>
+            {isFull ? <InfoChip icon={CircleDot} tone="muted">Dolu</InfoChip> : <InfoChip icon={CircleDot} tone="success">Aktif</InfoChip>}
+            <InfoChip icon={Calendar}>{formatDate(activity.eventDate)}</InfoChip>
+            {dist && <InfoChip icon={MapPin}>{dist} uzakta</InfoChip>}
+            <InfoChip icon={Users}>{missing > 0 ? `${missing} kişi eksik` : "Kontenjan doldu"}</InfoChip>
             {activity.pricePerPerson && activity.pricePerPerson > 0
-              ? <InfoChip icon="💰">{activity.pricePerPerson}₺ kişi başı</InfoChip>
-              : <InfoChip icon="🆓">Ücretsiz</InfoChip>
+              ? <InfoChip icon={Wallet}>{activity.pricePerPerson}₺ kişi başı</InfoChip>
+              : <InfoChip icon={Gift}>Ücretsiz</InfoChip>
             }
-            <InfoChip icon="🎯">{SKILL_LABELS[activity.skillLevel] ?? "Herkes"}</InfoChip>
-            <InfoChip icon="⚧">{GENDER_LABELS[activity.genderPreference] ?? "Herkes"}</InfoChip>
+            <InfoChip icon={Target}>{SKILL_LABELS[activity.skillLevel] ?? "Herkes"}</InfoChip>
+            <InfoChip icon={VenusAndMars}>{GENDER_LABELS[activity.genderPreference] ?? "Herkes"}</InfoChip>
           </div>
 
           {/* Address */}
           <div style={{
             background: "#F9FAFB",
-            borderRadius: 10,
+            borderRadius: "var(--radius-sm)",
             padding: "10px 14px",
             marginBottom: activity.description ? 10 : 0,
           }}>
-            <div style={{ fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 2 }}>📍 Yaklaşık Konum</div>
-            <div style={{ fontSize: 13, color: "#6B7280" }}>{activity.addressText}</div>
+            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 2 }}>
+              <MapPin size={13} /> Yaklaşık Konum
+            </div>
+            <div style={{ fontSize: 13, color: "var(--color-muted-foreground)" }}>{activity.addressText}</div>
             {activity.addressDetailPrivate && (
-              <div style={{ fontSize: 12, color: "#22C55E", marginTop: 4 }}>
-                🔑 {activity.addressDetailPrivate}
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--color-success)", marginTop: 4 }}>
+                <Key size={12} /> {activity.addressDetailPrivate}
               </div>
             )}
           </div>
@@ -130,17 +144,17 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
         {/* Creator + Participants */}
         <div style={{
-          background: "#fff",
-          borderRadius: 16,
+          background: "var(--color-surface)",
+          borderRadius: "var(--radius-lg)",
           padding: 16,
-          border: "1px solid #EEF2F7",
+          border: "1px solid var(--color-border)",
           marginBottom: 12,
         }}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: activity.participants.length > 0 ? 12 : 0 }}>
             <UserAvatar displayName={activity.createdByDisplayName} avatarUrl={activity.createdByAvatarUrl} size={40} />
             <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: "#6B7280" }}>Oluşturan</div>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "#111827" }}>{activity.createdByDisplayName}</div>
+              <div style={{ fontSize: 11, color: "var(--color-muted-foreground)" }}>Oluşturan</div>
+              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)" }}>{activity.createdByDisplayName}</div>
             </div>
             {currentUserId && currentUserId !== activity.createdByUserId && (
               <ParticipantActionsMenu userId={activity.createdByUserId} displayName={activity.createdByDisplayName} />
@@ -149,7 +163,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
           {activity.participants.length > 0 && (
             <>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "#6B7280", margin: "0 0 8px" }}>
+              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-muted-foreground)", margin: "0 0 8px" }}>
                 Katılımcılar ({activity.participants.length})
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
@@ -170,10 +184,10 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
         {/* Join CTA */}
         {!isCancelled && !isFull && !isParticipant && (
           <div style={{
-            background: "#fff",
-            borderRadius: 16,
+            background: "var(--color-surface)",
+            borderRadius: "var(--radius-lg)",
             padding: 16,
-            border: "1px solid #EEF2F7",
+            border: "1px solid var(--color-border)",
             marginBottom: 12,
           }}>
             {showMessageInput ? (
@@ -186,12 +200,13 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
                   style={{
                     width: "100%",
                     padding: "10px 14px",
-                    border: "1px solid #EEF2F7",
-                    borderRadius: 10,
+                    border: "1px solid var(--color-border)",
+                    borderRadius: "var(--radius-sm)",
                     fontSize: 14,
                     resize: "none",
                     outline: "none",
                     boxSizing: "border-box",
+                    fontFamily: "inherit",
                   }}
                 />
                 <div style={{ display: "flex", gap: 8 }}>
@@ -201,13 +216,14 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
                     style={{
                       flex: 1,
                       padding: "12px",
-                      background: "#FF9D23",
+                      background: "var(--color-accent)",
                       color: "#fff",
                       border: "none",
-                      borderRadius: 12,
+                      borderRadius: "var(--radius-md)",
                       fontSize: 14,
                       fontWeight: 600,
-                      cursor: "pointer",
+                      cursor: join.isPending ? "default" : "pointer",
+                      opacity: join.isPending ? 0.7 : 1,
                     }}
                   >
                     {join.isPending ? "Gönderiliyor..." : "İstek Gönder"}
@@ -217,11 +233,11 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
                     style={{
                       padding: "12px 16px",
                       background: "none",
-                      border: "1px solid #EEF2F7",
-                      borderRadius: 12,
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-md)",
                       fontSize: 14,
                       cursor: "pointer",
-                      color: "#6B7280",
+                      color: "var(--color-muted-foreground)",
                     }}
                   >
                     İptal
@@ -232,18 +248,22 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
               <button
                 onClick={() => setShowMessageInput(true)}
                 style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
                   width: "100%",
                   padding: "14px",
-                  background: "#FF9D23",
+                  background: "var(--color-accent)",
                   color: "#fff",
                   border: "none",
-                  borderRadius: 12,
+                  borderRadius: "var(--radius-md)",
                   fontSize: 15,
                   fontWeight: 600,
                   cursor: "pointer",
                 }}
               >
-                🙋 Katılmak İstiyorum
+                <Users size={17} /> Katılmak İstiyorum
               </button>
             )}
           </div>
@@ -252,10 +272,10 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
         {isFull && (
           <div style={{
             background: "#F3F4F6",
-            borderRadius: 12,
+            borderRadius: "var(--radius-md)",
             padding: "14px 20px",
             textAlign: "center",
-            color: "#6B7280",
+            color: "var(--color-muted-foreground)",
             fontSize: 14,
             marginBottom: 12,
           }}>
@@ -265,11 +285,11 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
         {isCancelled && (
           <div style={{
-            background: "#FEF2F2",
-            borderRadius: 12,
+            background: "var(--color-destructive-bg)",
+            borderRadius: "var(--radius-md)",
             padding: "14px 20px",
             textAlign: "center",
-            color: "#EF4444",
+            color: "var(--color-destructive)",
             fontSize: 14,
             marginBottom: 12,
           }}>
@@ -284,19 +304,22 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
   );
 }
 
-function InfoChip({ icon, children }: { icon: string; children: React.ReactNode }) {
+function InfoChip({ icon: Icon, children, tone }: { icon: LucideIcon; children: React.ReactNode; tone?: "success" | "muted" }) {
+  const color = tone === "success" ? "var(--color-success)" : tone === "muted" ? "var(--color-muted-foreground)" : "#374151";
+  const background = tone === "success" ? "var(--color-success-bg)" : "#F3F4F6";
   return (
     <span style={{
       display: "inline-flex",
       alignItems: "center",
       gap: 4,
       padding: "4px 9px",
-      background: "#F3F4F6",
-      borderRadius: 20,
+      background,
+      borderRadius: "var(--radius-full)",
       fontSize: 11,
-      color: "#374151",
+      color,
+      fontWeight: tone ? 600 : 400,
     }}>
-      {icon} {children}
+      <Icon size={11} /> {children}
     </span>
   );
 }

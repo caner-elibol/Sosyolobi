@@ -9,18 +9,19 @@ import { EmptyState } from "@/components/app/EmptyState";
 import { useSentRequests, useIncomingRequests } from "@/hooks/useJoinRequest";
 import { ActivityRequestStatus } from "@/types/user";
 import Link from "next/link";
+import { Inbox, Send, Star } from "lucide-react";
 
 const STATUS_LABELS: Record<number, { label: string; color: string }> = {
-  [ActivityRequestStatus.Pending]:   { label: "Bekliyor",  color: "#F59E0B" },
-  [ActivityRequestStatus.Approved]:  { label: "Onaylandı", color: "#22C55E" },
-  [ActivityRequestStatus.Rejected]:  { label: "Reddedildi", color: "#EF4444" },
-  [ActivityRequestStatus.Cancelled]: { label: "İptal",     color: "#9CA3AF" },
+  [ActivityRequestStatus.Pending]:   { label: "Bekliyor",  color: "#B45309" },
+  [ActivityRequestStatus.Approved]:  { label: "Onaylandı", color: "#15803D" },
+  [ActivityRequestStatus.Rejected]:  { label: "Reddedildi", color: "#DC2626" },
+  [ActivityRequestStatus.Cancelled]: { label: "İptal",     color: "#6B7280" },
 };
 
 function SentRequests() {
   const { data = [], isLoading } = useSentRequests();
   if (isLoading) return <LoadingState />;
-  if (!data.length) return <EmptyState icon="📤" title="Henüz istek göndermediniz" />;
+  if (!data.length) return <EmptyState icon={Send} title="Henüz istek göndermediniz" />;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -29,25 +30,25 @@ function SentRequests() {
         return (
           <Link key={req.id} href={`/app/activities/${req.activityId}`} style={{ textDecoration: "none" }}>
             <div style={{
-              background: "#fff",
-              border: "1px solid #EEF2F7",
-              borderRadius: 16,
+              background: "var(--color-surface)",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-lg)",
               padding: "16px",
               display: "flex",
               alignItems: "center",
               gap: 12,
             }}>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "#111827", marginBottom: 4 }}>
+                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)", marginBottom: 4 }}>
                   Aktivite #{req.activityId.slice(-6)}
                 </div>
-                <div style={{ fontSize: 12, color: "#6B7280" }}>
+                <div style={{ fontSize: 12, color: "var(--color-muted-foreground)" }}>
                   {new Date(req.createdAt).toLocaleDateString("tr-TR")}
                 </div>
               </div>
               <span style={{
                 padding: "4px 10px",
-                borderRadius: 20,
+                borderRadius: "var(--radius-full)",
                 fontSize: 12,
                 fontWeight: 600,
                 background: `${s?.color}18`,
@@ -69,7 +70,7 @@ function IncomingRequests() {
   if (isLoading) return <LoadingState />;
   if (!data.length) return (
     <EmptyState
-      icon="📩"
+      icon={Inbox}
       title="Henüz gelen istek yok"
       description="Oluşturduğunuz etkinliklere katılım isteği geldiğinde burada görünecek."
     />
@@ -99,7 +100,7 @@ function IncomingRequests() {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
       {pending.length > 0 && (
-        <p style={{ fontSize: 13, fontWeight: 600, color: "#6B7280", margin: "0 0 4px" }}>
+        <p style={{ fontSize: 13, fontWeight: 600, color: "var(--color-muted-foreground)", margin: "0 0 4px" }}>
           Bekleyen ({pending.length})
         </p>
       )}
@@ -108,24 +109,24 @@ function IncomingRequests() {
         const isPending = req.status === ActivityRequestStatus.Pending;
         return (
           <div key={req.id} style={{
-            background: "#fff",
-            border: `1px solid ${isPending ? "#FFD580" : "#EEF2F7"}`,
-            borderRadius: 16,
+            background: "var(--color-surface)",
+            border: `1px solid ${isPending ? "#FFD580" : "var(--color-border)"}`,
+            borderRadius: "var(--radius-lg)",
             padding: "16px",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: isPending ? 12 : 0 }}>
               <UserAvatar displayName={req.user.displayName} avatarUrl={req.user.avatarUrl} size={44} />
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 15, fontWeight: 600, color: "#111827" }}>{req.user.displayName}</div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: "var(--color-foreground)" }}>{req.user.displayName}</div>
                 {req.user.averageRating > 0 && (
-                  <div style={{ fontSize: 12, color: "#6B7280" }}>
-                    ⭐ {req.user.averageRating.toFixed(1)} · {req.user.completedActivityCount} etkinlik
+                  <div style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 12, color: "var(--color-muted-foreground)" }}>
+                    <Star size={12} fill="#F59E0B" color="#F59E0B" strokeWidth={0} /> {req.user.averageRating.toFixed(1)} · {req.user.completedActivityCount} etkinlik
                   </div>
                 )}
               </div>
               <span style={{
                 padding: "4px 10px",
-                borderRadius: 20,
+                borderRadius: "var(--radius-full)",
                 fontSize: 12,
                 fontWeight: 600,
                 background: `${s?.color}18`,
@@ -141,7 +142,7 @@ function IncomingRequests() {
                 fontSize: 13,
                 color: "#374151",
                 background: "#F9FAFB",
-                borderRadius: 8,
+                borderRadius: "var(--radius-sm)",
                 padding: "8px 12px",
                 margin: isPending ? "0 0 12px" : "8px 0 0",
               }}>
@@ -152,7 +153,7 @@ function IncomingRequests() {
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <Link
                 href={`/app/activities/${req.activityId}`}
-                style={{ fontSize: 12, color: "#6B7280", textDecoration: "none" }}
+                style={{ fontSize: 12, color: "var(--color-muted-foreground)", textDecoration: "none" }}
               >
                 Etkinliği Gör →
               </Link>
@@ -165,11 +166,11 @@ function IncomingRequests() {
                     style={{
                       padding: "7px 14px",
                       background: "none",
-                      border: "1px solid #EEF2F7",
-                      borderRadius: 8,
+                      border: "1px solid var(--color-border)",
+                      borderRadius: "var(--radius-sm)",
                       fontSize: 13,
                       cursor: "pointer",
-                      color: "#6B7280",
+                      color: "var(--color-muted-foreground)",
                     }}
                   >
                     Reddet
@@ -179,9 +180,9 @@ function IncomingRequests() {
                     disabled={approve.isPending}
                     style={{
                       padding: "7px 16px",
-                      background: "#FF9D23",
+                      background: "var(--color-accent)",
                       border: "none",
-                      borderRadius: 8,
+                      borderRadius: "var(--radius-sm)",
                       fontSize: 13,
                       fontWeight: 600,
                       cursor: "pointer",
@@ -206,7 +207,7 @@ export default function RequestsPage() {
   return (
     <AppShell>
       <div style={{ maxWidth: 680, margin: "0 auto", padding: "20px 16px 40px" }}>
-        <h1 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 20px" }}>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: "var(--color-foreground)", margin: "0 0 20px" }}>
           Katılım İstekleri
         </h1>
 
@@ -214,7 +215,7 @@ export default function RequestsPage() {
         <div style={{
           display: "flex",
           background: "#F3F4F6",
-          borderRadius: 12,
+          borderRadius: "var(--radius-md)",
           padding: 4,
           marginBottom: 20,
         }}>
@@ -226,14 +227,14 @@ export default function RequestsPage() {
                 flex: 1,
                 padding: "8px",
                 border: "none",
-                borderRadius: 9,
+                borderRadius: "calc(var(--radius-md) - 3px)",
                 fontSize: 14,
                 fontWeight: 600,
                 cursor: "pointer",
-                background: tab === t ? "#fff" : "none",
-                color: tab === t ? "#111827" : "#6B7280",
-                boxShadow: tab === t ? "0 1px 4px rgba(0,0,0,0.08)" : "none",
-                transition: "all 0.15s",
+                background: tab === t ? "var(--color-surface)" : "none",
+                color: tab === t ? "var(--color-foreground)" : "var(--color-muted-foreground)",
+                boxShadow: tab === t ? "var(--shadow-sm)" : "none",
+                transition: "all 0.15s var(--ease-out)",
               }}
             >
               {t === "incoming" ? "Gelen İstekler" : "Gönderdiğim"}

@@ -42,7 +42,7 @@ export function BottomSheet({ open, onClose, children, title, snapHeight = "60vh
               bottom: 0,
               left: 0,
               right: 0,
-              background: "#fff",
+              background: "var(--color-surface)",
               borderRadius: "20px 20px 0 0",
               zIndex: 301,
               maxHeight: snapHeight,
@@ -58,11 +58,11 @@ export function BottomSheet({ open, onClose, children, title, snapHeight = "60vh
               padding: "12px 20px 8px",
               flexShrink: 0,
             }}>
-              <div style={{ width: 36, height: 4, background: "#D1D5DB", borderRadius: 2 }} />
+              <div style={{ width: 36, height: 4, background: "#D1D5DB", borderRadius: "var(--radius-full)" }} />
             </div>
             {title && (
               <div style={{ padding: "0 20px 12px", flexShrink: 0 }}>
-                <h3 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: 0 }}>{title}</h3>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>{title}</h3>
               </div>
             )}
             <div style={{ overflowY: "auto", flex: 1, padding: "0 16px 80px" }}>

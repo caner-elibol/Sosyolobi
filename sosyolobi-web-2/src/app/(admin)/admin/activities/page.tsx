@@ -50,13 +50,13 @@ export default function ActivitiesPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1B1D29" }}>Etkinlikler</h2>
-        <p style={{ fontSize: 13, color: "#9498A6", marginTop: 4 }}>{data?.totalCount ?? 0} etkinlik</p>
+        <p style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>{data?.totalCount ?? 0} etkinlik</p>
       </div>
 
       <div style={{ backgroundColor: "#fff", borderRadius: 16, border: "1px solid #F0F1F5", padding: "16px 20px", marginBottom: 16 }}>
         <div style={{ display: "flex", gap: 12, flexWrap: "wrap", alignItems: "center" }}>
           <div style={{ position: "relative" }}>
-            <Search style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#9498A6" }} />
+            <Search style={{ position: "absolute", left: 11, top: "50%", transform: "translateY(-50%)", width: 14, height: 14, color: "#6B7280" }} />
             <input placeholder="Etkinlik ara…" value={searchInput}
               onChange={(e) => setSearchInput(e.target.value)}
               onKeyDown={(e) => { if (e.key === "Enter") { setSearch(searchInput); setPage(1); } }}
@@ -66,7 +66,7 @@ export default function ActivitiesPage() {
           <div style={{ display: "flex", gap: 6 }}>
             {STATUS_FILTERS.map(({ label, value }) => (
               <button key={label} onClick={() => { setFilterStatus(value as ActivityStatus | undefined); setPage(1); }}
-                style={{ ...PILL_BASE, backgroundColor: filterStatus === value ? "#5B5FE9" : "#F8F9FF", color: filterStatus === value ? "#fff" : "#9498A6" }}>
+                style={{ ...PILL_BASE, backgroundColor: filterStatus === value ? "#5B5FE9" : "#F8F9FF", color: filterStatus === value ? "#fff" : "#6B7280" }}>
                 {label}
               </button>
             ))}
@@ -79,7 +79,7 @@ export default function ActivitiesPage() {
           <thead>
             <tr style={{ borderBottom: "1px solid #F0F1F5" }}>
               {["Başlık", "Kategori", "Durum", "Katılım", "Tarih", "Oluşturan", ""].map((h) => (
-                <th key={h} style={{ textAlign: "left", padding: "13px 18px", fontSize: 12, fontWeight: 600, color: "#9498A6", backgroundColor: "#FAFBFF", whiteSpace: "nowrap" }}>{h}</th>
+                <th key={h} style={{ textAlign: "left", padding: "13px 18px", fontSize: 12, fontWeight: 600, color: "#6B7280", backgroundColor: "#FAFBFF", whiteSpace: "nowrap" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -98,15 +98,15 @@ export default function ActivitiesPage() {
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}>
                 <td style={{ padding: "13px 18px" }}>
                   <p style={{ fontSize: 14, fontWeight: 600, color: "#1B1D29", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.title}</p>
-                  <p style={{ fontSize: 11, color: "#9498A6", marginTop: 2, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.addressText}</p>
+                  <p style={{ fontSize: 11, color: "#6B7280", marginTop: 2, maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.addressText}</p>
                 </td>
                 <td style={{ padding: "13px 18px" }}>
                   <span style={{ fontSize: 12, backgroundColor: "#EEF0FF", color: "#5B5FE9", padding: "3px 10px", borderRadius: 20, fontWeight: 500 }}>{a.categoryName || "—"}</span>
                 </td>
                 <td style={{ padding: "13px 18px" }}><ActivityStatusBadge status={a.status} /></td>
                 <td style={{ padding: "13px 18px", fontSize: 13, color: "#1B1D29", fontWeight: 500 }}>{a.currentPeopleCount}/{a.neededPeopleCount}</td>
-                <td style={{ padding: "13px 18px", fontSize: 12, color: "#9498A6" }}>{formatDate(a.eventDate)}</td>
-                <td style={{ padding: "13px 18px", fontSize: 13, color: "#9498A6" }}>{a.createdByDisplayName || "—"}</td>
+                <td style={{ padding: "13px 18px", fontSize: 12, color: "#6B7280" }}>{formatDate(a.eventDate)}</td>
+                <td style={{ padding: "13px 18px", fontSize: 13, color: "#6B7280" }}>{a.createdByDisplayName || "—"}</td>
                 <td style={{ padding: "13px 18px" }}>
                   <ActionMenu items={[
                     { label: "Detay Gör", icon: Eye, action: () => router.push(`/admin/activities/${a.id}`) },
@@ -125,7 +125,7 @@ export default function ActivitiesPage() {
 
       {data && data.totalPages > 1 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-          <span style={{ fontSize: 13, color: "#9498A6" }}>{data.totalCount} kayıt — sayfa {page} / {data.totalPages}</span>
+          <span style={{ fontSize: 13, color: "#6B7280" }}>{data.totalCount} kayıt — sayfa {page} / {data.totalPages}</span>
           <div style={{ display: "flex", gap: 8 }}>
             <button disabled={!data.hasPreviousPage} onClick={() => setPage((p) => p - 1)} style={{ ...PILL_BASE, backgroundColor: "#fff", color: "#1B1D29", border: "1px solid #F0F1F5", opacity: data.hasPreviousPage ? 1 : 0.4 }}>← Önceki</button>
             <button disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)} style={{ ...PILL_BASE, backgroundColor: "#5B5FE9", color: "#fff", opacity: data.hasNextPage ? 1 : 0.4 }}>Sonraki →</button>

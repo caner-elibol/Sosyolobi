@@ -23,7 +23,7 @@ export function EmptyState({
         <Icon size={22} color="#5B5FE9" />
       </div>
       <p style={{ fontSize: 15, fontWeight: 600, color: "#1B1D29" }}>{title}</p>
-      {description && <p style={{ fontSize: 13, color: "#9498A6" }}>{description}</p>}
+      {description && <p style={{ fontSize: 13, color: "#6B7280" }}>{description}</p>}
     </div>
   );
 }

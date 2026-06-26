@@ -16,6 +16,7 @@ import { buildChatConnection } from "@/lib/chat-signalr";
 import { UserApiError } from "@/lib/user-api-client";
 import type { ChatMessage, PagedResponse } from "@/types/user";
 import { ChatRoomStatus } from "@/types/user";
+import { MessageCircle, Send } from "lucide-react";
 
 function formatTime(iso: string) {
   return new Date(iso).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
@@ -110,25 +111,26 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
   }
 
   if (roomLoading) return <LoadingState message="Sohbet yükleniyor..." />;
-  if (roomError || !room) return <EmptyState icon="💬" title="Sohbete erişilemiyor" />;
+  if (roomError || !room) return <EmptyState icon={MessageCircle} title="Sohbete erişilemiyor" />;
 
   return (
     <div style={{
       display: "flex",
       flexDirection: "column",
-      background: "#fff",
-      borderRadius: 20,
-      border: "1px solid #EEF2F7",
+      background: "var(--color-surface)",
+      borderRadius: "var(--radius-xl)",
+      border: "1px solid var(--color-border)",
       overflow: "hidden",
     }}>
-      <div style={{ padding: "14px 16px", borderBottom: "1px solid #EEF2F7" }}>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>💬 Sohbet</h3>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, padding: "14px 16px", borderBottom: "1px solid var(--color-border)" }}>
+        <MessageCircle size={17} color="var(--color-accent)" />
+        <h3 style={{ fontSize: 15, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>Sohbet</h3>
       </div>
 
       <div style={{ height: 360, overflowY: "auto", padding: "14px 16px", display: "flex", flexDirection: "column", gap: 10 }}>
         {messagesLoading && <LoadingState message="Mesajlar yükleniyor..." />}
         {!messagesLoading && messages.length === 0 && (
-          <EmptyState icon="💬" title="Henüz mesaj yok" description="İlk mesajı sen gönder." />
+          <EmptyState icon={MessageCircle} title="Henüz mesaj yok" description="İlk mesajı sen gönder." />
         )}
         {messages.map((m) => (
           <div
@@ -141,27 +143,27 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
           >
             <UserAvatar displayName={m.senderDisplayName} avatarUrl={m.senderAvatarUrl} size={32} />
             <div>
-              <div style={{ fontSize: 12, color: "#6B7280", marginBottom: 2 }}>
+              <div style={{ fontSize: 12, color: "var(--color-muted-foreground)", marginBottom: 2 }}>
                 {m.senderDisplayName} · {formatTime(m.createdAt)}
               </div>
               <div style={{
                 background: "#F3F4F6",
-                borderRadius: 12,
+                borderRadius: "var(--radius-md)",
                 padding: "8px 12px",
                 fontSize: 14,
-                color: "#111827",
+                color: "var(--color-foreground)",
                 maxWidth: 320,
                 wordBreak: "break-word",
               }}>
                 {m.replyTo && (
                   <div style={{
-                    borderLeft: "3px solid #FF9D23",
+                    borderLeft: "3px solid var(--color-accent)",
                     paddingLeft: 8,
                     marginBottom: 6,
                     fontSize: 12,
-                    color: "#6B7280",
+                    color: "var(--color-muted-foreground)",
                   }}>
-                    <div style={{ fontWeight: 600, color: "#FF9D23" }}>{m.replyTo.senderDisplayName}</div>
+                    <div style={{ fontWeight: 600, color: "var(--color-accent)" }}>{m.replyTo.senderDisplayName}</div>
                     <div style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
                       {m.replyTo.content}
                     </div>
@@ -179,10 +181,10 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
         <div style={{
           padding: "14px 20px",
           textAlign: "center",
-          color: "#6B7280",
+          color: "var(--color-muted-foreground)",
           fontSize: 14,
           background: "#F3F4F6",
-          borderTop: "1px solid #EEF2F7",
+          borderTop: "1px solid var(--color-border)",
         }}>
           Bu etkinlik tamamlandığı için sohbet arşivlendi.
         </div>
@@ -200,8 +202,8 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
             alignItems: "center",
             gap: 8,
             padding: "12px 16px",
-            borderTop: "1px solid #EEF2F7",
-            background: "#fff",
+            borderTop: "1px solid var(--color-border)",
+            background: "var(--color-surface)",
           }}>
             <EmojiPicker onSelect={(emoji) => setText((t) => t + emoji)} />
             <input
@@ -215,10 +217,11 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
                 flex: 1,
                 minWidth: 0,
                 padding: "10px 14px",
-                border: "1px solid #EEF2F7",
-                borderRadius: 20,
+                border: "1px solid var(--color-border)",
+                borderRadius: "var(--radius-full)",
                 fontSize: 14,
                 outline: "none",
+                fontFamily: "inherit",
               }}
             />
             <button
@@ -226,17 +229,21 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
               disabled={sendMessage.isPending || !text.trim()}
               style={{
                 flexShrink: 0,
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
                 padding: "10px 18px",
-                background: "#FF9D23",
+                background: "var(--color-accent)",
                 color: "#fff",
                 border: "none",
-                borderRadius: 20,
+                borderRadius: "var(--radius-full)",
                 fontSize: 14,
                 fontWeight: 600,
                 cursor: "pointer",
+                opacity: sendMessage.isPending || !text.trim() ? 0.6 : 1,
               }}
             >
-              Gönder
+              <Send size={14} /> Gönder
             </button>
           </div>
         </>

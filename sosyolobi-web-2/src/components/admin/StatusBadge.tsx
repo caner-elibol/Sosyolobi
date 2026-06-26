@@ -1,13 +1,13 @@
 import { type LucideIcon } from "lucide-react";
 
 const STATUS_COLORS: Record<string, { color: string; bg: string }> = {
-  "bg-green-100 text-green-700":   { color: "#22C55E", bg: "#DCFCE7" },
-  "bg-red-100 text-red-700":       { color: "#EF4444", bg: "#FEE2E2" },
-  "bg-yellow-100 text-yellow-700": { color: "#F5A623", bg: "#FFF6DE" },
-  "bg-blue-100 text-blue-700":     { color: "#3D8BFF", bg: "#E7F1FF" },
-  "bg-gray-100 text-gray-600":     { color: "#9498A6", bg: "#F4F5F9" },
-  "bg-orange-100 text-orange-700": { color: "#F97316", bg: "#FFEDD5" },
-  "bg-purple-100 text-purple-700": { color: "#7B61FF", bg: "#EFEAFE" },
+  "bg-green-100 text-green-700":   { color: "#15803D", bg: "#DCFCE7" },
+  "bg-red-100 text-red-700":       { color: "#B91C1C", bg: "#FEE2E2" },
+  "bg-yellow-100 text-yellow-700": { color: "#92400E", bg: "#FFF6DE" },
+  "bg-blue-100 text-blue-700":     { color: "#1D4ED8", bg: "#E7F1FF" },
+  "bg-gray-100 text-gray-600":     { color: "#52525B", bg: "#F4F5F9" },
+  "bg-orange-100 text-orange-700": { color: "#9A3412", bg: "#FFEDD5" },
+  "bg-purple-100 text-purple-700": { color: "#5B21B6", bg: "#EFEAFE" },
 };
 
 import {
@@ -18,7 +18,7 @@ import {
 import type { UserStatus, ActivityStatus, ReportStatus } from "@/types/admin";
 
 function Badge({ label, colorKey }: { label: string; colorKey: string }) {
-  const t = STATUS_COLORS[colorKey] ?? { color: "#9498A6", bg: "#F4F5F9" };
+  const t = STATUS_COLORS[colorKey] ?? { color: "#6B7280", bg: "#F4F5F9" };
   return (
     <span style={{
       display: "inline-flex", alignItems: "center",

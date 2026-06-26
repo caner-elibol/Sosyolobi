@@ -20,7 +20,7 @@ const C = {
   cardBg: "#FFFFFF",
   cardBorder: "#F0F1F5",
   textDark: "#1B1D29",
-  textMuted: "#9498A6",
+  textMuted: "#6B7280",
 };
 
 function Card({ children, style }: { children: React.ReactNode; style?: React.CSSProperties }) {
@@ -124,13 +124,13 @@ export default function ActivityDetailPage() {
             <div style={{ display: "flex", gap: 8, flexShrink: 0 }}>
               <button
                 onClick={() => setConfirm("complete")}
-                style={{ height: 36, padding: "0 14px", borderRadius: 8, border: `1px solid ${C.cardBorder}`, backgroundColor: "#fff", color: "#22C55E", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                style={{ height: 36, padding: "0 14px", borderRadius: 8, border: `1px solid ${C.cardBorder}`, backgroundColor: "#fff", color: "#15803D", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
               >
                 Tamamlandı
               </button>
               <button
                 onClick={() => setConfirm("cancel")}
-                style={{ height: 36, padding: "0 14px", borderRadius: 8, border: "1px solid #FEE2E2", backgroundColor: "#FEF2F2", color: "#EF4444", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
+                style={{ height: 36, padding: "0 14px", borderRadius: 8, border: "1px solid #FEE2E2", backgroundColor: "#FEF2F2", color: "#B91C1C", fontSize: 13, fontWeight: 500, cursor: "pointer" }}
               >
                 İptal Et
               </button>
@@ -147,7 +147,7 @@ export default function ActivityDetailPage() {
             </span>
           </div>
           <div style={{ height: 6, backgroundColor: "#F0F1F5", borderRadius: 99 }}>
-            <div style={{ height: "100%", width: `${Math.min(fillPct, 100)}%`, backgroundColor: fillPct >= 100 ? "#22C55E" : C.purple, borderRadius: 99, transition: "width 0.3s" }} />
+            <div style={{ height: "100%", width: `${Math.min(fillPct, 100)}%`, backgroundColor: fillPct >= 100 ? "#15803D" : C.purple, borderRadius: 99, transition: "width 0.3s" }} />
           </div>
         </div>
       </Card>

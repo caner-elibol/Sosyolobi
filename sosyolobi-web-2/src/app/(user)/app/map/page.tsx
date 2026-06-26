@@ -15,6 +15,7 @@ import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useMapActivities } from "@/hooks/useMapActivities";
 import { userApiClient } from "@/lib/user-api-client";
 import type { Category, ActivityMapItem, Activity } from "@/types/user";
+import { List, MapPinned } from "lucide-react";
 
 export default function MapPage() {
   const router = useRouter();
@@ -44,7 +45,7 @@ export default function MapPage() {
       <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 60px)" }}>
 
         {/* Filter chips */}
-        <div style={{ background: "#fff", borderBottom: "1px solid #EEF2F7", flexShrink: 0 }}>
+        <div style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)", flexShrink: 0 }}>
           <FilterChips
             categories={categories}
             selected={selectedCategoryId}
@@ -54,7 +55,7 @@ export default function MapPage() {
 
         {/* Location permission (prompt) */}
         {permission === "prompt" && (
-          <div style={{ padding: "12px 16px", background: "#fff", flexShrink: 0 }}>
+          <div style={{ padding: "12px 16px", background: "var(--color-surface)", flexShrink: 0 }}>
             <LocationPermissionCard
               onAllow={requestLocation}
               onDismiss={() => {/* state stays as prompt, map shows Istanbul */}}
@@ -71,8 +72,8 @@ export default function MapPage() {
               width: 420,
               flexShrink: 0,
               overflowY: "auto",
-              borderRight: "1px solid #EEF2F7",
-              background: "#FAFBFD",
+              borderRight: "1px solid var(--color-border)",
+              background: "var(--color-background)",
               padding: "16px",
               display: "flex",
               flexDirection: "column",
@@ -80,16 +81,16 @@ export default function MapPage() {
             }}
           >
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <h2 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: 0 }}>
+              <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>
                 Yakındaki Etkinlikler
               </h2>
-              <span style={{ fontSize: 13, color: "#6B7280" }}>{mapActivities.length} etkinlik</span>
+              <span style={{ fontSize: 13, color: "var(--color-muted-foreground)" }}>{mapActivities.length} etkinlik</span>
             </div>
 
             {isLoading && <LoadingState message="Etkinlikler aranıyor..." />}
             {!isLoading && mapActivities.length === 0 && (
               <EmptyState
-                icon="🗺️"
+                icon={MapPinned}
                 title="Yakında etkinlik bulunamadı"
                 description="Arama yarıçapını artırın veya filtre kaldırın."
               />
@@ -124,22 +125,25 @@ export default function MapPage() {
               className="show-mobile"
               onClick={() => setSheetOpen(true)}
               style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 7,
                 position: "absolute",
                 bottom: 80,
                 left: "50%",
                 transform: "translateX(-50%)",
-                background: "#081B4B",
+                background: "var(--color-navy)",
                 color: "#fff",
                 border: "none",
-                borderRadius: 24,
+                borderRadius: "var(--radius-full)",
                 padding: "10px 20px",
                 fontSize: 14,
                 fontWeight: 600,
                 cursor: "pointer",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                boxShadow: "var(--shadow-lg)",
               }}
             >
-              📋 Listeyi Gör ({mapActivities.length})
+              <List size={16} /> Listeyi Gör ({mapActivities.length})
             </button>
           </div>
         </div>
@@ -148,7 +152,7 @@ export default function MapPage() {
         <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Yakındaki Etkinlikler">
           {isLoading && <LoadingState />}
           {!isLoading && mapActivities.length === 0 && (
-            <EmptyState icon="🗺️" title="Yakında etkinlik yok" />
+            <EmptyState icon={MapPinned} title="Yakında etkinlik yok" />
           )}
           <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
             {mapActivities.map((a) => (

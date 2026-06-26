@@ -33,7 +33,7 @@ export function UserAvatar({ displayName, avatarUrl, size = 40 }: UserAvatarProp
       width: size,
       height: size,
       borderRadius: "50%",
-      background: "#081B4B",
+      background: "var(--color-navy)",
       color: "#fff",
       display: "flex",
       alignItems: "center",

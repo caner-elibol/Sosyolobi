@@ -71,7 +71,7 @@ export function Sidebar() {
             width: 28, height: 28, borderRadius: 8, border: "1px solid #F0F1F5",
             backgroundColor: "#fff", cursor: "pointer",
             display: "flex", alignItems: "center", justifyContent: "center",
-            color: "#9498A6", flexShrink: 0,
+            color: "#6B7280", flexShrink: 0,
           }}
         >
           {collapsed ? <ChevronRight size={14} /> : <ChevronLeft size={14} />}
@@ -93,7 +93,7 @@ export function Sidebar() {
                 padding: collapsed ? "10px 0" : "10px 12px",
                 borderRadius: 12,
                 backgroundColor: active ? "#EEF0FF" : "transparent",
-                color: active ? "#5B5FE9" : "#9498A6",
+                color: active ? "#5B5FE9" : "#6B7280",
                 fontWeight: active ? 600 : 400,
                 fontSize: 14,
                 textDecoration: "none",
@@ -119,7 +119,7 @@ export function Sidebar() {
             justifyContent: collapsed ? "center" : "flex-start",
             padding: collapsed ? "10px 0" : "10px 12px",
             borderRadius: 12, border: "none", backgroundColor: "transparent",
-            color: "#9498A6", fontSize: 14, cursor: "pointer",
+            color: "#6B7280", fontSize: 14, cursor: "pointer",
           }}
           onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#FFF0F0")}
           onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}

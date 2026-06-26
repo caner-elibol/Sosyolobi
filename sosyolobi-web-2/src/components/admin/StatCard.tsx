@@ -27,9 +27,9 @@ export function StatCard({ icon: Icon, label, value, iconBg, iconColor, trend }:
         <p style={{ fontSize: 26, fontWeight: 700, color: "#1B1D29", letterSpacing: "-0.02em", lineHeight: 1 }}>
           {value}
         </p>
-        <p style={{ fontSize: 13, color: "#9498A6", marginTop: 4 }}>{label}</p>
+        <p style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>{label}</p>
         {trend && (
-          <p style={{ fontSize: 11, color: "#22C55E", marginTop: 2, fontWeight: 500 }}>{trend}</p>
+          <p style={{ fontSize: 11, color: "#15803D", marginTop: 2, fontWeight: 500 }}>{trend}</p>
         )}
       </div>
     </div>

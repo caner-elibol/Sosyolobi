@@ -48,10 +48,10 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
         <div style={{
           width: 14,
           height: 14,
-          background: "#081B4B",
+          background: "var(--color-navy)",
           border: "3px solid #fff",
           borderRadius: "50%",
-          boxShadow: "0 0 0 3px rgba(8,27,75,0.25)",
+          boxShadow: "0 0 0 3px rgba(11,23,54,0.25)",
         }} />
       </Marker>
 
@@ -91,32 +91,32 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
               fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
             }}
           >
-            <p style={{ fontSize: 14, fontWeight: 600, color: "#111827", margin: "0 0 4px" }}>
+            <p style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)", margin: "0 0 4px" }}>
               {selected.title}
             </p>
-            <p style={{ fontSize: 12, color: "#6B7280", margin: "0 0 4px" }}>
+            <p style={{ fontSize: 12, color: "var(--color-muted-foreground)", margin: "0 0 4px" }}>
               {formatDate(selected.eventDate)}
             </p>
             <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
               <span style={{
                 fontSize: 11,
-                background: "#FFF7ED",
-                color: "#FF9D23",
+                background: "var(--color-accent-soft-bg)",
+                color: "var(--color-accent-soft-fg)",
                 padding: "2px 6px",
-                borderRadius: 8,
+                borderRadius: "var(--radius-sm)",
                 fontWeight: 600,
               }}>
                 {selected.neededPeopleCount} kişi eksik
               </span>
               {selected.distanceMeters < 1000
-                ? <span style={{ fontSize: 11, color: "#6B7280" }}>{Math.round(selected.distanceMeters)} m</span>
-                : <span style={{ fontSize: 11, color: "#6B7280" }}>{(selected.distanceMeters / 1000).toFixed(1)} km</span>
+                ? <span style={{ fontSize: 11, color: "var(--color-muted-foreground)" }}>{Math.round(selected.distanceMeters)} m</span>
+                : <span style={{ fontSize: 11, color: "var(--color-muted-foreground)" }}>{(selected.distanceMeters / 1000).toFixed(1)} km</span>
               }
             </div>
             <div style={{ marginTop: 8 }}>
               <span style={{
                 fontSize: 12,
-                color: "#FF9D23",
+                color: "var(--color-accent)",
                 fontWeight: 600,
               }}>
                 Detay →

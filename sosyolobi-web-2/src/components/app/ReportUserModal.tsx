@@ -50,17 +50,17 @@ export function ReportUserModal({ userId, displayName, onClose }: ReportUserModa
       <div
         onClick={(e) => e.stopPropagation()}
         style={{
-          background: "#fff",
-          borderRadius: 16,
+          background: "var(--color-surface)",
+          borderRadius: "var(--radius-lg)",
           padding: 24,
           width: "100%",
           maxWidth: 380,
         }}
       >
-        <h3 style={{ fontSize: 16, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: "var(--color-foreground)", margin: "0 0 4px" }}>
           {displayName} kullanıcısını şikayet et
         </h3>
-        <p style={{ fontSize: 13, color: "#6B7280", margin: "0 0 16px" }}>
+        <p style={{ fontSize: 13, color: "var(--color-muted-foreground)", margin: "0 0 16px" }}>
           Şikayetiniz ekibimiz tarafından incelenecektir.
         </p>
 
@@ -73,11 +73,12 @@ export function ReportUserModal({ userId, displayName, onClose }: ReportUserModa
           style={{
             width: "100%",
             padding: "10px 12px",
-            border: "1px solid #EEF2F7",
-            borderRadius: 10,
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-sm)",
             fontSize: 14,
             marginBottom: 14,
             boxSizing: "border-box",
+            fontFamily: "inherit",
           }}
         >
           {REASONS.map((r) => <option key={r} value={r}>{r}</option>)}
@@ -94,12 +95,13 @@ export function ReportUserModal({ userId, displayName, onClose }: ReportUserModa
           style={{
             width: "100%",
             padding: "10px 12px",
-            border: "1px solid #EEF2F7",
-            borderRadius: 10,
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-sm)",
             fontSize: 14,
             resize: "vertical",
             boxSizing: "border-box",
             marginBottom: 18,
+            fontFamily: "inherit",
           }}
         />
 
@@ -110,10 +112,10 @@ export function ReportUserModal({ userId, displayName, onClose }: ReportUserModa
               flex: 1,
               padding: "12px",
               background: "none",
-              border: "1px solid #EEF2F7",
-              borderRadius: 12,
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-md)",
               fontSize: 14,
-              color: "#6B7280",
+              color: "var(--color-muted-foreground)",
               cursor: "pointer",
             }}
           >
@@ -125,13 +127,14 @@ export function ReportUserModal({ userId, displayName, onClose }: ReportUserModa
             style={{
               flex: 1,
               padding: "12px",
-              background: "#EF4444",
+              background: "var(--color-destructive)",
               color: "#fff",
               border: "none",
-              borderRadius: 12,
+              borderRadius: "var(--radius-md)",
               fontSize: 14,
               fontWeight: 600,
               cursor: "pointer",
+              opacity: report.isPending ? 0.7 : 1,
             }}
           >
             {report.isPending ? "Gönderiliyor..." : "Şikayet Et"}

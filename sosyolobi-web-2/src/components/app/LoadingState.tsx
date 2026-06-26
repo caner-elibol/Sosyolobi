@@ -15,13 +15,12 @@ export function LoadingState({ message = "Yükleniyor..." }: LoadingStateProps) 
       <div style={{
         width: 32,
         height: 32,
-        border: "3px solid #EEF2F7",
-        borderTopColor: "#FF9D23",
+        border: "3px solid var(--color-border)",
+        borderTopColor: "var(--color-accent)",
         borderRadius: "50%",
         animation: "spin 0.8s linear infinite",
       }} />
-      <p style={{ fontSize: 14, color: "#6B7280", margin: 0 }}>{message}</p>
-      <style>{`@keyframes spin { to { transform: rotate(360deg) } }`}</style>
+      <p style={{ fontSize: 14, color: "var(--color-muted-foreground)", margin: 0 }}>{message}</p>
     </div>
   );
 }

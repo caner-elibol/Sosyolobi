@@ -11,6 +11,7 @@ import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useNearbyActivities } from "@/hooks/useNearbyActivities";
 import { userApiClient } from "@/lib/user-api-client";
 import type { Category } from "@/types/user";
+import { MapPinOff, Search, SearchX } from "lucide-react";
 
 export default function ActivitiesPage() {
   const { location } = useCurrentLocation();
@@ -40,7 +41,8 @@ export default function ActivitiesPage() {
     <AppShell>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
         {/* Search */}
-        <div style={{ padding: "16px 16px 0" }}>
+        <div style={{ padding: "16px 16px 0", position: "relative" }}>
+          <Search size={16} color="var(--color-muted-foreground)" style={{ position: "absolute", left: 30, top: "50%", transform: "translateY(-50%)" }} />
           <input
             type="text"
             value={search}
@@ -48,13 +50,14 @@ export default function ActivitiesPage() {
             placeholder="Etkinlik ara..."
             style={{
               width: "100%",
-              padding: "12px 16px",
-              border: "1px solid #EEF2F7",
-              borderRadius: 12,
+              padding: "12px 16px 12px 40px",
+              border: "1px solid var(--color-border)",
+              borderRadius: "var(--radius-md)",
               fontSize: 14,
               outline: "none",
               boxSizing: "border-box",
-              background: "#fff",
+              background: "var(--color-surface)",
+              fontFamily: "inherit",
             }}
           />
         </div>
@@ -69,18 +72,18 @@ export default function ActivitiesPage() {
         {/* Results */}
         <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 12 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 4 }}>
-            <h2 style={{ fontSize: 15, fontWeight: 700, color: "#111827", margin: 0 }}>
+            <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>
               Yakındaki Etkinlikler
             </h2>
-            {!isLoading && <span style={{ fontSize: 13, color: "#6B7280" }}>{filtered.length} sonuç</span>}
+            {!isLoading && <span style={{ fontSize: 13, color: "var(--color-muted-foreground)" }}>{filtered.length} sonuç</span>}
           </div>
 
           {isLoading && <LoadingState />}
           {!isLoading && !location && (
-            <EmptyState icon="📍" title="Konum gerekli" description="Etkinlikleri görmek için harita sayfasından konum izni verin." />
+            <EmptyState icon={MapPinOff} title="Konum gerekli" description="Etkinlikleri görmek için harita sayfasından konum izni verin." />
           )}
           {!isLoading && location && filtered.length === 0 && (
-            <EmptyState icon="🔍" title="Etkinlik bulunamadı" description="Arama kelimesini veya filtreyi değiştirin." />
+            <EmptyState icon={SearchX} title="Etkinlik bulunamadı" description="Arama kelimesini veya filtreyi değiştirin." />
           )}
           {filtered.map((a) => (
             <ActivityCard key={a.id} activity={a} />

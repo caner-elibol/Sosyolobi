@@ -13,8 +13,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 
 // Swagger
-builder.Services.AddSwaggerGen();
-
+builder.Services.AddSwaggerGen(c =>
+{
+    c.CustomSchemaIds(type => type.FullName);
+});
 // Options
 builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptions.SectionName));
 builder.Services.Configure<SmsOptions>(builder.Configuration.GetSection(SmsOptions.SectionName));
@@ -66,7 +68,6 @@ if (app.Environment.IsDevelopment())
 app.UseExceptionHandling();
 app.UseRequestLogging();
 
-app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseCors();
 

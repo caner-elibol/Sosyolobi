@@ -12,9 +12,9 @@ export function AppShell({ children, fullscreen = false, hideBottomNav = false }
     <div style={{
       display: "flex",
       flexDirection: "column",
-      minHeight: "100vh",
-      fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif",
-      background: "#FAFBFD",
+      minHeight: "100dvh",
+      fontFamily: "var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif",
+      background: "var(--color-background)",
     }}>
       <AppTopbar />
       <main style={{

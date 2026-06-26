@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { Reply } from "lucide-react";
 
 interface ChatMessageContextMenuProps {
   x: number;
@@ -27,29 +28,32 @@ export function ChatMessageContextMenu({ x, y, onReply, onClose }: ChatMessageCo
         position: "fixed",
         top: y,
         left: x,
-        background: "#fff",
-        borderRadius: 10,
-        boxShadow: "0 4px 20px rgba(0,0,0,0.18)",
+        background: "var(--color-surface)",
+        borderRadius: "var(--radius-sm)",
+        boxShadow: "var(--shadow-lg)",
         zIndex: 300,
         overflow: "hidden",
-        minWidth: 120,
+        minWidth: 130,
+        border: "1px solid var(--color-border)",
       }}
     >
       <button
         onClick={onReply}
         style={{
-          display: "block",
+          display: "flex",
+          alignItems: "center",
+          gap: 8,
           width: "100%",
           textAlign: "left",
           padding: "10px 14px",
           fontSize: 13,
-          color: "#111827",
+          color: "var(--color-foreground)",
           background: "none",
           border: "none",
           cursor: "pointer",
         }}
       >
-        ↩ Cevapla
+        <Reply size={14} /> Cevapla
       </button>
     </div>
   );

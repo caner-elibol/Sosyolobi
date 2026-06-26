@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/useNotifications";
 import { getUserFromToken, clearUserToken } from "@/lib/user-auth";
 import { UserAvatar } from "@/components/app/UserAvatar";
+import { Compass, LogOut, Plus, UserPen } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/app/map", label: "Keşfet" },
@@ -39,7 +40,7 @@ export function AppTopbar() {
   return (
     <header style={{
       height: 60,
-      background: "#081B4B",
+      background: "var(--color-navy)",
       display: "flex",
       alignItems: "center",
       padding: "0 20px",
@@ -49,9 +50,20 @@ export function AppTopbar() {
       zIndex: 100,
       flexShrink: 0,
     }}>
-      <Link href="/app/map" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 6 }}>
-        <span style={{ fontSize: 20 }}>🏃</span>
-        <span style={{ color: "#FF9D23", fontWeight: 700, fontSize: 16 }}>Sosyolobi</span>
+      <Link href="/app/map" style={{ textDecoration: "none", display: "flex", alignItems: "center", gap: 8 }}>
+        <span style={{
+          width: 30,
+          height: 30,
+          borderRadius: "var(--radius-md)",
+          background: "var(--color-accent-bright)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <Compass size={17} color="var(--color-navy)" strokeWidth={2.5} />
+        </span>
+        <span style={{ color: "#fff", fontWeight: 700, fontSize: 16 }}>Sosyolobi</span>
       </Link>
 
       <nav style={{ display: "flex", gap: 4, marginLeft: 16, flex: 1 }} className="hidden-mobile">
@@ -61,12 +73,13 @@ export function AppTopbar() {
             href={item.href}
             style={{
               padding: "6px 12px",
-              borderRadius: 8,
+              borderRadius: "var(--radius-sm)",
               fontSize: 14,
-              fontWeight: pathname.startsWith(item.href) ? 600 : 400,
-              color: pathname.startsWith(item.href) ? "#FF9D23" : "#94a3b8",
+              fontWeight: pathname.startsWith(item.href) ? 600 : 500,
+              color: pathname.startsWith(item.href) ? "var(--color-accent-bright)" : "rgba(255,255,255,0.65)",
               textDecoration: "none",
               position: "relative",
+              transition: "color 0.15s ease",
             }}
           >
             {item.label}
@@ -75,7 +88,7 @@ export function AppTopbar() {
                 position: "absolute",
                 top: 2,
                 right: 2,
-                background: "#EF4444",
+                background: "var(--color-destructive)",
                 color: "#fff",
                 borderRadius: "50%",
                 width: 16,
@@ -95,19 +108,23 @@ export function AppTopbar() {
 
       <div style={{ marginLeft: "auto", display: "flex", alignItems: "center", gap: 12 }}>
         <Link href="/app/activities/create" style={{
-          padding: "6px 14px",
-          background: "#FF9D23",
-          color: "#fff",
-          borderRadius: 20,
+          display: "inline-flex",
+          alignItems: "center",
+          gap: 6,
+          padding: "7px 14px",
+          background: "var(--color-accent-bright)",
+          color: "var(--color-navy)",
+          borderRadius: "var(--radius-full)",
           fontSize: 13,
-          fontWeight: 600,
+          fontWeight: 700,
           textDecoration: "none",
+          transition: "filter 0.15s ease",
         }} className="hidden-mobile">
-          + Oluştur
+          <Plus size={15} strokeWidth={2.5} /> Oluştur
         </Link>
         {user && (
           <div ref={menuRef} style={{ position: "relative" }}>
-            <button onClick={() => setMenuOpen((o) => !o)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+            <button onClick={() => setMenuOpen((o) => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}>
               <UserAvatar displayName={user.displayName ?? "U"} size={32} />
             </button>
             {menuOpen && (
@@ -115,36 +132,39 @@ export function AppTopbar() {
                 position: "absolute",
                 top: 40,
                 right: 0,
-                background: "#fff",
-                borderRadius: 12,
-                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-                minWidth: 170,
+                background: "var(--color-surface)",
+                borderRadius: "var(--radius-md)",
+                boxShadow: "var(--shadow-lg)",
+                minWidth: 180,
                 zIndex: 200,
                 overflow: "hidden",
+                border: "1px solid var(--color-border)",
               }}>
                 <Link
                   href="/app/profile"
                   onClick={() => setMenuOpen(false)}
-                  style={{ display: "block", padding: "12px 16px", fontSize: 14, color: "#111827", textDecoration: "none" }}
+                  style={{ display: "flex", alignItems: "center", gap: 8, padding: "12px 16px", fontSize: 14, color: "var(--color-foreground)", textDecoration: "none" }}
                 >
-                  Profili Düzenle
+                  <UserPen size={15} /> Profili Düzenle
                 </Link>
                 <button
                   onClick={logout}
                   style={{
-                    display: "block",
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
                     width: "100%",
                     textAlign: "left",
                     padding: "12px 16px",
                     fontSize: 14,
-                    color: "#EF4444",
+                    color: "var(--color-destructive)",
                     background: "none",
                     border: "none",
-                    borderTop: "1px solid #EEF2F7",
+                    borderTop: "1px solid var(--color-border)",
                     cursor: "pointer",
                   }}
                 >
-                  Çıkış Yap
+                  <LogOut size={15} /> Çıkış Yap
                 </button>
               </div>
             )}

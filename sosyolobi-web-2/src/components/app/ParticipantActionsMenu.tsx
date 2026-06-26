@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useBlockUser } from "@/hooks/useUserActions";
 import { ReportUserModal } from "@/components/app/ReportUserModal";
+import { Flag, MoreVertical, ShieldOff } from "lucide-react";
 
 interface ParticipantActionsMenuProps {
   userId: string;
@@ -43,37 +44,39 @@ export function ParticipantActionsMenu({ userId, displayName }: ParticipantActio
           background: "none",
           border: "none",
           cursor: "pointer",
-          color: "#9CA3AF",
-          fontSize: 16,
+          color: "var(--color-muted-foreground)",
           padding: 4,
-          lineHeight: 1,
+          display: "flex",
+          alignItems: "center",
+          borderRadius: "var(--radius-sm)",
         }}
       >
-        ⋮
+        <MoreVertical size={17} />
       </button>
       {menuOpen && (
         <div style={{
           position: "absolute",
-          top: 24,
+          top: 28,
           right: 0,
-          background: "#fff",
-          borderRadius: 12,
-          boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
-          minWidth: 170,
+          background: "var(--color-surface)",
+          borderRadius: "var(--radius-md)",
+          boxShadow: "var(--shadow-lg)",
+          minWidth: 180,
           zIndex: 200,
           overflow: "hidden",
+          border: "1px solid var(--color-border)",
         }}>
           <button
             onClick={() => { setReportOpen(true); setMenuOpen(false); }}
-            style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "#111827", background: "none", border: "none", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", cursor: "pointer" }}
           >
-            Şikayet Et
+            <Flag size={14} /> Şikayet Et
           </button>
           <button
             onClick={handleBlock}
-            style={{ display: "block", width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "#EF4444", background: "none", border: "none", borderTop: "1px solid #EEF2F7", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-destructive)", background: "none", border: "none", borderTop: "1px solid var(--color-border)", cursor: "pointer" }}
           >
-            Kullanıcıyı Engelle
+            <ShieldOff size={14} /> Kullanıcıyı Engelle
           </button>
         </div>
       )}

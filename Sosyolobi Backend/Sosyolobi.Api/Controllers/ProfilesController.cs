@@ -34,13 +34,21 @@ public class ProfilesController : ControllerBase
         return Ok(ApiResponse<ProfileResponse>.Ok(result));
     }
 
+    public sealed class UploadAvatarRequest
+    {
+        public IFormFile File { get; set; } = default!;
+    }
+
     [HttpPost("me/avatar")]
+    [Consumes("multipart/form-data")]
     [RequestSizeLimit(5_000_000)]
-    public async Task<IActionResult> UploadMyAvatar([FromForm] IFormFile file)
+    public async Task<IActionResult> UploadMyAvatar([FromForm] UploadAvatarRequest request)
     {
         var userId = User.GetUserId();
         var baseUrl = $"{Request.Scheme}://{Request.Host}";
-        var result = await _profileService.UploadAvatarAsync(userId, file, baseUrl);
+
+        var result = await _profileService.UploadAvatarAsync(userId, request.File, baseUrl);
+
         return Ok(ApiResponse<ProfileResponse>.Ok(result));
     }
 

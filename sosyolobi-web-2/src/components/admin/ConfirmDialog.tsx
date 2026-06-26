@@ -27,14 +27,14 @@ export function ConfirmDialog({
         border: "1px solid #F0F1F5",
       }}>
         <h3 style={{ fontSize: 17, fontWeight: 700, color: "#1B1D29", marginBottom: 8 }}>{title}</h3>
-        <p style={{ fontSize: 14, color: "#9498A6", marginBottom: 24 }}>{description}</p>
+        <p style={{ fontSize: 14, color: "#6B7280", marginBottom: 24 }}>{description}</p>
         <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
           <button
             onClick={onCancel}
             style={{
               height: 40, padding: "0 20px", borderRadius: 10,
               border: "1px solid #F0F1F5", backgroundColor: "#fff",
-              fontSize: 14, fontWeight: 500, color: "#9498A6", cursor: "pointer",
+              fontSize: 14, fontWeight: 500, color: "#6B7280", cursor: "pointer",
             }}
           >
             Vazgeç
@@ -43,7 +43,7 @@ export function ConfirmDialog({
             onClick={onConfirm}
             style={{
               height: 40, padding: "0 20px", borderRadius: 10, border: "none",
-              backgroundColor: destructive ? "#EF4444" : "#5B5FE9",
+              backgroundColor: destructive ? "#B91C1C" : "#5B5FE9",
               color: "#fff", fontSize: 14, fontWeight: 600, cursor: "pointer",
             }}
           >

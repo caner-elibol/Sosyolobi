@@ -8,6 +8,7 @@ import { z } from "zod";
 import { toast } from "sonner";
 import { getUserFromToken } from "@/lib/user-auth";
 import type { ApiResponse } from "@/types/user";
+import { Compass } from "lucide-react";
 
 const schema = z.object({
   phoneNumber: z.string().min(10, "Gecerli bir telefon numarasi girin"),
@@ -47,19 +48,30 @@ function LoginForm() {
   return (
     <div style={{ width: "100%", maxWidth: 400 }}>
       <div style={{ textAlign: "center", marginBottom: 40 }}>
-        <div style={{ fontSize: 40, marginBottom: 8 }}>ðŸƒ</div>
-        <h1 style={{ fontSize: 28, fontWeight: 700, color: "#081B4B", margin: "0 0 4px" }}>Sosyolobi</h1>
-        <p style={{ color: "#6B7280", fontSize: 15, margin: 0 }}>Etkinlikleri kesfet, insanlarla buluş</p>
+        <div style={{
+          width: 56,
+          height: 56,
+          borderRadius: "var(--radius-md)",
+          background: "var(--color-accent-bright)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          margin: "0 auto 12px",
+        }}>
+          <Compass size={28} color="var(--color-navy)" strokeWidth={2.25} />
+        </div>
+        <h1 style={{ fontSize: 28, fontWeight: 700, color: "var(--color-navy)", margin: "0 0 4px" }}>Sosyolobi</h1>
+        <p style={{ color: "var(--color-muted-foreground)", fontSize: 15, margin: 0 }}>Etkinlikleri kesfet, insanlarla buluş</p>
       </div>
-      <div style={{ background: "#fff", borderRadius: 20, padding: 32, boxShadow: "0 4px 24px rgba(8,27,75,0.08)" }}>
-        <h2 style={{ fontSize: 22, fontWeight: 700, color: "#111827", margin: "0 0 24px" }}>Giris Yap</h2>
+      <div style={{ background: "var(--color-surface)", borderRadius: "var(--radius-xl)", padding: 32, boxShadow: "var(--shadow-lg)" }}>
+        <h2 style={{ fontSize: 22, fontWeight: 700, color: "var(--color-foreground)", margin: "0 0 24px" }}>Giris Yap</h2>
         <form onSubmit={handleSubmit(onSubmit)}>
           <div style={{ marginBottom: 20 }}>
             <label style={{ display: "block", fontSize: 14, fontWeight: 500, color: "#374151", marginBottom: 6 }}>Telefon Numarasi</label>
-            <input {...register("phoneNumber")} type="tel" placeholder="+90 555 000 00 00" style={{ width: "100%", padding: "12px 16px", border: `1px solid ${errors.phoneNumber ? "#EF4444" : "#EEF2F7"}`, borderRadius: 12, fontSize: 15, outline: "none", boxSizing: "border-box" }} />
-            {errors.phoneNumber && <p style={{ color: "#EF4444", fontSize: 12, marginTop: 4 }}>{errors.phoneNumber.message}</p>}
+            <input {...register("phoneNumber")} type="tel" placeholder="+90 555 000 00 00" style={{ width: "100%", padding: "12px 16px", border: `1px solid ${errors.phoneNumber ? "var(--color-destructive)" : "var(--color-border)"}`, borderRadius: "var(--radius-md)", fontSize: 15, outline: "none", boxSizing: "border-box", fontFamily: "inherit" }} />
+            {errors.phoneNumber && <p style={{ color: "var(--color-destructive)", fontSize: 12, marginTop: 4 }}>{errors.phoneNumber.message}</p>}
           </div>
-          <button type="submit" disabled={isSubmitting} style={{ width: "100%", padding: "13px", background: isSubmitting ? "#fb923c" : "#FF9D23", color: "#fff", border: "none", borderRadius: 12, fontSize: 15, fontWeight: 600, cursor: isSubmitting ? "not-allowed" : "pointer" }}>
+          <button type="submit" disabled={isSubmitting} style={{ width: "100%", padding: "13px", background: "var(--color-accent)", color: "#fff", border: "none", borderRadius: "var(--radius-md)", fontSize: 15, fontWeight: 600, cursor: isSubmitting ? "not-allowed" : "pointer", opacity: isSubmitting ? 0.7 : 1 }}>
             {isSubmitting ? "Gonderiliyor..." : "Dogrulama Kodu Gonder"}
           </button>
         </form>
@@ -70,7 +82,7 @@ function LoginForm() {
 
 export default function LoginPage() {
   return (
-    <div style={{ minHeight: "100vh", background: "linear-gradient(160deg, #fff8ee 0%, #fff3e0 40%, #fafbfd 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}>
+    <div style={{ minHeight: "100dvh", background: "linear-gradient(160deg, #fff8ee 0%, #fff3e0 40%, #fafbfd 100%)", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "var(--font-inter), Inter, ui-sans-serif, system-ui, sans-serif" }}>
       <Suspense fallback={null}><LoginForm /></Suspense>
     </div>
   );

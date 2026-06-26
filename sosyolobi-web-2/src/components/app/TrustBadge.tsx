@@ -1,3 +1,5 @@
+import { BadgeCheck, Star } from "lucide-react";
+
 interface TrustBadgeProps {
   isPhoneVerified?: boolean;
   rating?: number;
@@ -12,14 +14,14 @@ export function TrustBadge({ isPhoneVerified, rating, compact = false }: TrustBa
           display: "inline-flex",
           alignItems: "center",
           gap: 3,
-          background: "#DCFCE7",
-          color: "#16A34A",
+          background: "var(--color-success-bg)",
+          color: "var(--color-success)",
           fontSize: compact ? 11 : 12,
           fontWeight: 600,
           padding: "2px 8px",
-          borderRadius: 20,
+          borderRadius: "var(--radius-full)",
         }}>
-          ✓ {!compact && "Doğrulandı"}
+          <BadgeCheck size={compact ? 12 : 13} strokeWidth={2.25} /> {!compact && "Doğrulandı"}
         </span>
       )}
       {rating !== undefined && rating > 0 && (
@@ -27,10 +29,10 @@ export function TrustBadge({ isPhoneVerified, rating, compact = false }: TrustBa
           display: "inline-flex",
           alignItems: "center",
           gap: 3,
-          color: "#6B7280",
+          color: "var(--color-muted-foreground)",
           fontSize: compact ? 12 : 13,
         }}>
-          ⭐ {rating.toFixed(1)}
+          <Star size={compact ? 12 : 13} fill="#F59E0B" color="#F59E0B" strokeWidth={0} /> {rating.toFixed(1)}
         </span>
       )}
     </div>

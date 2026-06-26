@@ -40,7 +40,7 @@ export default function ReviewsPage() {
     <div>
       <div style={{ marginBottom: 24 }}>
         <h2 style={{ fontSize: 22, fontWeight: 700, color: "#1B1D29" }}>Yorumlar</h2>
-        <p style={{ fontSize: 13, color: "#9498A6", marginTop: 4 }}>{data?.totalCount ?? 0} yorum</p>
+        <p style={{ fontSize: 13, color: "#6B7280", marginTop: 4 }}>{data?.totalCount ?? 0} yorum</p>
       </div>
 
       <div style={{ backgroundColor: "#fff", borderRadius: 16, border: "1px solid #F0F1F5", overflow: "hidden" }}>
@@ -48,7 +48,7 @@ export default function ReviewsPage() {
           <thead>
             <tr style={{ borderBottom: "1px solid #F0F1F5" }}>
               {["Yorum Yapan", "Yorum Alan", "Etkinlik", "Puan", "Yorum", "Tarih", ""].map((h) => (
-                <th key={h} style={{ textAlign: "left", padding: "13px 18px", fontSize: 12, fontWeight: 600, color: "#9498A6", backgroundColor: "#FAFBFF" }}>{h}</th>
+                <th key={h} style={{ textAlign: "left", padding: "13px 18px", fontSize: 12, fontWeight: 600, color: "#6B7280", backgroundColor: "#FAFBFF" }}>{h}</th>
               ))}
             </tr>
           </thead>
@@ -74,15 +74,15 @@ export default function ReviewsPage() {
                     <span style={{ fontSize: 14, fontWeight: 600, color: "#1B1D29" }}>{r.reviewerDisplayName}</span>
                   </div>
                 </td>
-                <td style={{ padding: "13px 18px", fontSize: 13, color: "#9498A6" }}>{r.reviewedDisplayName}</td>
+                <td style={{ padding: "13px 18px", fontSize: 13, color: "#6B7280" }}>{r.reviewedDisplayName}</td>
                 <td style={{ padding: "13px 18px" }}>
-                  <p style={{ fontSize: 13, color: "#9498A6", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.activityTitle}</p>
+                  <p style={{ fontSize: 13, color: "#6B7280", maxWidth: 160, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.activityTitle}</p>
                 </td>
                 <td style={{ padding: "13px 18px" }}><Stars rating={r.rating} /></td>
                 <td style={{ padding: "13px 18px" }}>
                   <p style={{ fontSize: 13, color: "#1B1D29", maxWidth: 200, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{r.comment || "—"}</p>
                 </td>
-                <td style={{ padding: "13px 18px", fontSize: 12, color: "#9498A6" }}>{formatDateTime(r.createdAt)}</td>
+                <td style={{ padding: "13px 18px", fontSize: 12, color: "#6B7280" }}>{formatDateTime(r.createdAt)}</td>
                 <td style={{ padding: "13px 18px" }}>
                   <button
                     onClick={() => toggleVisibility(r.id, r.isHidden)}
@@ -90,7 +90,7 @@ export default function ReviewsPage() {
                       display: "flex", alignItems: "center", gap: 5, height: 30, padding: "0 12px",
                       borderRadius: 8, border: "1px solid #F0F1F5", backgroundColor: "#fff",
                       fontSize: 12, fontWeight: 500, cursor: "pointer",
-                      color: r.isHidden ? "#22C55E" : "#9498A6",
+                      color: r.isHidden ? "#15803D" : "#6B7280",
                     }}
                   >
                     {r.isHidden ? <><Eye size={12} /> Göster</> : <><EyeOff size={12} /> Gizle</>}
@@ -105,7 +105,7 @@ export default function ReviewsPage() {
 
       {data && data.totalPages > 1 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginTop: 16 }}>
-          <span style={{ fontSize: 13, color: "#9498A6" }}>{data.totalCount} kayıt — sayfa {page} / {data.totalPages}</span>
+          <span style={{ fontSize: 13, color: "#6B7280" }}>{data.totalCount} kayıt — sayfa {page} / {data.totalPages}</span>
           <div style={{ display: "flex", gap: 8 }}>
             <button disabled={!data.hasPreviousPage} onClick={() => setPage((p) => p - 1)} style={{ ...PILL_BASE, backgroundColor: "#fff", color: "#1B1D29", border: "1px solid #F0F1F5", opacity: data.hasPreviousPage ? 1 : 0.4 }}>← Önceki</button>
             <button disabled={!data.hasNextPage} onClick={() => setPage((p) => p + 1)} style={{ ...PILL_BASE, backgroundColor: "#5B5FE9", color: "#fff", opacity: data.hasNextPage ? 1 : 0.4 }}>Sonraki →</button>
