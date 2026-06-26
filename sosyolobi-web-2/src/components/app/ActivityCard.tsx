@@ -1,5 +1,7 @@
 import type { Activity } from "@/types/user";
+import { ActivityStatus } from "@/types/user";
 import { CATEGORY_ICONS } from "@/lib/category-icons";
+import { formatDistanceMeters } from "@/lib/format";
 import Link from "next/link";
 
 interface ActivityCardProps {
@@ -13,15 +15,11 @@ function formatDate(iso: string) {
     " " + d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
 }
 
-function formatDistance(m?: number) {
-  if (!m) return null;
-  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`;
-}
-
 export function ActivityCard({ activity, compact = false }: ActivityCardProps) {
   const icon = CATEGORY_ICONS[activity.categoryName] ?? "📍";
-  const missing = activity.neededPeopleCount - activity.currentPeopleCount;
-  const dist = formatDistance(activity.distanceMeters);
+  // currentPeopleCount organizatörü de içerir; neededPeopleCount organizatör HARİÇ ihtiyaçtır.
+  const missing = activity.neededPeopleCount - (activity.currentPeopleCount - 1);
+  const dist = formatDistanceMeters(activity.distanceMeters);
 
   return (
     <Link href={`/app/activities/${activity.id}`} style={{ textDecoration: "none" }}>
@@ -72,6 +70,9 @@ export function ActivityCard({ activity, compact = false }: ActivityCardProps) {
         </div>
 
         <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
+          {activity.status === ActivityStatus.Full
+            ? <Chip accent>Dolu</Chip>
+            : <Chip>Aktif</Chip>}
           <Chip>📅 {formatDate(activity.eventDate)}</Chip>
           {dist && <Chip>📍 {dist}</Chip>}
           {missing > 0 && <Chip accent>{missing} kişi eksik</Chip>}

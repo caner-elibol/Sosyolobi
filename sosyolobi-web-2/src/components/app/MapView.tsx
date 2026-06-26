@@ -3,6 +3,7 @@
 import { useState, useCallback } from "react";
 import Map, { Marker, Popup, NavigationControl } from "react-map-gl/maplibre";
 import "maplibre-gl/dist/maplibre-gl.css";
+import { silenceMissingStyleImages } from "@/lib/map-utils";
 import { ActivityMarker } from "@/components/app/ActivityMarker";
 import type { ActivityMapItem } from "@/types/user";
 
@@ -30,6 +31,8 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
 
   return (
     <Map
+      reuseMaps
+      onLoad={silenceMissingStyleImages}
       initialViewState={{
         longitude: center.lng,
         latitude: center.lat,

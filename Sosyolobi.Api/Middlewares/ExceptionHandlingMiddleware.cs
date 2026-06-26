@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using Sosyolobi.Api.DTOs.Common;
+using Sosyolobi.Api.Exceptions;
 
 namespace Sosyolobi.Api.Middlewares;
 
@@ -32,6 +33,7 @@ public class ExceptionHandlingMiddleware
     {
         var (statusCode, message) = exception switch
         {
+            ApiException apiEx => (apiEx.StatusCode, apiEx.Message),
             UnauthorizedAccessException => (HttpStatusCode.Unauthorized, exception.Message),
             KeyNotFoundException => (HttpStatusCode.NotFound, exception.Message),
             InvalidOperationException => (HttpStatusCode.BadRequest, exception.Message),
@@ -42,7 +44,7 @@ public class ExceptionHandlingMiddleware
         context.Response.ContentType = "application/json";
         context.Response.StatusCode = (int)statusCode;
 
-        var response = new ErrorResponse { Message = message };
+        var response = new ErrorResponse { Message = message, Code = (exception as ApiException)?.Code };
         var json = JsonSerializer.Serialize(response, new JsonSerializerOptions { PropertyNamingPolicy = JsonNamingPolicy.CamelCase });
         return context.Response.WriteAsync(json);
     }

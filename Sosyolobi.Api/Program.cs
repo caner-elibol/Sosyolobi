@@ -4,6 +4,7 @@ using Sosyolobi.Api.Data;
 using Sosyolobi.Api.Extensions;
 using Sosyolobi.Api.Hubs;
 using Sosyolobi.Api.Options;
+using Sosyolobi.Api.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -40,6 +41,7 @@ builder.Services.AddSignalR();
 
 // Application Services
 builder.Services.AddApplicationServices();
+builder.Services.AddHostedService<ActivityAutoCompletionService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -65,6 +67,7 @@ app.UseExceptionHandling();
 app.UseRequestLogging();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 app.UseCors();
 
 app.UseAuthentication();
@@ -72,6 +75,7 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapHub<NotificationHub>("/hubs/notifications");
+app.MapHub<ChatHub>("/hubs/chat");
 
 // DB Initialize
 await DbInitializer.InitializeAsync(app.Services);

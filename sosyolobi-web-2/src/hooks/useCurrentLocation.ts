@@ -30,6 +30,13 @@ export function useCurrentLocation() {
   }, []);
 
   useEffect(() => {
+    // React Strict Mode dev'de bu effect mount->cleanup->mount sırasıyla iki kez
+    // çalışabilir; `cancelled` bayrağı olmadan iki ayrı permissions.query() çağrısı
+    // permission state'ini "granted" -> "loading" -> "granted" arasında art arda
+    // değiştirip Map bileşeninin hızlıca unmount/remount olmasına (ve maplibre-gl'in
+    // container hatası vermesine) yol açıyordu.
+    let cancelled = false;
+
     if (!navigator.geolocation) {
       setPermission("denied");
       setLocation({ lat: 41.0082, lng: 28.9784 });
@@ -38,6 +45,7 @@ export function useCurrentLocation() {
     navigator.permissions
       .query({ name: "geolocation" })
       .then((result) => {
+        if (cancelled) return;
         if (result.state === "granted") {
           request();
         } else if (result.state === "denied") {
@@ -47,7 +55,13 @@ export function useCurrentLocation() {
           setPermission("prompt");
         }
       })
-      .catch(() => setPermission("prompt"));
+      .catch(() => {
+        if (!cancelled) setPermission("prompt");
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, [request]);
 
   return { location, permission, request };

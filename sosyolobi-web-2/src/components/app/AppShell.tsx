@@ -4,9 +4,10 @@ import { AppBottomNav } from "@/components/app/AppBottomNav";
 interface AppShellProps {
   children: React.ReactNode;
   fullscreen?: boolean;
+  hideBottomNav?: boolean;
 }
 
-export function AppShell({ children, fullscreen = false }: AppShellProps) {
+export function AppShell({ children, fullscreen = false, hideBottomNav = false }: AppShellProps) {
   return (
     <div style={{
       display: "flex",
@@ -22,7 +23,7 @@ export function AppShell({ children, fullscreen = false }: AppShellProps) {
       }}>
         {children}
       </main>
-      <AppBottomNav />
+      {!hideBottomNav && <AppBottomNav />}
 
       <style>{`
         @media (min-width: 768px) {

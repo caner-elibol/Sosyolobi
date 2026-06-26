@@ -28,6 +28,11 @@ export enum GenderPreference {
   Mixed = 3,
 }
 
+export enum ChatRoomStatus {
+  Open = 1,
+  Closed = 2,
+}
+
 // ── Common ─────────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
@@ -110,6 +115,7 @@ export interface ActivityMapItem {
   id: string;
   title: string;
   categoryName: string;
+  status: ActivityStatus;
   latitude: number;
   longitude: number;
   eventDate: string;
@@ -153,6 +159,33 @@ export interface ActivityJoinRequest {
   status: ActivityRequestStatus;
   createdAt: string;
   respondedAt?: string;
+}
+
+// ── Chat ───────────────────────────────────────────────────────────────────
+
+export interface ChatRoom {
+  id: string;
+  activityId: string;
+  status: ChatRoomStatus;
+  createdAt: string;
+  closedAt?: string;
+}
+
+export interface ChatMessageReplyPreview {
+  id: string;
+  senderDisplayName: string;
+  content: string;
+}
+
+export interface ChatMessage {
+  id: string;
+  chatRoomId: string;
+  senderUserId: string;
+  senderDisplayName: string;
+  senderAvatarUrl?: string;
+  content: string;
+  replyTo?: ChatMessageReplyPreview;
+  createdAt: string;
 }
 
 // ── Notifications ──────────────────────────────────────────────────────────

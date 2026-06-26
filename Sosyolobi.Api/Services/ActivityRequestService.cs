@@ -118,7 +118,9 @@ public class ActivityRequestService : IActivityRequestService
         });
 
         request.Activity.CurrentPeopleCount++;
-        if (request.Activity.CurrentPeopleCount >= request.Activity.NeededPeopleCount)
+        // CurrentPeopleCount organizatörü de içerir (1'den başlar); NeededPeopleCount
+        // organizatör HARİÇ ihtiyaç duyulan kişi sayısıdır, bu yüzden -1 ile karşılaştırılır.
+        if (request.Activity.CurrentPeopleCount - 1 >= request.Activity.NeededPeopleCount)
             request.Activity.Status = ActivityStatus.Full;
 
         await _db.SaveChangesAsync();

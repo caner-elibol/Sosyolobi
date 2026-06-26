@@ -58,6 +58,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IGeoService, GeoService>();
         services.AddScoped<IAdminService, AdminService>();
+        services.AddScoped<IChatService, ChatService>();
         return services;
     }
 }

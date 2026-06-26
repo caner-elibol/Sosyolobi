@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sosyolobi.Api.DTOs.Common;
 using Sosyolobi.Api.DTOs.Profiles;
@@ -30,6 +31,16 @@ public class ProfilesController : ControllerBase
     {
         var userId = User.GetUserId();
         var result = await _profileService.UpdateProfileAsync(userId, request);
+        return Ok(ApiResponse<ProfileResponse>.Ok(result));
+    }
+
+    [HttpPost("me/avatar")]
+    [RequestSizeLimit(5_000_000)]
+    public async Task<IActionResult> UploadMyAvatar([FromForm] IFormFile file)
+    {
+        var userId = User.GetUserId();
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var result = await _profileService.UploadAvatarAsync(userId, file, baseUrl);
         return Ok(ApiResponse<ProfileResponse>.Ok(result));
     }
 

@@ -14,4 +14,6 @@ public interface IActivityService
     Task DeleteAsync(Guid id, Guid userId);
     Task CancelAsync(Guid id, Guid userId);
     Task CompleteAsync(Guid id, Guid userId);
+    Task CloseChatRoomAsync(Guid activityId);
+    Task<IList<Guid>> AutoCompleteExpiredAsync();
 }

@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using NetTopologySuite.Geometries;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
@@ -12,9 +13,11 @@ using Sosyolobi.Api.Data;
 namespace Sosyolobi.Api.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260624144337_AddChatRoomAndMessages")]
+    partial class AddChatRoomAndMessages
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,10 +255,6 @@ namespace Sosyolobi.Api.Migrations
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at");
 
-                    b.Property<Guid?>("ReplyToMessageId")
-                        .HasColumnType("uuid")
-                        .HasColumnName("reply_to_message_id");
-
                     b.Property<Guid>("SenderUserId")
                         .HasColumnType("uuid")
                         .HasColumnName("sender_user_id");
@@ -263,14 +262,11 @@ namespace Sosyolobi.Api.Migrations
                     b.HasKey("Id")
                         .HasName("pk_chat_messages");
 
-                    b.HasIndex("ReplyToMessageId")
-                        .HasDatabaseName("ix_chat_messages_reply_to_message_id");
+                    b.HasIndex("ChatRoomId")
+                        .HasDatabaseName("ix_chat_messages_chat_room_id");
 
                     b.HasIndex("SenderUserId")
                         .HasDatabaseName("ix_chat_messages_sender_user_id");
-
-                    b.HasIndex("ChatRoomId", "SenderUserId", "CreatedAt")
-                        .HasDatabaseName("ix_chat_messages_chat_room_id_sender_user_id_created_at");
 
                     b.ToTable("chat_messages", (string)null);
                 });
@@ -743,12 +739,6 @@ namespace Sosyolobi.Api.Migrations
                         .IsRequired()
                         .HasConstraintName("fk_chat_messages_chat_rooms_chat_room_id");
 
-                    b.HasOne("Sosyolobi.Api.Entities.ChatMessage", "ReplyToMessage")
-                        .WithMany()
-                        .HasForeignKey("ReplyToMessageId")
-                        .OnDelete(DeleteBehavior.SetNull)
-                        .HasConstraintName("fk_chat_messages_chat_messages_reply_to_message_id");
-
                     b.HasOne("Sosyolobi.Api.Entities.User", "SenderUser")
                         .WithMany()
                         .HasForeignKey("SenderUserId")
@@ -757,8 +747,6 @@ namespace Sosyolobi.Api.Migrations
                         .HasConstraintName("fk_chat_messages_users_sender_user_id");
 
                     b.Navigation("ChatRoom");
-
-                    b.Navigation("ReplyToMessage");
 
                     b.Navigation("SenderUser");
                 });

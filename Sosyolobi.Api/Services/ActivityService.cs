@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using NetTopologySuite.Geometries;
 using Sosyolobi.Api.Data;
@@ -6,6 +7,7 @@ using Sosyolobi.Api.DTOs.Common;
 using Sosyolobi.Api.DTOs.Profiles;
 using Sosyolobi.Api.Entities;
 using Sosyolobi.Api.Enums;
+using Sosyolobi.Api.Hubs;
 using Sosyolobi.Api.Services.Interfaces;
 
 namespace Sosyolobi.Api.Services;
@@ -13,8 +15,13 @@ namespace Sosyolobi.Api.Services;
 public class ActivityService : IActivityService
 {
     private readonly AppDbContext _db;
+    private readonly IHubContext<ChatHub> _chatHub;
 
-    public ActivityService(AppDbContext db) => _db = db;
+    public ActivityService(AppDbContext db, IHubContext<ChatHub> chatHub)
+    {
+        _db = db;
+        _chatHub = chatHub;
+    }
 
     public async Task<ActivityResponse> CreateAsync(Guid userId, CreateActivityRequest request)
     {
@@ -54,17 +61,31 @@ public class ActivityService : IActivityService
             HasAttended = false
         });
 
+        _db.ChatRooms.Add(new ChatRoom
+        {
+            Id = Guid.CreateVersion7(),
+            ActivityId = activity.Id,
+            Status = ChatRoomStatus.Open,
+            CreatedAt = DateTime.UtcNow
+        });
+
         await _db.SaveChangesAsync();
         activity.Category = category;
         return MapToResponse(activity);
     }
+
+    // Etkinlikler tarihinden 3 saat sonra otomatik tamamlanır (bkz. ActivityAutoCompletionService);
+    // bu pencere, arka plan servisinin henüz çalışmadığı kısa aralıkta da Open/Full etkinliklerin
+    // listelerde görünmeye devam etmesini sağlayan ek bir güvenlik sınırıdır.
+    private static readonly TimeSpan AutoCompleteWindow = TimeSpan.FromHours(3);
 
     public async Task<PagedResponse<ActivityResponse>> GetListAsync(PagedRequest paged)
     {
         var query = _db.Activities
             .Include(a => a.Category)
             .Include(a => a.CreatedByUser).ThenInclude(u => u.Profile)
-            .Where(a => a.Status == ActivityStatus.Open && a.EventDate >= DateTime.UtcNow)
+            .Where(a => (a.Status == ActivityStatus.Open || a.Status == ActivityStatus.Full)
+                && a.EventDate >= DateTime.UtcNow - AutoCompleteWindow)
             .OrderByDescending(a => a.CreatedAt);
 
         var total = await query.CountAsync();
@@ -86,8 +107,8 @@ public class ActivityService : IActivityService
         var query = _db.Activities
             .Include(a => a.Category)
             .Include(a => a.CreatedByUser).ThenInclude(u => u.Profile)
-            .Where(a => a.Status == ActivityStatus.Open)
-            .Where(a => a.EventDate >= DateTime.UtcNow)
+            .Where(a => a.Status == ActivityStatus.Open || a.Status == ActivityStatus.Full)
+            .Where(a => a.EventDate >= DateTime.UtcNow - AutoCompleteWindow)
             .Where(a => a.Location.Distance(userLocation) <= request.RadiusMeters);
 
         if (request.CategoryId.HasValue)
@@ -104,7 +125,7 @@ public class ActivityService : IActivityService
         return items.Select(a =>
         {
             var r = MapToResponse(a);
-            r.DistanceMeters = a.Location.Distance(userLocation);
+            r.DistanceMeters = a.Location.Distance(userLocation)*111_320;
             return r;
         }).ToList();
     }
@@ -113,11 +134,22 @@ public class ActivityService : IActivityService
 {
     var userLocation = new Point(request.Longitude, request.Latitude) { SRID = 4326 };
 
-    var activities = await _db.Activities
+    var query = _db.Activities
         .Include(a => a.Category)
-        .Where(a => a.Status == ActivityStatus.Open)
-        .Where(a => a.EventDate >= DateTime.UtcNow)
-        .Where(a => a.Location.Distance(userLocation) <= request.RadiusMeters)
+        .Where(a => a.Status == ActivityStatus.Open || a.Status == ActivityStatus.Full)
+        .Where(a => a.EventDate >= DateTime.UtcNow - AutoCompleteWindow)
+        .Where(a => a.Location.Distance(userLocation) <= request.RadiusMeters);
+
+    if (request.CategoryId.HasValue)
+        query = query.Where(a => a.CategoryId == request.CategoryId.Value);
+
+    if (request.FromDate.HasValue)
+        query = query.Where(a => a.EventDate >= request.FromDate.Value.ToUniversalTime());
+
+    if (request.ToDate.HasValue)
+        query = query.Where(a => a.EventDate <= request.ToDate.Value.ToUniversalTime());
+
+    var activities = await query
         .OrderBy(a => a.Location.Distance(userLocation))
         .ToListAsync();
 
@@ -126,12 +158,13 @@ public class ActivityService : IActivityService
         Id = a.Id,
         Title = a.Title,
         CategoryName = a.Category?.Name ?? string.Empty,
+        Status = a.Status,
         Latitude = a.Location.Y,
         Longitude = a.Location.X,
         EventDate = a.EventDate,
         NeededPeopleCount = a.NeededPeopleCount,
         PricePerPerson = a.PricePerPerson,
-        DistanceMeters = a.Location.Distance(userLocation)
+        DistanceMeters = a.Location.Distance(userLocation)*111_320
     }).ToList();
 
     return items;
@@ -237,6 +270,7 @@ public class ActivityService : IActivityService
         activity.Status = ActivityStatus.Cancelled;
         activity.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
+        await CloseChatRoomAsync(id);
     }
 
     public async Task CompleteAsync(Guid id, Guid userId)
@@ -250,6 +284,39 @@ public class ActivityService : IActivityService
         activity.Status = ActivityStatus.Completed;
         activity.UpdatedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync();
+        await CloseChatRoomAsync(id);
+    }
+
+    public async Task CloseChatRoomAsync(Guid activityId)
+    {
+        var room = await _db.ChatRooms.FirstOrDefaultAsync(r => r.ActivityId == activityId);
+        if (room is null || room.Status == ChatRoomStatus.Closed) return;
+
+        room.Status = ChatRoomStatus.Closed;
+        room.ClosedAt = DateTime.UtcNow;
+        await _db.SaveChangesAsync();
+
+        await _chatHub.Clients.Group($"chatroom_{room.Id}").SendAsync("RoomClosed", new { room.Id, room.ClosedAt });
+    }
+
+    public async Task<IList<Guid>> AutoCompleteExpiredAsync()
+    {
+        var cutoff = DateTime.UtcNow - AutoCompleteWindow;
+
+        var expired = await _db.Activities
+            .Where(a => (a.Status == ActivityStatus.Open || a.Status == ActivityStatus.Full) && a.EventDate <= cutoff)
+            .ToListAsync();
+
+        if (expired.Count == 0) return Array.Empty<Guid>();
+
+        foreach (var activity in expired)
+        {
+            activity.Status = ActivityStatus.Completed;
+            activity.UpdatedAt = DateTime.UtcNow;
+        }
+        await _db.SaveChangesAsync();
+
+        return expired.Select(a => a.Id).ToList();
     }
 
     private static ActivityResponse MapToResponse(Activity a) => new()

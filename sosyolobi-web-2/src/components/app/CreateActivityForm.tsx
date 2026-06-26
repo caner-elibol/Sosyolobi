@@ -10,6 +10,7 @@ import "maplibre-gl/dist/maplibre-gl.css";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { userApiClient } from "@/lib/user-api-client";
+import { silenceMissingStyleImages } from "@/lib/map-utils";
 import { useCreateActivity } from "@/hooks/useCreateActivity";
 import { SkillLevel, GenderPreference } from "@/types/user";
 import type { Category } from "@/types/user";
@@ -28,6 +29,11 @@ const schema = z.object({
 });
 type FormValues = z.infer<typeof schema>;
 
+function nowForDatetimeLocal() {
+  const d = new Date(Date.now() - new Date().getTimezoneOffset() * 60000);
+  return d.toISOString().slice(0, 16);
+}
+
 export function CreateActivityForm() {
   const router = useRouter();
   const create = useCreateActivity();
@@ -41,7 +47,12 @@ export function CreateActivityForm() {
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
-    defaultValues: { skillLevel: SkillLevel.Any, genderPreference: GenderPreference.Any, neededPeopleCount: 1 },
+    defaultValues: {
+      skillLevel: SkillLevel.Any,
+      genderPreference: GenderPreference.Any,
+      neededPeopleCount: 1,
+      eventDate: nowForDatetimeLocal(),
+    },
   });
 
   const handleMapClick = useCallback((evt: { lngLat: { lat: number; lng: number } }) => {
@@ -135,6 +146,8 @@ export function CreateActivityForm() {
         <Field label="Konum Seç (haritaya tıklayın)" error={pin ? undefined : "Konum zorunlu"}>
           <div style={{ height: 300, borderRadius: 12, overflow: "hidden", border: "1px solid #EEF2F7" }}>
             <Map
+              reuseMaps
+              onLoad={silenceMissingStyleImages}
               initialViewState={{ longitude: 28.9784, latitude: 41.0082, zoom: 11 }}
               mapStyle="https://tiles.openfreemap.org/styles/liberty"
               style={{ width: "100%", height: "100%" }}

@@ -19,6 +19,8 @@ public class AppDbContext : DbContext
     public DbSet<Report> Reports => Set<Report>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
+    public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
+    public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,5 +77,24 @@ public class AppDbContext : DbContext
             .WithMany()
             .HasForeignKey(r => r.ReportedUserId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ChatRoom>()
+            .HasIndex(x => x.ActivityId)
+            .IsUnique();
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne(m => m.SenderUser)
+            .WithMany()
+            .HasForeignKey(m => m.SenderUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasOne(m => m.ReplyToMessage)
+            .WithMany()
+            .HasForeignKey(m => m.ReplyToMessageId)
+            .OnDelete(DeleteBehavior.SetNull);
+
+        modelBuilder.Entity<ChatMessage>()
+            .HasIndex(m => new { m.ChatRoomId, m.SenderUserId, m.CreatedAt });
     }
 }

@@ -18,6 +18,13 @@ export function formatDateTime(dateStr: string): string {
   });
 }
 
+export function formatDistanceMeters(m?: number | null): string | null {
+  if (m === undefined || m === null) return null;
+  if (m < 10) return "<10 m";
+  if (m < 1000) return `${Math.round(m)} m`;
+  return `${(m / 1000).toFixed(1)} km`;
+}
+
 export function formatRelative(dateStr: string): string {
   const diff = Date.now() - new Date(dateStr).getTime();
   const mins = Math.floor(diff / 60000);

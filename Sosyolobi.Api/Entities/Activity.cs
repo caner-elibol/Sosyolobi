@@ -32,4 +32,5 @@ public class Activity
     public ActivityCategory Category { get; set; } = null!;
     public ICollection<ActivityRequest> Requests { get; set; } = new List<ActivityRequest>();
     public ICollection<ActivityParticipant> Participants { get; set; } = new List<ActivityParticipant>();
+    public ChatRoom? ChatRoom { get; set; }
 }

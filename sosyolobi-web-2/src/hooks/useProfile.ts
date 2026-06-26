@@ -29,7 +29,21 @@ export function useProfile() {
     },
   });
 
-  return { ...query, update };
+  const uploadAvatar = useMutation({
+    mutationFn: (file: File) => {
+      const formData = new FormData();
+      formData.append("file", file);
+      return userApiClient<UserProfile>("/api/profiles/me/avatar", {
+        method: "POST",
+        body: formData,
+      });
+    },
+    onSuccess: (data) => {
+      qc.setQueryData(["profile-me"], data);
+    },
+  });
+
+  return { ...query, update, uploadAvatar };
 }
 
 export function usePublicProfile(userId: string | null) {

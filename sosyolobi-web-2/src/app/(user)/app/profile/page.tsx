@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -21,8 +21,21 @@ type FormValues = z.infer<typeof schema>;
 
 export default function ProfilePage() {
   const router = useRouter();
-  const { data: profile, isLoading, update } = useProfile();
+  const { data: profile, isLoading, update, uploadAvatar } = useProfile();
   const [editing, setEditing] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  async function handleAvatarChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    try {
+      await uploadAvatar.mutateAsync(file);
+      toast.success("Profil fotoğrafı güncellendi.");
+    } catch {
+      toast.error("Fotoğraf yüklenemedi.");
+    }
+  }
 
   const { register, handleSubmit, formState: { errors, isSubmitting } } = useForm<FormValues>({
     resolver: zodResolver(schema),
@@ -61,7 +74,39 @@ export default function ProfilePage() {
           alignItems: "flex-start",
           gap: 16,
         }}>
-          <UserAvatar displayName={profile.displayName} avatarUrl={profile.avatarUrl} size={72} />
+          <div style={{ position: "relative", flexShrink: 0 }}>
+            <UserAvatar displayName={profile.displayName} avatarUrl={profile.avatarUrl} size={72} />
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              disabled={uploadAvatar.isPending}
+              style={{
+                position: "absolute",
+                bottom: -2,
+                right: -2,
+                width: 26,
+                height: 26,
+                borderRadius: "50%",
+                background: "#FF9D23",
+                border: "2px solid #fff",
+                color: "#fff",
+                fontSize: 13,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+              }}
+              aria-label="Fotoğrafı değiştir"
+            >
+              {uploadAvatar.isPending ? "…" : "📷"}
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleAvatarChange}
+              style={{ display: "none" }}
+            />
+          </div>
           <div style={{ flex: 1 }}>
             <h1 style={{ fontSize: 20, fontWeight: 700, color: "#111827", margin: "0 0 4px" }}>
               {profile.displayName}

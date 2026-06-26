@@ -25,7 +25,7 @@ export default function ActivitiesPage() {
 
   const { data: activities = [], isLoading } = useNearbyActivities(
     location
-      ? { lat: location.lat, lng: location.lng, radiusMeters: 50000, categoryId: categoryId ?? undefined }
+      ? { lat: location.lat, lng: location.lng, radiusMeters: 10000, categoryId: categoryId ?? undefined }
       : null
   );
 

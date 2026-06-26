@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useNotifications } from "@/hooks/useNotifications";
@@ -18,6 +19,17 @@ export function AppTopbar() {
   const router = useRouter();
   const { unreadCount } = useNotifications();
   const user = getUserFromToken();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    function handleClickOutside(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [menuOpen]);
 
   function logout() {
     clearUserToken();
@@ -94,9 +106,49 @@ export function AppTopbar() {
           + Oluştur
         </Link>
         {user && (
-          <button onClick={logout} style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <UserAvatar displayName={user.displayName ?? "U"} size={32} />
-          </button>
+          <div ref={menuRef} style={{ position: "relative" }}>
+            <button onClick={() => setMenuOpen((o) => !o)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+              <UserAvatar displayName={user.displayName ?? "U"} size={32} />
+            </button>
+            {menuOpen && (
+              <div style={{
+                position: "absolute",
+                top: 40,
+                right: 0,
+                background: "#fff",
+                borderRadius: 12,
+                boxShadow: "0 4px 20px rgba(0,0,0,0.15)",
+                minWidth: 170,
+                zIndex: 200,
+                overflow: "hidden",
+              }}>
+                <Link
+                  href="/app/profile"
+                  onClick={() => setMenuOpen(false)}
+                  style={{ display: "block", padding: "12px 16px", fontSize: 14, color: "#111827", textDecoration: "none" }}
+                >
+                  Profili Düzenle
+                </Link>
+                <button
+                  onClick={logout}
+                  style={{
+                    display: "block",
+                    width: "100%",
+                    textAlign: "left",
+                    padding: "12px 16px",
+                    fontSize: 14,
+                    color: "#EF4444",
+                    background: "none",
+                    border: "none",
+                    borderTop: "1px solid #EEF2F7",
+                    cursor: "pointer",
+                  }}
+                >
+                  Çıkış Yap
+                </button>
+              </div>
+            )}
+          </div>
         )}
       </div>
     </header>

@@ -3,7 +3,8 @@ import type { ApiResponse } from "@/types/user";
 export class UserApiError extends Error {
   constructor(
     public status: number,
-    message: string
+    message: string,
+    public code?: string
   ) {
     super(message);
   }
@@ -20,13 +21,14 @@ export async function userApiClient<T>(
   options?: RequestInit
 ): Promise<T> {
   const token = getUserToken();
+  const isFormData = options?.body instanceof FormData;
 
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}${url}`,
     {
       ...options,
       headers: {
-        "Content-Type": "application/json",
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.headers ?? {}),
       },
@@ -43,13 +45,15 @@ export async function userApiClient<T>(
   if (!response.ok) {
     const text = await response.text().catch(() => "");
     let message = `HTTP ${response.status}`;
+    let code: string | undefined;
     try {
-      const json = JSON.parse(text) as { message?: string };
+      const json = JSON.parse(text) as { message?: string; code?: string };
       if (json.message) message = json.message;
+      code = json.code;
     } catch {
       // ignore
     }
-    throw new UserApiError(response.status, message);
+    throw new UserApiError(response.status, message, code);
   }
 
   const json = (await response.json()) as ApiResponse<T>;
