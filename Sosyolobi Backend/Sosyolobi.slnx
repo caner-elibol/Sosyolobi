@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="Sosyolobi.Api/Sosyolobi.Api.csproj" />
+  <Project Path="docker-compose.dcproj" />
+</Solution>
