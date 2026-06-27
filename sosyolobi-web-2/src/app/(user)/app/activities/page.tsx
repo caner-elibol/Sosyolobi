@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app/AppShell";
 import { ActivityCard } from "@/components/app/ActivityCard";
@@ -14,9 +15,18 @@ import type { Category } from "@/types/user";
 import { MapPinOff, Search, SearchX } from "lucide-react";
 
 export default function ActivitiesPage() {
+  return (
+    <Suspense fallback={<AppShell><LoadingState /></AppShell>}>
+      <ActivitiesPageInner />
+    </Suspense>
+  );
+}
+
+function ActivitiesPageInner() {
+  const searchParams = useSearchParams();
   const { location } = useCurrentLocation();
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],

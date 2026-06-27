@@ -2,12 +2,16 @@
 
 :root {
   /* Brand */
-  --color-navy: #0b1736;
-  --color-navy-light: #16234a;
+  --color-navy: #0f1736;
+  --color-navy-light: #181c51;
   --color-accent: #c2540c;
-  --color-accent-bright: #ff9d23;
+  --color-accent-bright: #f2821f;
   --color-accent-soft-bg: #fff1e0;
   --color-accent-soft-fg: #9a3412;
+  --color-violet: #8454d9;
+  --color-pink: #e94c79;
+  --gradient-promo: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 100%);
+  --gradient-cta: linear-gradient(120deg, var(--color-accent-bright) 0%, var(--color-pink) 65%, var(--color-violet) 130%);
 
   /* Semantic */
   --color-success: #15803d;

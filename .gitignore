@@ -1,6 +1,10 @@
 # Old frontend (replaced by sosyolobi-web-2)
 sosyolobi-web/
 
+# Locally uploaded avatars (served from a Docker volume in containers; not source)
+Sosyolobi Backend/Sosyolobi.Api/wwwroot/avatars/*
+!Sosyolobi Backend/Sosyolobi.Api/wwwroot/avatars/.gitkeep
+
 # Build outputs
 bin/
 obj/

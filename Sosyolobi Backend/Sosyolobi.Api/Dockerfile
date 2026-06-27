@@ -19,5 +19,6 @@ RUN dotnet publish "Sosyolobi.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 
 FROM base AS final
 WORKDIR /app
-COPY --from=publish /app/publish .
+COPY --from=publish --chown=$APP_UID:$APP_UID /app/publish .
+RUN mkdir -p /app/wwwroot/avatars && chmod -R 777 /app/wwwroot/avatars
 ENTRYPOINT ["dotnet", "Sosyolobi.Api.dll"]

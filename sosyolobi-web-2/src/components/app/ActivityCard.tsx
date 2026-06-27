@@ -1,26 +1,119 @@
 import type { Activity } from "@/types/user";
 import { ActivityStatus } from "@/types/user";
-import { getCategoryIcon } from "@/lib/category-icons";
+import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { formatDistanceMeters } from "@/lib/format";
+import { UserAvatar } from "@/components/app/UserAvatar";
 import Link from "next/link";
-import { Calendar, Gift, MapPin, Wallet } from "lucide-react";
+import { Clock, MapPin, Users } from "lucide-react";
 
 interface ActivityCardProps {
   activity: Activity & { distanceMeters?: number };
   compact?: boolean;
+  categoryColor?: string;
+  variant?: "horizontal" | "vertical";
 }
 
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" }) +
-    " " + d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+  const time = d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+  if (isToday) return `Bugün ${time}`;
+  return d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" }) + " " + time;
 }
 
-export function ActivityCard({ activity, compact = false }: ActivityCardProps) {
+export function ActivityCard({ activity, compact = false, categoryColor, variant = "horizontal" }: ActivityCardProps) {
   const Icon = getCategoryIcon(activity.categoryName);
-  // currentPeopleCount organizatörü de içerir; neededPeopleCount organizatör HARİÇ ihtiyaçtır.
-  const missing = activity.neededPeopleCount - (activity.currentPeopleCount - 1);
+  const color = getCategoryColor(activity.categoryName, categoryColor);
   const dist = formatDistanceMeters(activity.distanceMeters);
+  const isFull = activity.status === ActivityStatus.Full;
+  const hasParticipantData = typeof activity.currentPeopleCount === "number";
+
+  const categoryBadge = (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      alignSelf: "flex-start",
+      padding: "2px 9px 2px 7px",
+      borderRadius: "var(--radius-full)",
+      background: `color-mix(in srgb, ${color} 14%, white)`,
+      color,
+      fontSize: 11,
+      fontWeight: 600,
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      {activity.categoryName}
+    </span>
+  );
+
+  const participantsRow = (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+      {activity.createdByDisplayName ? (
+        <UserAvatar displayName={activity.createdByDisplayName} avatarUrl={activity.createdByAvatarUrl} size={20} />
+      ) : (
+        <Users size={14} color="var(--color-subtle-foreground)" />
+      )}
+      <span style={{ fontSize: 12, color: "var(--color-muted-foreground)", fontWeight: 500 }}>
+        {hasParticipantData
+          ? `${activity.currentPeopleCount} / ${activity.neededPeopleCount + 1} katılıyor`
+          : `${activity.neededPeopleCount} kişi aranıyor`}
+      </span>
+    </div>
+  );
+
+  if (variant === "vertical") {
+    return (
+      <Link href={`/app/activities/${activity.id}`} style={{ textDecoration: "none" }}>
+        <div
+          className="activity-card"
+          style={{
+            background: "var(--color-surface)",
+            border: "1px solid var(--color-border)",
+            borderRadius: "var(--radius-lg)",
+            overflow: "hidden",
+            cursor: "pointer",
+            transition: "box-shadow 0.2s var(--ease-out), border-color 0.2s ease",
+          }}
+        >
+          <div style={{
+            height: 120,
+            background: `linear-gradient(135deg, color-mix(in srgb, ${color} 22%, white) 0%, color-mix(in srgb, ${color} 10%, white) 100%)`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}>
+            <Icon size={34} color={color} strokeWidth={1.75} />
+          </div>
+          <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 5 }}>
+            {categoryBadge}
+            <h4 style={{
+              fontSize: 14,
+              fontWeight: 700,
+              color: "var(--color-foreground)",
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+            }}>
+              {activity.title}
+            </h4>
+            <Row icon={<Clock size={12} />} color="var(--color-accent)">
+              {formatDate(activity.eventDate)}
+              {isFull && <span style={{ color: "var(--color-destructive)", fontWeight: 600, marginLeft: 6 }}>· Dolu</span>}
+            </Row>
+            <Row icon={<MapPin size={12} />} color="var(--color-muted-foreground)">
+              {dist || activity.addressText || "Konum"}
+            </Row>
+            {participantsRow}
+          </div>
+        </div>
+        <style>{`
+          .activity-card:hover { box-shadow: var(--shadow-md); border-color: transparent; }
+        `}</style>
+      </Link>
+    );
+  }
 
   return (
     <Link href={`/app/activities/${activity.id}`} style={{ textDecoration: "none" }}>
@@ -29,58 +122,53 @@ export function ActivityCard({ activity, compact = false }: ActivityCardProps) {
         style={{
           background: "var(--color-surface)",
           border: "1px solid var(--color-border)",
-          borderRadius: compact ? "var(--radius-lg)" : "var(--radius-xl)",
-          padding: compact ? "14px 16px" : "20px",
+          borderRadius: "var(--radius-lg)",
+          padding: compact ? 12 : 14,
           cursor: "pointer",
-          transition: "box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out), border-color 0.2s ease",
+          transition: "box-shadow 0.2s var(--ease-out), border-color 0.2s ease",
           display: "flex",
-          flexDirection: "column",
-          gap: compact ? 8 : 12,
+          gap: 12,
         }}
       >
-        <div style={{ display: "flex", alignItems: "flex-start", gap: 12 }}>
-          <div style={{
-            width: compact ? 36 : 44,
-            height: compact ? 36 : 44,
-            background: "var(--color-accent-soft-bg)",
-            borderRadius: "var(--radius-md)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            flexShrink: 0,
-          }}>
-            <Icon size={compact ? 18 : 22} color="var(--color-accent-soft-fg)" strokeWidth={2} />
-          </div>
-          <div style={{ flex: 1, minWidth: 0 }}>
-            <h4 style={{
-              fontSize: compact ? 14 : 16,
-              fontWeight: 600,
-              color: "var(--color-foreground)",
-              margin: "0 0 2px",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              whiteSpace: "nowrap",
-            }}>
-              {activity.title}
-            </h4>
-            <p style={{ fontSize: 12, color: "var(--color-muted-foreground)", margin: 0 }}>
-              {activity.createdByDisplayName}
-            </p>
-          </div>
+        <div style={{
+          width: compact ? 56 : 64,
+          height: compact ? 56 : 64,
+          borderRadius: "var(--radius-md)",
+          background: `color-mix(in srgb, ${color} 14%, white)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          flexShrink: 0,
+        }}>
+          <Icon size={compact ? 22 : 26} color={color} strokeWidth={2} />
         </div>
 
-        <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-          {activity.status === ActivityStatus.Full
-            ? <Chip accent>Dolu</Chip>
-            : <Chip tone="success">Aktif</Chip>}
-          <Chip icon={<Calendar size={11} />}>{formatDate(activity.eventDate)}</Chip>
-          {dist && <Chip icon={<MapPin size={11} />}>{dist}</Chip>}
-          {missing > 0 && <Chip accent>{missing} kişi eksik</Chip>}
-          {activity.pricePerPerson && activity.pricePerPerson > 0 ? (
-            <Chip icon={<Wallet size={11} />}>{activity.pricePerPerson}₺</Chip>
-          ) : (
-            <Chip icon={<Gift size={11} />}>Ücretsiz</Chip>
-          )}
+        <div style={{ flex: 1, minWidth: 0, display: "flex", flexDirection: "column", gap: 4 }}>
+          {categoryBadge}
+
+          <h4 style={{
+            fontSize: compact ? 14 : 15,
+            fontWeight: 700,
+            color: "var(--color-foreground)",
+            margin: 0,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}>
+            {activity.title}
+          </h4>
+
+          <Row icon={<Clock size={12} />} color="var(--color-accent)">
+            {formatDate(activity.eventDate)}
+            {isFull && <span style={{ color: "var(--color-destructive)", fontWeight: 600, marginLeft: 6 }}>· Dolu</span>}
+          </Row>
+
+          <Row icon={<MapPin size={12} />} color="var(--color-muted-foreground)">
+            {activity.addressText || "Konum"}
+            {dist && <span style={{ marginLeft: 6 }}>· {dist}</span>}
+          </Row>
+
+          {participantsRow}
         </div>
       </div>
       <style>{`
@@ -90,24 +178,11 @@ export function ActivityCard({ activity, compact = false }: ActivityCardProps) {
   );
 }
 
-function Chip({ children, accent, tone, icon }: { children: React.ReactNode; accent?: boolean; tone?: "success"; icon?: React.ReactNode }) {
-  const background = accent ? "var(--color-accent-soft-bg)" : tone === "success" ? "var(--color-success-bg)" : "#F3F4F6";
-  const color = accent ? "var(--color-accent-soft-fg)" : tone === "success" ? "var(--color-success)" : "var(--color-muted-foreground)";
+function Row({ icon, color, children }: { icon: React.ReactNode; color: string; children: React.ReactNode }) {
   return (
-    <span style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 4,
-      padding: "3px 8px",
-      borderRadius: "var(--radius-full)",
-      fontSize: 11,
-      fontWeight: 500,
-      background,
-      color,
-      whiteSpace: "nowrap",
-    }}>
-      {icon}
-      {children}
-    </span>
+    <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color, fontWeight: 500, overflow: "hidden", whiteSpace: "nowrap", textOverflow: "ellipsis" }}>
+      <span style={{ display: "inline-flex", flexShrink: 0 }}>{icon}</span>
+      <span style={{ overflow: "hidden", textOverflow: "ellipsis" }}>{children}</span>
+    </div>
   );
 }

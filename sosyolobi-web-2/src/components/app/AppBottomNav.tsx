@@ -3,11 +3,11 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useNotifications } from "@/hooks/useNotifications";
-import { Compass, Inbox, List, Plus, User, type LucideIcon } from "lucide-react";
+import { Calendar, Inbox, MapPin, Plus, User, type LucideIcon } from "lucide-react";
 
 const TABS: { href: string; icon: LucideIcon; label: string; accent?: boolean }[] = [
-  { href: "/app/map", icon: Compass, label: "Keşfet" },
-  { href: "/app/activities", icon: List, label: "Liste" },
+  { href: "/app/map", icon: MapPin, label: "Keşfet" },
+  { href: "/app/activities", icon: Calendar, label: "Etkinlikler" },
   { href: "/app/activities/create", icon: Plus, label: "Oluştur", accent: true },
   { href: "/app/requests", icon: Inbox, label: "İstekler" },
   { href: "/app/profile", icon: User, label: "Profil" },

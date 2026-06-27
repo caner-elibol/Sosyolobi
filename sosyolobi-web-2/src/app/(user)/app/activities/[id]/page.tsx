@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { use } from "react";
+import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app/AppShell";
 import { UserAvatar } from "@/components/app/UserAvatar";
@@ -11,19 +12,19 @@ import { ChatPanel } from "@/components/app/ChatPanel";
 import { ParticipantActionsMenu } from "@/components/app/ParticipantActionsMenu";
 import { useActivity } from "@/hooks/useCreateActivity";
 import { useJoinRequest } from "@/hooks/useJoinRequest";
-import { getCategoryIcon } from "@/lib/category-icons";
+import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { formatDistanceMeters } from "@/lib/format";
 import { ActivityStatus } from "@/types/user";
 import { getUserFromToken } from "@/lib/user-auth";
 import {
+  ArrowLeft,
   Calendar,
-  CircleDot,
   Gift,
   Key,
   MapPin,
+  Star,
   Target,
   Users,
-  VenusAndMars,
   Wallet,
   XCircle,
   type LucideIcon,
@@ -38,14 +39,17 @@ const GENDER_LABELS: Record<number, string> = {
 
 function formatDate(iso: string) {
   const d = new Date(iso);
-  return d.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long", year: "numeric" }) +
-    " " + d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
+  const today = new Date();
+  const isToday = d.toDateString() === today.toDateString();
+  const day = isToday ? "Bugün" : d.toLocaleDateString("tr-TR", { weekday: "long", day: "numeric", month: "long" });
+  return `${day} ${d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
 export default function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
+  const router = useRouter();
   const { data: activity, isLoading, error } = useActivity(id);
-  const { join, cancel } = useJoinRequest(id);
+  const { join } = useJoinRequest(id);
   const [joinMessage, setJoinMessage] = useState("");
   const [showMessageInput, setShowMessageInput] = useState(false);
 
@@ -53,8 +57,8 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
   if (error || !activity) return <AppShell><EmptyState icon={XCircle} title="Etkinlik bulunamadı" /></AppShell>;
 
   const CategoryIcon = getCategoryIcon(activity.categoryName);
-  // currentPeopleCount organizatörü de içerir; neededPeopleCount organizatör HARİÇ ihtiyaçtır.
-  const missing = activity.neededPeopleCount - (activity.currentPeopleCount - 1);
+  const categoryColor = getCategoryColor(activity.categoryName);
+  const totalSpots = activity.neededPeopleCount + 1;
   const dist = formatDistanceMeters(activity.distanceMeters);
   const isCancelled = activity.status === ActivityStatus.Cancelled;
   const isFull = activity.status === ActivityStatus.Full;
@@ -74,103 +78,184 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
   return (
     <AppShell>
-      <div style={{ maxWidth: 680, margin: "0 auto", padding: "16px 16px 32px" }}>
-        {/* Header */}
+      <div style={{ maxWidth: 680, margin: "0 auto", padding: "0 0 32px" }}>
+        {/* Hero */}
         <div style={{
-          background: "var(--color-surface)",
-          borderRadius: "var(--radius-lg)",
-          padding: 18,
-          border: "1px solid var(--color-border)",
-          marginBottom: 12,
+          position: "relative",
+          height: 180,
+          background: `linear-gradient(135deg, ${categoryColor} 0%, color-mix(in srgb, ${categoryColor} 70%, black) 100%)`,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
         }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10 }}>
-            <div style={{
-              width: 44,
-              height: 44,
-              background: "var(--color-accent-soft-bg)",
-              borderRadius: "var(--radius-md)",
+          <button
+            onClick={() => router.back()}
+            aria-label="Geri"
+            style={{
+              position: "absolute",
+              top: 16,
+              left: 16,
+              width: 36,
+              height: 36,
+              borderRadius: "50%",
+              background: "rgba(255,255,255,0.92)",
+              border: "none",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
-              flexShrink: 0,
+              cursor: "pointer",
+              boxShadow: "var(--shadow-md)",
+            }}
+          >
+            <ArrowLeft size={18} color="var(--color-foreground)" />
+          </button>
+          <CategoryIcon size={56} color="rgba(255,255,255,0.85)" strokeWidth={1.75} />
+        </div>
+
+        <div style={{ padding: "16px 16px 0" }}>
+          {/* Category + status */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
+            <span style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: 5,
+              padding: "3px 10px 3px 8px",
+              borderRadius: "var(--radius-full)",
+              background: `color-mix(in srgb, ${categoryColor} 14%, white)`,
+              color: categoryColor,
+              fontSize: 12,
+              fontWeight: 600,
             }}>
-              <CategoryIcon size={22} color="var(--color-accent-soft-fg)" strokeWidth={2} />
-            </div>
-            <div style={{ minWidth: 0 }}>
-              <div style={{ fontSize: 11, color: "var(--color-muted-foreground)", marginBottom: 1 }}>{activity.categoryName}</div>
-              <h1 style={{ fontSize: 18, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>{activity.title}</h1>
-            </div>
-          </div>
-
-          {/* Info chips */}
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 10 }}>
-            {isFull ? <InfoChip icon={CircleDot} tone="muted">Dolu</InfoChip> : <InfoChip icon={CircleDot} tone="success">Aktif</InfoChip>}
-            <InfoChip icon={Calendar}>{formatDate(activity.eventDate)}</InfoChip>
-            {dist && <InfoChip icon={MapPin}>{dist} uzakta</InfoChip>}
-            <InfoChip icon={Users}>{missing > 0 ? `${missing} kişi eksik` : "Kontenjan doldu"}</InfoChip>
-            {activity.pricePerPerson && activity.pricePerPerson > 0
-              ? <InfoChip icon={Wallet}>{activity.pricePerPerson}₺ kişi başı</InfoChip>
-              : <InfoChip icon={Gift}>Ücretsiz</InfoChip>
-            }
-            <InfoChip icon={Target}>{SKILL_LABELS[activity.skillLevel] ?? "Herkes"}</InfoChip>
-            <InfoChip icon={VenusAndMars}>{GENDER_LABELS[activity.genderPreference] ?? "Herkes"}</InfoChip>
-          </div>
-
-          {/* Address */}
-          <div style={{
-            background: "#F9FAFB",
-            borderRadius: "var(--radius-sm)",
-            padding: "10px 14px",
-            marginBottom: activity.description ? 10 : 0,
-          }}>
-            <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: "#374151", marginBottom: 2 }}>
-              <MapPin size={13} /> Yaklaşık Konum
-            </div>
-            <div style={{ fontSize: 13, color: "var(--color-muted-foreground)" }}>{activity.addressText}</div>
-            {activity.addressDetailPrivate && (
-              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, color: "var(--color-success)", marginTop: 4 }}>
-                <Key size={12} /> {activity.addressDetailPrivate}
-              </div>
+              <span style={{ width: 6, height: 6, borderRadius: "50%", background: categoryColor }} />
+              {activity.categoryName}
+            </span>
+            {isCancelled ? (
+              <InfoChip icon={XCircle} tone="muted">İptal edildi</InfoChip>
+            ) : isFull ? (
+              <InfoChip icon={Users} tone="muted">Dolu</InfoChip>
+            ) : (
+              <InfoChip icon={Users} tone="success">Açık</InfoChip>
             )}
           </div>
 
-          {/* Description */}
-          {activity.description && (
-            <div style={{ fontSize: 13, color: "#374151", lineHeight: 1.5 }}>
-              {activity.description}
-            </div>
-          )}
-        </div>
+          <h1 style={{ fontSize: 21, fontWeight: 700, color: "var(--color-foreground)", margin: "0 0 10px" }}>{activity.title}</h1>
 
-        {/* Creator + Participants */}
-        <div style={{
-          background: "var(--color-surface)",
-          borderRadius: "var(--radius-lg)",
-          padding: 16,
-          border: "1px solid var(--color-border)",
-          marginBottom: 12,
-        }}>
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: activity.participants.length > 0 ? 12 : 0 }}>
-            <UserAvatar displayName={activity.createdByDisplayName} avatarUrl={activity.createdByAvatarUrl} size={40} />
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 11, color: "var(--color-muted-foreground)" }}>Oluşturan</div>
+          <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 12 }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "var(--color-accent)" }}>
+              <Calendar size={14} /> {formatDate(activity.eventDate)}
+            </div>
+            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--color-muted-foreground)" }}>
+              <MapPin size={14} /> {activity.addressText}
+              {dist && <span>· {dist}</span>}
+            </div>
+          </div>
+
+          {/* Participants + skill/gender chips */}
+          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
+            {activity.participants.length > 0 && (
+              <div style={{ display: "flex", marginLeft: 4 }}>
+                {activity.participants.slice(0, 4).map((p, i) => (
+                  <span key={p.userId} style={{ marginLeft: i === 0 ? 0 : -8, border: "2px solid var(--color-background)", borderRadius: "50%" }}>
+                    <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={26} />
+                  </span>
+                ))}
+              </div>
+            )}
+            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-foreground)" }}>
+              {activity.currentPeopleCount} / {totalSpots} katılıyor
+            </span>
+          </div>
+
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
+            <InfoChip icon={Target}>{SKILL_LABELS[activity.skillLevel] ?? "Herkes"}</InfoChip>
+            <InfoChip icon={Users}>{GENDER_LABELS[activity.genderPreference] ?? "Herkes"}</InfoChip>
+          </div>
+
+          {/* About */}
+          {activity.description && (
+            <>
+              <SectionTitle>Hakkında</SectionTitle>
+              <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, margin: "0 0 16px" }}>{activity.description}</p>
+            </>
+          )}
+
+          {/* Details grid */}
+          <SectionTitle>Detaylar</SectionTitle>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
+            <DetailBox icon={Wallet} label="Kişi Başı Ücret" value={activity.pricePerPerson && activity.pricePerPerson > 0 ? `${activity.pricePerPerson} ₺` : "Ücretsiz"} />
+            <DetailBox icon={Users} label="Kontenjan" value={`${totalSpots} kişi`} />
+            <DetailBox icon={Users} label="Şu an" value={`${activity.currentPeopleCount} kişi`} />
+            <DetailBox icon={Target} label="Seviye" value={SKILL_LABELS[activity.skillLevel] ?? "Herkes"} />
+          </div>
+
+          {/* Owner */}
+          <SectionTitle>Etkinlik Sahibi</SectionTitle>
+          <div style={{
+            background: "var(--color-surface)",
+            borderRadius: "var(--radius-lg)",
+            padding: 14,
+            border: "1px solid var(--color-border)",
+            marginBottom: 16,
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+          }}>
+            <UserAvatar displayName={activity.createdByDisplayName} avatarUrl={activity.createdByAvatarUrl} size={42} />
+            <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)" }}>{activity.createdByDisplayName}</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "var(--color-muted-foreground)" }}>
+                <Star size={12} fill="#F59E0B" color="#F59E0B" strokeWidth={0} /> Etkinlik sahibi
+              </div>
             </div>
             {currentUserId && currentUserId !== activity.createdByUserId && (
               <ParticipantActionsMenu userId={activity.createdByUserId} displayName={activity.createdByDisplayName} />
             )}
           </div>
 
+          {/* Location */}
+          {activity.addressDetailPrivate && (
+            <>
+              <SectionTitle>Konum</SectionTitle>
+              <div style={{
+                background: "#F9FAFB",
+                borderRadius: "var(--radius-lg)",
+                padding: "12px 14px",
+                marginBottom: 16,
+              }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: "var(--color-success)" }}>
+                  <Key size={12} /> {activity.addressDetailPrivate}
+                </div>
+                <p style={{ fontSize: 11, color: "var(--color-muted-foreground)", margin: "4px 0 0" }}>
+                  Bu adres detayı sadece onaylı katılımcılara gösterilir.
+                </p>
+              </div>
+            </>
+          )}
+
+          {/* Participants list */}
           {activity.participants.length > 0 && (
             <>
-              <div style={{ fontSize: 12, fontWeight: 600, color: "var(--color-muted-foreground)", margin: "0 0 8px" }}>
-                Katılımcılar ({activity.participants.length})
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
+                <SectionTitle noMargin>Katılımcılar</SectionTitle>
+                <span style={{ fontSize: 12, color: "var(--color-muted-foreground)" }}>{activity.participants.length} kişi</span>
               </div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {activity.participants.map((p) => (
-                  <div key={p.userId} style={{ display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{
+                background: "var(--color-surface)",
+                borderRadius: "var(--radius-lg)",
+                border: "1px solid var(--color-border)",
+                marginBottom: 16,
+                overflow: "hidden",
+              }}>
+                {activity.participants.map((p, i) => (
+                  <div key={p.userId} style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 8,
+                    padding: "10px 14px",
+                    borderTop: i === 0 ? "none" : "1px solid var(--color-border)",
+                  }}>
                     <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={28} />
-                    <span style={{ fontSize: 12, color: "#374151", flex: 1 }}>{p.displayName}</span>
+                    <span style={{ fontSize: 13, color: "var(--color-foreground)", flex: 1, fontWeight: 500 }}>{p.displayName}</span>
                     {currentUserId && currentUserId !== p.userId && (
                       <ParticipantActionsMenu userId={p.userId} displayName={p.displayName} />
                     )}
@@ -181,6 +266,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
           )}
         </div>
 
+        <div style={{ padding: "0 16px" }}>
         {/* Join CTA */}
         {!isCancelled && !isFull && !isParticipant && (
           <div style={{
@@ -299,8 +385,28 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
 
         {/* Chat */}
         {isParticipant && <ChatPanel activityId={id} />}
+        </div>
       </div>
     </AppShell>
+  );
+}
+
+function SectionTitle({ children, noMargin }: { children: React.ReactNode; noMargin?: boolean }) {
+  return (
+    <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--color-foreground)", margin: noMargin ? 0 : "0 0 10px" }}>
+      {children}
+    </h2>
+  );
+}
+
+function DetailBox({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
+  return (
+    <div style={{ background: "#F9FAFB", borderRadius: "var(--radius-md)", padding: "12px 14px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--color-muted-foreground)", marginBottom: 4 }}>
+        <Icon size={12} /> {label}
+      </div>
+      <div style={{ fontSize: 15, fontWeight: 700, color: "var(--color-foreground)" }}>{value}</div>
+    </div>
   );
 }
 

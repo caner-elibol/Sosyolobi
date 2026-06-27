@@ -34,3 +34,23 @@ export const CATEGORY_ICONS: Record<string, LucideIcon> = {
 export function getCategoryIcon(categoryName: string): LucideIcon {
   return CATEGORY_ICONS[categoryName] ?? MapPin;
 }
+
+const CATEGORY_COLORS: Record<string, string> = {
+  "Futbol": "#2EA86F",
+  "Basketbol": "#E8740C",
+  "Voleybol": "#2563EB",
+  "Tenis": "#CA8A04",
+  "Koşu": "#DC2626",
+  "Bisiklet": "#8454D9",
+  "Yürüyüş": "#8454D9",
+  "Kamp": "#E8740C",
+  "Kayak": "#2563EB",
+  "Masa Oyunu": "#B45309",
+  "Konser": "#E94C79",
+  "Kahve & Sosyal Buluşma": "#9A3412",
+  "Diğer": "#6B7280",
+};
+
+export function getCategoryColor(categoryName: string, override?: string): string {
+  return override || CATEGORY_COLORS[categoryName] || "#6B7280";
+}

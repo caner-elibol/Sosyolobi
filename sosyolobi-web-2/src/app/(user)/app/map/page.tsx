@@ -7,7 +7,6 @@ import { AppShell } from "@/components/app/AppShell";
 import { MapView } from "@/components/app/MapView";
 import { ActivityCard } from "@/components/app/ActivityCard";
 import { FilterChips } from "@/components/app/FilterChips";
-import { BottomSheet } from "@/components/app/BottomSheet";
 import { LocationPermissionCard } from "@/components/app/LocationPermissionCard";
 import { LoadingState } from "@/components/app/LoadingState";
 import { EmptyState } from "@/components/app/EmptyState";
@@ -15,13 +14,13 @@ import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useMapActivities } from "@/hooks/useMapActivities";
 import { userApiClient } from "@/lib/user-api-client";
 import type { Category, ActivityMapItem, Activity } from "@/types/user";
-import { List, MapPinned } from "lucide-react";
+import Link from "next/link";
+import { ArrowRight, MapPinned, Users2 } from "lucide-react";
 
 export default function MapPage() {
   const router = useRouter();
   const { location, permission, request: requestLocation } = useCurrentLocation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
-  const [sheetOpen, setSheetOpen] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -40,9 +39,23 @@ export default function MapPage() {
   // Default: İstanbul
   const center = location ?? { lat: 41.0082, lng: 28.9784 };
 
+  const mapBox = permission === "loading" ? (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      height: "100%",
+      background: "#f0f0f0",
+    }}>
+      <LoadingState message="Konum alınıyor..." />
+    </div>
+  ) : (
+    <MapView center={center} activities={mapActivities} onActivityClick={handleMarkerClick} />
+  );
+
   return (
     <AppShell fullscreen>
-      <div style={{ display: "flex", flexDirection: "column", height: "calc(100vh - 60px)" }}>
+      <div className="map-shell" style={{ display: "flex", flexDirection: "column" }}>
 
         {/* Filter chips */}
         <div style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)", flexShrink: 0 }}>
@@ -63,11 +76,40 @@ export default function MapPage() {
           </div>
         )}
 
-        {/* Main layout */}
-        <div style={{ flex: 1, display: "flex", overflow: "hidden" }}>
-          {/* Desktop: Left panel */}
+        {/* Mobile: scrollable feed */}
+        <div className="show-mobile" style={{ flexDirection: "column", padding: 16, gap: 16 }}>
+          <div style={{ height: 200, borderRadius: "var(--radius-lg)", overflow: "hidden", position: "relative", flexShrink: 0 }}>
+            {mapBox}
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h2 style={{ fontSize: 16, fontWeight: 700, color: "var(--color-foreground)", margin: 0 }}>
+              Yakındaki Etkinlikler
+            </h2>
+            {mapActivities.length > 0 && (
+              <Link href="/app/activities" style={{ display: "inline-flex", alignItems: "center", gap: 4, fontSize: 13, fontWeight: 600, color: "var(--color-accent)", textDecoration: "none" }}>
+                Tümünü Gör <ArrowRight size={13} />
+              </Link>
+            )}
+          </div>
+
+          {isLoading && <LoadingState message="Etkinlikler aranıyor..." />}
+          {!isLoading && mapActivities.length === 0 && (
+            <EmptyState icon={MapPinned} title="Yakında etkinlik bulunamadı" description="Arama yarıçapını artırın veya filtre kaldırın." />
+          )}
+          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+            {mapActivities.map((a) => (
+              <ActivityCard key={a.id} activity={a as unknown as Activity} variant="vertical" />
+            ))}
+          </div>
+
+          <PromoCard />
+        </div>
+
+        {/* Desktop: split layout */}
+        <div className="hidden-mobile" style={{ flex: 1, overflow: "hidden" }}>
+          {/* Left panel */}
           <div
-            className="hidden-mobile"
             style={{
               width: 420,
               flexShrink: 0,
@@ -95,71 +137,33 @@ export default function MapPage() {
                 description="Arama yarıçapını artırın veya filtre kaldırın."
               />
             )}
-            {mapActivities.map((a) => (
+            {mapActivities.slice(0, 8).map((a) => (
               <ActivityCard key={a.id} activity={a as unknown as Activity} compact />
             ))}
+
+            {mapActivities.length > 0 && (
+              <Link href="/app/activities" style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                fontSize: 13,
+                fontWeight: 600,
+                color: "var(--color-accent)",
+                textDecoration: "none",
+                padding: "4px 2px",
+              }}>
+                Tüm Etkinlikleri Gör <ArrowRight size={14} />
+              </Link>
+            )}
+
+            <PromoCard />
           </div>
 
           {/* Map */}
           <div style={{ flex: 1, position: "relative" }}>
-            {permission === "loading" ? (
-              <div style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                height: "100%",
-                background: "#f0f0f0",
-              }}>
-                <LoadingState message="Konum alınıyor..." />
-              </div>
-            ) : (
-              <MapView
-                center={center}
-                activities={mapActivities}
-                onActivityClick={handleMarkerClick}
-              />
-            )}
-
-            {/* Mobile: show list button */}
-            <button
-              className="show-mobile"
-              onClick={() => setSheetOpen(true)}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: 7,
-                position: "absolute",
-                bottom: 80,
-                left: "50%",
-                transform: "translateX(-50%)",
-                background: "var(--color-navy)",
-                color: "#fff",
-                border: "none",
-                borderRadius: "var(--radius-full)",
-                padding: "10px 20px",
-                fontSize: 14,
-                fontWeight: 600,
-                cursor: "pointer",
-                boxShadow: "var(--shadow-lg)",
-              }}
-            >
-              <List size={16} /> Listeyi Gör ({mapActivities.length})
-            </button>
+            {mapBox}
           </div>
         </div>
-
-        {/* Mobile: Bottom sheet */}
-        <BottomSheet open={sheetOpen} onClose={() => setSheetOpen(false)} title="Yakındaki Etkinlikler">
-          {isLoading && <LoadingState />}
-          {!isLoading && mapActivities.length === 0 && (
-            <EmptyState icon={MapPinned} title="Yakında etkinlik yok" />
-          )}
-          <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-            {mapActivities.map((a) => (
-              <ActivityCard key={a.id} activity={a as unknown as Activity} compact />
-            ))}
-          </div>
-        </BottomSheet>
       </div>
 
       <style>{`
@@ -168,8 +172,60 @@ export default function MapPage() {
         }
         @media (min-width: 768px) {
           .show-mobile { display: none !important; }
+          .map-shell { height: calc(100vh - 60px); }
         }
       `}</style>
     </AppShell>
+  );
+}
+
+function PromoCard() {
+  return (
+    <Link href="/app/activities/create" style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 14,
+      padding: 18,
+      borderRadius: "var(--radius-lg)",
+      background: "var(--gradient-promo)",
+      textDecoration: "none",
+      flexShrink: 0,
+    }}>
+      <span style={{
+        width: 40,
+        height: 40,
+        borderRadius: "50%",
+        background: "rgba(255,255,255,0.12)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}>
+        <Users2 size={20} color="#fff" />
+      </span>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <p style={{ color: "#fff", fontSize: 14, fontWeight: 700, margin: "0 0 2px" }}>
+          Etkinlik oluştur, insanları bir araya getir!
+        </p>
+        <p style={{ color: "rgba(255,255,255,0.65)", fontSize: 12, margin: 0 }}>
+          Kendi etkinliğini oluştur ve topluluğunu büyüt.
+        </p>
+      </div>
+      <span style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "9px 14px",
+        borderRadius: "var(--radius-full)",
+        background: "var(--gradient-cta)",
+        color: "#fff",
+        fontSize: 12,
+        fontWeight: 700,
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+      }}>
+        Oluştur <ArrowRight size={13} />
+      </span>
+    </Link>
   );
 }
