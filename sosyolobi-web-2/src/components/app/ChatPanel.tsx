@@ -12,6 +12,7 @@ import { EmojiPicker } from "@/components/app/EmojiPicker";
 import { ChatMessageContextMenu } from "@/components/app/ChatMessageContextMenu";
 import { ChatReplyPreviewBar } from "@/components/app/ChatReplyPreviewBar";
 import { useChatRoom, useChatMessages } from "@/hooks/useChatRoom";
+import { useChatUnread } from "@/hooks/useChatUnread";
 import { buildChatConnection } from "@/lib/chat-signalr";
 import { UserApiError } from "@/lib/user-api-client";
 import type { ChatMessage, PagedResponse } from "@/types/user";
@@ -31,6 +32,7 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
   const qc = useQueryClient();
   const { data: room, isLoading: roomLoading, error: roomError } = useChatRoom(activityId);
   const { data: messagesPage, isLoading: messagesLoading, sendMessage } = useChatMessages(room?.id ?? null);
+  const { markChatRead } = useChatUnread();
   const [text, setText] = useState("");
   const [closed, setClosed] = useState(false);
   const [replyTarget, setReplyTarget] = useState<ChatMessage | null>(null);
@@ -57,6 +59,7 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
       qc.setQueryData<PagedResponse<ChatMessage>>(["chat-messages", room.id], (prev) =>
         prev ? { ...prev, items: [message, ...prev.items] } : prev
       );
+      markChatRead.mutate(room.id);
     });
 
     connection.on("RoomClosed", (payload: { id: string }) => {
@@ -84,6 +87,11 @@ export function ChatPanel({ activityId }: ChatPanelProps) {
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages.length]);
+
+  useEffect(() => {
+    if (room?.id) markChatRead.mutate(room.id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [room?.id]);
 
   const isClosed = closed || room?.status === ChatRoomStatus.Closed;
 

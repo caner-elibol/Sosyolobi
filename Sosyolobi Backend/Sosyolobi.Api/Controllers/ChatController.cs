@@ -38,4 +38,20 @@ public class ChatController : ControllerBase
         var result = await _chatService.SendMessageAsync(roomId, userId, request);
         return Ok(ApiResponse<ChatMessageResponse>.Ok(result));
     }
+
+    [HttpGet("api/chat-rooms/unread-summary")]
+    public async Task<IActionResult> GetUnreadSummary()
+    {
+        var userId = User.GetUserId();
+        var result = await _chatService.GetUnreadSummaryAsync(userId);
+        return Ok(ApiResponse<IList<ChatUnreadSummaryResponse>>.Ok(result));
+    }
+
+    [HttpPost("api/chat-rooms/{roomId:guid}/read")]
+    public async Task<IActionResult> MarkRoomRead(Guid roomId)
+    {
+        var userId = User.GetUserId();
+        await _chatService.MarkRoomReadAsync(roomId, userId);
+        return Ok(ApiResponse<object>.Ok(null));
+    }
 }

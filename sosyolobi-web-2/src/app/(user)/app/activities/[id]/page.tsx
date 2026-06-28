@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { use } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app/AppShell";
 import { UserAvatar } from "@/components/app/UserAvatar";
@@ -46,12 +46,32 @@ function formatDate(iso: string) {
 }
 
 export default function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
+  return (
+    <Suspense fallback={<AppShell><LoadingState message="Etkinlik yükleniyor..." /></AppShell>}>
+      <ActivityDetailPageInner params={params} />
+    </Suspense>
+  );
+}
+
+function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { data: activity, isLoading, error } = useActivity(id);
   const { join } = useJoinRequest(id);
   const [joinMessage, setJoinMessage] = useState("");
   const [showMessageInput, setShowMessageInput] = useState(false);
+  const chatRef = useRef<HTMLDivElement>(null);
+
+  const shouldFocusChat = searchParams.get("chat") === "1";
+
+  useEffect(() => {
+    if (!shouldFocusChat || !activity) return;
+    const timer = setTimeout(() => {
+      chatRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+    }, 200);
+    return () => clearTimeout(timer);
+  }, [shouldFocusChat, activity]);
 
   if (isLoading) return <AppShell><LoadingState message="Etkinlik yükleniyor..." /></AppShell>;
   if (error || !activity) return <AppShell><EmptyState icon={XCircle} title="Etkinlik bulunamadı" /></AppShell>;
@@ -384,7 +404,7 @@ export default function ActivityDetailPage({ params }: { params: Promise<{ id: s
         )}
 
         {/* Chat */}
-        {isParticipant && <ChatPanel activityId={id} />}
+        {isParticipant && <div ref={chatRef}><ChatPanel activityId={id} /></div>}
         </div>
       </div>
     </AppShell>

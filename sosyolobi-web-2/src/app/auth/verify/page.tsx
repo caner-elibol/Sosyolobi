@@ -42,7 +42,10 @@ export default function VerifyPage() {
       setUserToken(json.data.accessToken);
       sessionStorage.removeItem("otp_phone");
       sessionStorage.removeItem("otp_redirect");
-      router.replace(redirectRef.current);
+      // Tam sayfa yönlendirme: SPA router.replace, Next'in client router
+      // cache'inde bu segmentin önceki (token yokken redirect'e düşmüş)
+      // halini tazeleyebiliyor ve kullanıcıyı tekrar login'e atıyordu.
+      window.location.href = redirectRef.current;
     } catch {
       toast.error("Bir hata oluştu. Tekrar deneyin.");
     }

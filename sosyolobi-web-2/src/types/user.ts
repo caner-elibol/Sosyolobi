@@ -195,7 +195,15 @@ export interface Notification {
   type: number;
   title: string;
   message?: string;
-  activityId?: string;
+  relatedActivityId?: string;
+  relatedActivityTitle?: string;
   isRead: boolean;
   createdAt: string;
+}
+
+export interface ChatUnreadSummary {
+  activityId: string;
+  activityTitle: string;
+  chatRoomId: string;
+  unreadCount: number;
 }

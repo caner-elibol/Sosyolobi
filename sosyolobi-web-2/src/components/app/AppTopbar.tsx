@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useNotifications } from "@/hooks/useNotifications";
+import { useChatUnread } from "@/hooks/useChatUnread";
 import { getUserFromToken, clearUserToken } from "@/lib/user-auth";
 import { UserAvatar } from "@/components/app/UserAvatar";
 import { Bell, Calendar, Crosshair, Inbox, LogOut, MapPin, Plus, Search, UserPen } from "lucide-react";
@@ -16,13 +17,28 @@ const NAV_ITEMS = [
 ];
 
 export function AppTopbar() {
+  return (
+    <Suspense fallback={null}>
+      <AppTopbarInner />
+    </Suspense>
+  );
+}
+
+function AppTopbarInner() {
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { unreadCount } = useNotifications();
+  const { totalUnreadRooms } = useChatUnread();
+  const badgeCount = unreadCount + totalUnreadRooms;
   const user = getUserFromToken();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    setSearch(searchParams.get("q") ?? "");
+  }, [searchParams]);
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -153,7 +169,7 @@ export function AppTopbar() {
             >
               <Icon size={16} strokeWidth={active ? 2.4 : 2} />
               {item.label}
-              {item.href === "/app/notifications" && unreadCount > 0 && (
+              {item.href === "/app/notifications" && badgeCount > 0 && (
                 <span style={{
                   position: "absolute",
                   top: 2,
@@ -169,7 +185,7 @@ export function AppTopbar() {
                   justifyContent: "center",
                   fontWeight: 700,
                 }}>
-                  {unreadCount > 9 ? "9+" : unreadCount}
+                  {badgeCount > 9 ? "9+" : badgeCount}
                 </span>
               )}
             </Link>
@@ -199,7 +215,7 @@ export function AppTopbar() {
           style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}
         >
           <Bell size={21} color="var(--color-foreground)" strokeWidth={2} />
-          {unreadCount > 0 && (
+          {badgeCount > 0 && (
             <span style={{
               position: "absolute",
               top: -3,
@@ -215,7 +231,7 @@ export function AppTopbar() {
               justifyContent: "center",
               fontWeight: 700,
             }}>
-              {unreadCount > 9 ? "9+" : unreadCount}
+              {badgeCount > 9 ? "9+" : badgeCount}
             </span>
           )}
         </Link>

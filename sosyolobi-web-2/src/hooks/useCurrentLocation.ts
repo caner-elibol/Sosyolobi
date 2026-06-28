@@ -9,6 +9,29 @@ interface GeoLocation {
 
 type PermissionState = "prompt" | "granted" | "denied" | "loading";
 
+const CACHE_KEY = "last_known_location";
+const CACHE_MAX_AGE_MS = 10 * 60 * 1000; // 10 dakika
+
+function readCachedLocation(): GeoLocation | null {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as GeoLocation & { timestamp: number };
+    if (Date.now() - parsed.timestamp > CACHE_MAX_AGE_MS) return null;
+    return { lat: parsed.lat, lng: parsed.lng };
+  } catch {
+    return null;
+  }
+}
+
+function writeCachedLocation(loc: GeoLocation) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ ...loc, timestamp: Date.now() }));
+  } catch {
+    // localStorage kullanılamıyor olabilir (gizli sekme vb.) — sessizce yok say.
+  }
+}
+
 export function useCurrentLocation() {
   const [location, setLocation] = useState<GeoLocation | null>(null);
   const [permission, setPermission] = useState<PermissionState>("loading");
@@ -17,8 +40,10 @@ export function useCurrentLocation() {
     setPermission("loading");
     navigator.geolocation.getCurrentPosition(
       (pos) => {
-        setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        const loc = { lat: pos.coords.latitude, lng: pos.coords.longitude };
+        setLocation(loc);
         setPermission("granted");
+        writeCachedLocation(loc);
       },
       () => {
         setPermission("denied");
@@ -36,6 +61,14 @@ export function useCurrentLocation() {
     // değiştirip Map bileşeninin hızlıca unmount/remount olmasına (ve maplibre-gl'in
     // container hatası vermesine) yol açıyordu.
     let cancelled = false;
+
+    // Taze bir cache varsa haritayı "Konum alınıyor..." beklemesi olmadan
+    // hemen gösterelim; arka planda gerçek izin/konum sorgusu devam eder.
+    const cached = readCachedLocation();
+    if (cached) {
+      setLocation(cached);
+      setPermission("granted");
+    }
 
     if (!navigator.geolocation) {
       setPermission("denied");

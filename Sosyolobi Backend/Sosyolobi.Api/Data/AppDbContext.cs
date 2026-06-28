@@ -21,6 +21,7 @@ public class AppDbContext : DbContext
     public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
+    public DbSet<ChatRoomRead> ChatRoomReads => Set<ChatRoomRead>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -96,5 +97,21 @@ public class AppDbContext : DbContext
 
         modelBuilder.Entity<ChatMessage>()
             .HasIndex(m => new { m.ChatRoomId, m.SenderUserId, m.CreatedAt });
+
+        modelBuilder.Entity<ChatRoomRead>()
+            .HasIndex(x => new { x.UserId, x.ChatRoomId })
+            .IsUnique();
+
+        modelBuilder.Entity<ChatRoomRead>()
+            .HasOne(x => x.User)
+            .WithMany()
+            .HasForeignKey(x => x.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<ChatRoomRead>()
+            .HasOne(x => x.ChatRoom)
+            .WithMany()
+            .HasForeignKey(x => x.ChatRoomId)
+            .OnDelete(DeleteBehavior.Cascade);
     }
 }

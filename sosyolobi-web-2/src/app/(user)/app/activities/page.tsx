@@ -12,7 +12,7 @@ import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useNearbyActivities } from "@/hooks/useNearbyActivities";
 import { userApiClient } from "@/lib/user-api-client";
 import type { Category } from "@/types/user";
-import { MapPinOff, Search, SearchX } from "lucide-react";
+import { MapPinOff, SearchX } from "lucide-react";
 
 export default function ActivitiesPage() {
   return (
@@ -24,9 +24,9 @@ export default function ActivitiesPage() {
 
 function ActivitiesPageInner() {
   const searchParams = useSearchParams();
+  const search = searchParams.get("q") ?? "";
   const { location } = useCurrentLocation();
   const [categoryId, setCategoryId] = useState<string | null>(null);
-  const [search, setSearch] = useState(searchParams.get("q") ?? "");
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -41,37 +41,20 @@ function ActivitiesPageInner() {
   );
 
   const filtered = search.trim()
-    ? activities.filter((a) =>
-        a.title.toLowerCase().includes(search.toLowerCase()) ||
-        a.createdByDisplayName.toLowerCase().includes(search.toLowerCase())
-      )
+    ? activities.filter((a) => {
+        const q = search.toLowerCase();
+        return (
+          a.title.toLowerCase().includes(q) ||
+          a.createdByDisplayName.toLowerCase().includes(q) ||
+          a.categoryName.toLowerCase().includes(q) ||
+          a.addressText.toLowerCase().includes(q)
+        );
+      })
     : activities;
 
   return (
     <AppShell>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
-        {/* Search */}
-        <div style={{ padding: "16px 16px 0", position: "relative" }}>
-          <Search size={16} color="var(--color-muted-foreground)" style={{ position: "absolute", left: 30, top: "50%", transform: "translateY(-50%)" }} />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Etkinlik ara..."
-            style={{
-              width: "100%",
-              padding: "12px 16px 12px 40px",
-              border: "1px solid var(--color-border)",
-              borderRadius: "var(--radius-md)",
-              fontSize: 14,
-              outline: "none",
-              boxSizing: "border-box",
-              background: "var(--color-surface)",
-              fontFamily: "inherit",
-            }}
-          />
-        </div>
-
         {/* Category filter */}
         <FilterChips
           categories={categories}

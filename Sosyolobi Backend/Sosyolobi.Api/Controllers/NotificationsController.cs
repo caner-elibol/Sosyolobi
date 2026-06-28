@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Sosyolobi.Api.DTOs.Common;
-using Sosyolobi.Api.Entities;
+using Sosyolobi.Api.DTOs.Notifications;
 using Sosyolobi.Api.Extensions;
 using Sosyolobi.Api.Services.Interfaces;
 
@@ -21,7 +21,7 @@ public class NotificationsController : ControllerBase
     {
         var userId = User.GetUserId();
         var result = await _notificationService.GetUserNotificationsAsync(userId);
-        return Ok(ApiResponse<IList<Notification>>.Ok(result));
+        return Ok(ApiResponse<IList<NotificationResponse>>.Ok(result));
     }
 
     [HttpPost("{id:guid}/read")]

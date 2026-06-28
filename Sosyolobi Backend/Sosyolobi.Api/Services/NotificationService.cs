@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.SignalR;
 using Microsoft.EntityFrameworkCore;
 using Sosyolobi.Api.Data;
+using Sosyolobi.Api.DTOs.Notifications;
 using Sosyolobi.Api.Entities;
 using Sosyolobi.Api.Enums;
 using Sosyolobi.Api.Hubs;
@@ -19,12 +20,26 @@ public class NotificationService : INotificationService
         _hub = hub;
     }
 
-    public async Task<IList<Notification>> GetUserNotificationsAsync(Guid userId)
+    public async Task<IList<NotificationResponse>> GetUserNotificationsAsync(Guid userId)
     {
         return await _db.Notifications
             .Where(n => n.UserId == userId)
             .OrderByDescending(n => n.CreatedAt)
             .Take(50)
+            .Select(n => new NotificationResponse
+            {
+                Id = n.Id,
+                Type = n.Type,
+                Title = n.Title,
+                Message = n.Body,
+                RelatedActivityId = n.RelatedActivityId,
+                RelatedActivityTitle = _db.Activities
+                    .Where(a => a.Id == n.RelatedActivityId)
+                    .Select(a => a.Title)
+                    .FirstOrDefault(),
+                IsRead = n.IsRead,
+                CreatedAt = n.CreatedAt
+            })
             .ToListAsync();
     }
 

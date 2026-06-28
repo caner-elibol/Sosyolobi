@@ -134,6 +134,69 @@ public class ChatService : IChatService
         return response;
     }
 
+    public async Task<IList<ChatUnreadSummaryResponse>> GetUnreadSummaryAsync(Guid userId)
+    {
+        var rooms = await _db.ChatRooms
+            .Where(r => r.Status == ChatRoomStatus.Open && r.Activity.Participants.Any(p => p.UserId == userId))
+            .Select(r => new { r.Id, r.ActivityId, ActivityTitle = r.Activity.Title })
+            .ToListAsync();
+
+        if (rooms.Count == 0) return [];
+
+        var roomIds = rooms.Select(r => r.Id).ToList();
+        var lastReads = await _db.ChatRoomReads
+            .Where(x => x.UserId == userId && roomIds.Contains(x.ChatRoomId))
+            .ToDictionaryAsync(x => x.ChatRoomId, x => x.LastReadAt);
+
+        var result = new List<ChatUnreadSummaryResponse>();
+        foreach (var room in rooms)
+        {
+            var since = lastReads.TryGetValue(room.Id, out var lastReadAt) ? lastReadAt : DateTime.MinValue;
+            var unreadCount = await _db.ChatMessages.CountAsync(m =>
+                m.ChatRoomId == room.Id && m.SenderUserId != userId && m.CreatedAt > since);
+
+            if (unreadCount > 0)
+            {
+                result.Add(new ChatUnreadSummaryResponse
+                {
+                    ActivityId = room.ActivityId,
+                    ActivityTitle = room.ActivityTitle,
+                    ChatRoomId = room.Id,
+                    UnreadCount = unreadCount
+                });
+            }
+        }
+
+        return result;
+    }
+
+    public async Task MarkRoomReadAsync(Guid roomId, Guid userId)
+    {
+        var isParticipant = await _db.ChatRooms
+            .Where(r => r.Id == roomId)
+            .SelectMany(r => r.Activity.Participants)
+            .AnyAsync(p => p.UserId == userId);
+        if (!isParticipant) throw new UnauthorizedAccessException("Bu sohbet odasına erişiminiz yok.");
+
+        var read = await _db.ChatRoomReads.FirstOrDefaultAsync(x => x.UserId == userId && x.ChatRoomId == roomId);
+        if (read is null)
+        {
+            _db.ChatRoomReads.Add(new ChatRoomRead
+            {
+                Id = Guid.CreateVersion7(),
+                UserId = userId,
+                ChatRoomId = roomId,
+                LastReadAt = DateTime.UtcNow
+            });
+        }
+        else
+        {
+            read.LastReadAt = DateTime.UtcNow;
+        }
+
+        await _db.SaveChangesAsync();
+    }
+
     private static ChatRoomResponse MapToResponse(ChatRoom r) => new()
     {
         Id = r.Id,
