@@ -125,6 +125,14 @@ namespace Sosyolobi.Api.Migrations
                         .HasColumnType("text")
                         .HasColumnName("icon_name");
 
+                    b.Property<DateTime?>("ImageFetchedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("image_fetched_at");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("text")
+                        .HasColumnName("image_url");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("boolean")
                         .HasColumnName("is_active");

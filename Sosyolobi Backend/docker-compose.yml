@@ -30,7 +30,9 @@ services:
       - "5000:8080"
     volumes:
       - sosyolobi-avatars:/app/wwwroot/avatars
+      - sosyolobi-category-images:/app/wwwroot/categories
 
 volumes:
   sosyolobi-pgdata:
   sosyolobi-avatars:
+  sosyolobi-category-images:

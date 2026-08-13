@@ -120,6 +120,14 @@ public class ActivityService : IActivityService
         if (request.ToDate.HasValue)
             query = query.Where(a => a.EventDate <= request.ToDate.Value.ToUniversalTime());
 
+        if (request.GenderPreference.HasValue && request.GenderPreference.Value != GenderPreference.Any)
+            query = query.Where(a => a.GenderPreference == GenderPreference.Any || a.GenderPreference == request.GenderPreference.Value);
+
+        if (request.IsFree.HasValue)
+            query = request.IsFree.Value
+                ? query.Where(a => a.PricePerPerson == null || a.PricePerPerson == 0)
+                : query.Where(a => a.PricePerPerson != null && a.PricePerPerson > 0);
+
         var items = await query.OrderBy(a => a.Location.Distance(userLocation)).ToListAsync();
 
         return items.Select(a =>
@@ -149,6 +157,14 @@ public class ActivityService : IActivityService
     if (request.ToDate.HasValue)
         query = query.Where(a => a.EventDate <= request.ToDate.Value.ToUniversalTime());
 
+    if (request.GenderPreference.HasValue && request.GenderPreference.Value != GenderPreference.Any)
+        query = query.Where(a => a.GenderPreference == GenderPreference.Any || a.GenderPreference == request.GenderPreference.Value);
+
+    if (request.IsFree.HasValue)
+        query = request.IsFree.Value
+            ? query.Where(a => a.PricePerPerson == null || a.PricePerPerson == 0)
+            : query.Where(a => a.PricePerPerson != null && a.PricePerPerson > 0);
+
     var activities = await query
         .OrderBy(a => a.Location.Distance(userLocation))
         .ToListAsync();
@@ -158,6 +174,7 @@ public class ActivityService : IActivityService
         Id = a.Id,
         Title = a.Title,
         CategoryName = a.Category?.Name ?? string.Empty,
+        CategoryImageUrl = a.Category?.ImageUrl,
         Status = a.Status,
         Latitude = a.Location.Y,
         Longitude = a.Location.X,
@@ -188,6 +205,7 @@ public class ActivityService : IActivityService
             CreatedByAvatarUrl = activity.CreatedByUser.Profile?.AvatarUrl,
             CategoryId = activity.CategoryId,
             CategoryName = activity.Category.Name,
+            CategoryImageUrl = activity.Category.ImageUrl,
             Title = activity.Title,
             Description = activity.Description,
             EventDate = activity.EventDate,
@@ -327,6 +345,7 @@ public class ActivityService : IActivityService
     CreatedByAvatarUrl = a.CreatedByUser?.Profile?.AvatarUrl,
     CategoryId = a.CategoryId,
     CategoryName = a.Category?.Name ?? string.Empty,
+    CategoryImageUrl = a.Category?.ImageUrl,
     Title = a.Title,
     Description = a.Description,
     EventDate = a.EventDate,

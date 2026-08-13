@@ -13,14 +13,39 @@ import { EmptyState } from "@/components/app/EmptyState";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useMapActivities } from "@/hooks/useMapActivities";
 import { userApiClient } from "@/lib/user-api-client";
+import { GenderPreference } from "@/types/user";
 import type { Category, ActivityMapItem, Activity } from "@/types/user";
 import Link from "next/link";
 import { ArrowRight, MapPinned, Users2 } from "lucide-react";
+
+const RADIUS_OPTIONS = [
+  { label: "2 km", value: 2000 },
+  { label: "5 km", value: 5000 },
+  { label: "10 km", value: 10000 },
+  { label: "25 km", value: 25000 },
+  { label: "50 km", value: 50000 },
+];
+
+const GENDER_OPTIONS: { label: string; value: GenderPreference | "all" }[] = [
+  { label: "Tümü", value: "all" },
+  { label: "Erkek", value: GenderPreference.Male },
+  { label: "Kadın", value: GenderPreference.Female },
+  { label: "Karışık", value: GenderPreference.Mixed },
+];
+
+const PRICE_OPTIONS: { label: string; value: "all" | "free" | "paid" }[] = [
+  { label: "Tümü", value: "all" },
+  { label: "Ücretsiz", value: "free" },
+  { label: "Ücretli", value: "paid" },
+];
 
 export default function MapPage() {
   const router = useRouter();
   const { location, permission, request: requestLocation } = useCurrentLocation();
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const [radiusMeters, setRadiusMeters] = useState(10000);
+  const [genderFilter, setGenderFilter] = useState<GenderPreference | "all">("all");
+  const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -29,7 +54,16 @@ export default function MapPage() {
   });
 
   const { data: mapActivities = [], isLoading } = useMapActivities(
-    location ? { lat: location.lat, lng: location.lng, categoryId: selectedCategoryId ?? undefined } : null
+    location
+      ? {
+          lat: location.lat,
+          lng: location.lng,
+          categoryId: selectedCategoryId ?? undefined,
+          radiusMeters,
+          genderPreference: genderFilter === "all" ? undefined : genderFilter,
+          isFree: priceFilter === "all" ? undefined : priceFilter === "free",
+        }
+      : null
   );
 
   function handleMarkerClick(activity: ActivityMapItem) {
@@ -64,6 +98,26 @@ export default function MapPage() {
             selected={selectedCategoryId}
             onSelect={setSelectedCategoryId}
           />
+          <div className="no-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 16px 12px" }}>
+            <FilterSelect
+              label="Mesafe"
+              value={String(radiusMeters)}
+              onChange={(v) => setRadiusMeters(Number(v))}
+              options={RADIUS_OPTIONS.map((o) => ({ label: o.label, value: String(o.value) }))}
+            />
+            <FilterSelect
+              label="Kimler"
+              value={String(genderFilter)}
+              onChange={(v) => setGenderFilter(v === "all" ? "all" : (Number(v) as GenderPreference))}
+              options={GENDER_OPTIONS.map((o) => ({ label: o.label, value: String(o.value) }))}
+            />
+            <FilterSelect
+              label="Ücret"
+              value={priceFilter}
+              onChange={(v) => setPriceFilter(v as "all" | "free" | "paid")}
+              options={PRICE_OPTIONS.map((o) => ({ label: o.label, value: o.value }))}
+            />
+          </div>
         </div>
 
         {/* Location permission (prompt) */}
@@ -176,6 +230,49 @@ export default function MapPage() {
         }
       `}</style>
     </AppShell>
+  );
+}
+
+function FilterSelect({ label, value, onChange, options }: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+  options: { label: string; value: string }[];
+}) {
+  return (
+    <label style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 6,
+      padding: "6px 10px 6px 12px",
+      borderRadius: "var(--radius-full)",
+      border: "1px solid var(--color-border)",
+      background: "var(--color-surface)",
+      fontSize: 12,
+      fontWeight: 600,
+      color: "var(--color-muted-foreground)",
+      flexShrink: 0,
+      whiteSpace: "nowrap",
+    }}>
+      {label}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        style={{
+          border: "none",
+          background: "transparent",
+          fontSize: 12,
+          fontWeight: 700,
+          color: "var(--color-foreground)",
+          outline: "none",
+          cursor: "pointer",
+        }}
+      >
+        {options.map((o) => (
+          <option key={o.value} value={o.value}>{o.label}</option>
+        ))}
+      </select>
+    </label>
   );
 }
 

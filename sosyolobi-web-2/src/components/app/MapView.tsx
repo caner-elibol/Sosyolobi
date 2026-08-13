@@ -161,6 +161,16 @@ function ActivityPreview({ activity, onGoToActivity }: { activity: ActivityMapIt
 
   return (
     <div style={{ minWidth: 220, fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}>
+      {activity.categoryImageUrl && (
+        <div
+          style={{
+            height: 90,
+            margin: "-10px -10px 8px",
+            borderRadius: "var(--radius-sm) var(--radius-sm) 0 0",
+            background: `url(${activity.categoryImageUrl}) center/cover no-repeat`,
+          }}
+        />
+      )}
       <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6 }}>
         <span style={{
           width: 28,

@@ -1,12 +1,14 @@
 import { useQuery } from "@tanstack/react-query";
 import { userApiClient } from "@/lib/user-api-client";
-import type { ActivityMapItem } from "@/types/user";
+import type { ActivityMapItem, GenderPreference } from "@/types/user";
 
 interface MapActivitiesParams {
   lat: number;
   lng: number;
   radiusMeters?: number;
   categoryId?: string;
+  genderPreference?: GenderPreference;
+  isFree?: boolean;
 }
 
 export function useMapActivities(params: MapActivitiesParams | null) {
@@ -19,6 +21,8 @@ export function useMapActivities(params: MapActivitiesParams | null) {
         longitude: String(params.lng),
         radiusMeters: String(params.radiusMeters ?? 10000),
         ...(params.categoryId ? { categoryId: params.categoryId } : {}),
+        ...(params.genderPreference !== undefined ? { genderPreference: String(params.genderPreference) } : {}),
+        ...(params.isFree !== undefined ? { isFree: String(params.isFree) } : {}),
       });
       return userApiClient<ActivityMapItem[]>(`/api/activities/map?${qs}`);
     },

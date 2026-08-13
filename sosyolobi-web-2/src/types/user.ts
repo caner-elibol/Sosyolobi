@@ -78,6 +78,7 @@ export interface Category {
   slug: string;
   iconName?: string;
   color?: string;
+  imageUrl?: string;
   sortOrder: number;
 }
 
@@ -90,6 +91,7 @@ export interface Activity {
   createdByAvatarUrl?: string;
   categoryId: string;
   categoryName: string;
+  categoryImageUrl?: string;
   title: string;
   description?: string;
   eventDate: string;
@@ -115,6 +117,7 @@ export interface ActivityMapItem {
   id: string;
   title: string;
   categoryName: string;
+  categoryImageUrl?: string;
   status: ActivityStatus;
   latitude: number;
   longitude: number;

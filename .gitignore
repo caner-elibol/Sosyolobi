@@ -5,6 +5,10 @@ sosyolobi-web/
 Sosyolobi Backend/Sosyolobi.Api/wwwroot/avatars/*
 !Sosyolobi Backend/Sosyolobi.Api/wwwroot/avatars/.gitkeep
 
+# Locally cached category images (downloaded from Pexels, served from a Docker volume; not source)
+Sosyolobi Backend/Sosyolobi.Api/wwwroot/categories/*
+!Sosyolobi Backend/Sosyolobi.Api/wwwroot/categories/.gitkeep
+
 # Build outputs
 bin/
 obj/

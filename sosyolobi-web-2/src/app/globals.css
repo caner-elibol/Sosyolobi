@@ -1,13 +1,26 @@
 @import "tailwindcss";
 
+@theme inline {
+  --color-navy: var(--color-navy);
+  --color-orange: var(--color-accent-bright);
+  --color-soft-orange: var(--color-soft-orange);
+  --color-soft-navy: var(--color-soft-navy);
+  --color-text-dark: var(--color-foreground);
+  --color-text-muted: var(--color-muted-foreground);
+  --color-border: var(--color-border);
+  --font-sans: var(--font-nunito), var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+}
+
 :root {
   /* Brand */
-  --color-navy: #0f1736;
-  --color-navy-light: #181c51;
+  --color-navy: #081b4b;
+  --color-navy-light: #12275e;
   --color-accent: #c2540c;
-  --color-accent-bright: #f2821f;
-  --color-accent-soft-bg: #fff1e0;
+  --color-accent-bright: #ff9d23;
+  --color-accent-soft-bg: #fff3e2;
   --color-accent-soft-fg: #9a3412;
+  --color-soft-orange: #fff3e2;
+  --color-soft-navy: #eef2fa;
   --color-violet: #8454d9;
   --color-pink: #e94c79;
   --gradient-promo: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 100%);
@@ -22,13 +35,13 @@
   --color-warning-bg: #fef3c7;
 
   /* Surfaces */
-  --color-background: #fafbfd;
+  --color-background: #ffffff;
   --color-surface: #ffffff;
-  --color-border: #eef2f7;
+  --color-border: #e7eaf0;
 
   /* Text */
-  --color-foreground: #111827;
-  --color-muted-foreground: #6b7280;
+  --color-foreground: #101828;
+  --color-muted-foreground: #667085;
   --color-subtle-foreground: #9ca3af;
 
   /* Radius */
@@ -62,7 +75,7 @@ html {
 body {
   background-color: var(--color-background);
   color: var(--color-foreground);
-  font-family: var(--font-inter, "Inter", ui-sans-serif, system-ui, sans-serif);
+  font-family: var(--font-nunito, "Nunito"), var(--font-inter, "Inter"), ui-sans-serif, system-ui, sans-serif;
 }
 
 a {
@@ -119,5 +132,56 @@ button {
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.hero-grid {
+  display: grid;
+  gap: 2.5rem;
+  grid-template-areas:
+    "heading"
+    "mockup"
+    "cta";
+}
+.hero-grid > .hero-heading {
+  grid-area: heading;
+}
+.hero-grid > .hero-mockup {
+  grid-area: mockup;
+}
+.hero-grid > .hero-cta {
+  grid-area: cta;
+}
+
+@media (min-width: 1024px) {
+  .hero-grid {
+    grid-template-columns: 1fr 1fr;
+    grid-template-areas:
+      "heading mockup"
+      "cta mockup";
+    align-items: center;
+    gap: 4rem;
+  }
+}
+
+@keyframes blink {
+  0%,
+  90%,
+  100% {
+    transform: scaleY(1);
+  }
+  95% {
+    transform: scaleY(0.1);
   }
 }

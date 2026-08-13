@@ -12,6 +12,7 @@ import { useRouter } from "next/navigation";
 import { userApiClient } from "@/lib/user-api-client";
 import { silenceMissingStyleImages } from "@/lib/map-utils";
 import { useCreateActivity } from "@/hooks/useCreateActivity";
+import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { SkillLevel, GenderPreference } from "@/types/user";
 import type { Category } from "@/types/user";
@@ -43,6 +44,7 @@ export function CreateActivityForm() {
   const create = useCreateActivity();
   const [step, setStep] = useState(1);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
+  const { location, permission } = useCurrentLocation();
   const nowLocal = nowForDatetimeLocal();
   const [dateStr, setDateStr] = useState(nowLocal.slice(0, 10));
   const [timeStr, setTimeStr] = useState(nowLocal.slice(11, 16));
@@ -71,6 +73,13 @@ export function CreateActivityForm() {
   const handleMapClick = useCallback((evt: { lngLat: { lat: number; lng: number } }) => {
     setPin({ lat: evt.lngLat.lat, lng: evt.lngLat.lng });
   }, []);
+
+  // Kullanıcı haritaya henüz tıklamadıysa, konumu çözüldüğünde varsayılan pin olarak kullan.
+  useEffect(() => {
+    if (location && pin === null) {
+      setPin(location);
+    }
+  }, [location, pin]);
 
   const categoryId = watch("categoryId");
 
@@ -191,25 +200,38 @@ export function CreateActivityForm() {
               <div style={{ display: "flex", flexDirection: "column", gap: 16 }}>
                 <Field label="Haritadan Seç" error={pin ? undefined : "Konum zorunlu"}>
                   <div style={{ height: 280, borderRadius: "var(--radius-md)", overflow: "hidden", border: "1px solid var(--color-border)" }}>
-                    <Map
-                      reuseMaps
-                      onLoad={silenceMissingStyleImages}
-                      initialViewState={{ longitude: 28.9784, latitude: 41.0082, zoom: 11 }}
-                      mapStyle="https://tiles.openfreemap.org/styles/liberty"
-                      style={{ width: "100%", height: "100%" }}
-                      onClick={handleMapClick}
-                      cursor="crosshair"
-                    >
-                      {pin && (
-                        <Marker longitude={pin.lng} latitude={pin.lat} anchor="bottom">
-                          <MapPin size={28} color="var(--color-accent)" fill="var(--color-accent-soft-bg)" strokeWidth={2} />
-                        </Marker>
-                      )}
-                    </Map>
+                    {permission === "loading" ? (
+                      <div style={{
+                        width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center",
+                        background: "var(--color-background)", color: "var(--color-muted-foreground)", fontSize: 13,
+                      }}>
+                        Konum alınıyor...
+                      </div>
+                    ) : (
+                      <Map
+                        reuseMaps
+                        onLoad={silenceMissingStyleImages}
+                        initialViewState={{
+                          longitude: (location ?? { lat: 41.0082, lng: 28.9784 }).lng,
+                          latitude: (location ?? { lat: 41.0082, lng: 28.9784 }).lat,
+                          zoom: 12,
+                        }}
+                        mapStyle="https://tiles.openfreemap.org/styles/liberty"
+                        style={{ width: "100%", height: "100%" }}
+                        onClick={handleMapClick}
+                        cursor="crosshair"
+                      >
+                        {pin && (
+                          <Marker longitude={pin.lng} latitude={pin.lat} anchor="bottom">
+                            <MapPin size={28} color="var(--color-accent)" fill="var(--color-accent-soft-bg)" strokeWidth={2} />
+                          </Marker>
+                        )}
+                      </Map>
+                    )}
                   </div>
                   {pin && (
                     <p style={{ fontSize: 12, color: "var(--color-muted-foreground)", marginTop: 4 }}>
-                      Konum belirlendi: {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
+                      Konum belirlendi: {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)} — haritada başka bir yere tıklayarak değiştirebilirsiniz.
                     </p>
                   )}
                 </Field>

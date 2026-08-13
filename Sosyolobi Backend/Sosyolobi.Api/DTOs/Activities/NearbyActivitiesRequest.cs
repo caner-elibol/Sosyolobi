@@ -1,3 +1,5 @@
+using Sosyolobi.Api.Enums;
+
 namespace Sosyolobi.Api.DTOs.Activities;
 
 public class NearbyActivitiesRequest
@@ -8,4 +10,6 @@ public class NearbyActivitiesRequest
     public Guid? CategoryId { get; set; }
     public DateTime? FromDate { get; set; }
     public DateTime? ToDate { get; set; }
+    public GenderPreference? GenderPreference { get; set; }
+    public bool? IsFree { get; set; }
 }

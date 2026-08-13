@@ -7,6 +7,8 @@ public class ActivityCategory
     public string Slug { get; set; } = null!;
     public string? IconName { get; set; }
     public string? Color { get; set; }
+    public string? ImageUrl { get; set; }
+    public DateTime? ImageFetchedAt { get; set; }
     public bool IsActive { get; set; } = true;
     public int SortOrder { get; set; }
 

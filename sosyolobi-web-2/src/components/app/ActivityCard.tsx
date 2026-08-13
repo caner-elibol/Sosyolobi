@@ -62,6 +62,42 @@ export function ActivityCard({ activity, compact = false, categoryColor, variant
     </div>
   );
 
+  const hasImage = Boolean(activity.categoryImageUrl);
+
+  const overlayCategoryBadge = (
+    <span style={{
+      display: "inline-flex",
+      alignItems: "center",
+      gap: 5,
+      alignSelf: "flex-start",
+      padding: "2px 9px 2px 7px",
+      borderRadius: "var(--radius-full)",
+      background: "rgba(255,255,255,0.22)",
+      backdropFilter: "blur(4px)",
+      color: "#fff",
+      fontSize: 11,
+      fontWeight: 600,
+    }}>
+      <span style={{ width: 6, height: 6, borderRadius: "50%", background: color, flexShrink: 0 }} />
+      {activity.categoryName}
+    </span>
+  );
+
+  const overlayParticipantsRow = (
+    <div style={{ display: "flex", alignItems: "center", gap: 6, marginTop: 2 }}>
+      {activity.createdByDisplayName ? (
+        <UserAvatar displayName={activity.createdByDisplayName} avatarUrl={activity.createdByAvatarUrl} size={20} />
+      ) : (
+        <Users size={14} color="rgba(255,255,255,0.85)" />
+      )}
+      <span style={{ fontSize: 12, color: "rgba(255,255,255,0.85)", fontWeight: 500 }}>
+        {hasParticipantData
+          ? `${activity.currentPeopleCount} / ${activity.neededPeopleCount + 1} katılıyor`
+          : `${activity.neededPeopleCount} kişi aranıyor`}
+      </span>
+    </div>
+  );
+
   if (variant === "vertical") {
     return (
       <Link href={`/app/activities/${activity.id}`} style={{ textDecoration: "none" }}>
@@ -78,12 +114,14 @@ export function ActivityCard({ activity, compact = false, categoryColor, variant
         >
           <div style={{
             height: 120,
-            background: `linear-gradient(135deg, color-mix(in srgb, ${color} 22%, white) 0%, color-mix(in srgb, ${color} 10%, white) 100%)`,
+            background: activity.categoryImageUrl
+              ? `linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%), url(${activity.categoryImageUrl}) center/cover no-repeat`
+              : `linear-gradient(135deg, color-mix(in srgb, ${color} 22%, white) 0%, color-mix(in srgb, ${color} 10%, white) 100%)`,
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
           }}>
-            <Icon size={34} color={color} strokeWidth={1.75} />
+            {!activity.categoryImageUrl && <Icon size={34} color={color} strokeWidth={1.75} />}
           </div>
           <div style={{ padding: 12, display: "flex", flexDirection: "column", gap: 5 }}>
             {categoryBadge}
@@ -110,6 +148,71 @@ export function ActivityCard({ activity, compact = false, categoryColor, variant
         </div>
         <style>{`
           .activity-card:hover { box-shadow: var(--shadow-md); border-color: transparent; }
+        `}</style>
+      </Link>
+    );
+  }
+
+  if (hasImage) {
+    return (
+      <Link href={`/app/activities/${activity.id}`} style={{ textDecoration: "none" }}>
+        <div
+          className="activity-card"
+          style={{
+            position: "relative",
+            minHeight: compact ? 100 : 128,
+            borderRadius: "var(--radius-lg)",
+            overflow: "hidden",
+            cursor: "pointer",
+            transition: "box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out)",
+            background: `url(${activity.categoryImageUrl}) center/cover no-repeat`,
+          }}
+        >
+          <div style={{
+            position: "absolute",
+            inset: 0,
+            background: "linear-gradient(180deg, rgba(0,0,0,0.05) 0%, rgba(0,0,0,0.35) 55%, rgba(0,0,0,0.8) 100%)",
+          }} />
+
+          <div style={{
+            position: "relative",
+            minHeight: compact ? 100 : 128,
+            padding: compact ? 12 : 14,
+            display: "flex",
+            flexDirection: "column",
+            justifyContent: "flex-end",
+            gap: 4,
+          }}>
+            {overlayCategoryBadge}
+
+            <h4 style={{
+              fontSize: compact ? 14 : 15,
+              fontWeight: 700,
+              color: "#fff",
+              margin: 0,
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              textShadow: "0 1px 3px rgba(0,0,0,0.4)",
+            }}>
+              {activity.title}
+            </h4>
+
+            <Row icon={<Clock size={12} />} color="rgba(255,255,255,0.9)">
+              {formatDate(activity.eventDate)}
+              {isFull && <span style={{ color: "#ffb4b4", fontWeight: 600, marginLeft: 6 }}>· Dolu</span>}
+            </Row>
+
+            <Row icon={<MapPin size={12} />} color="rgba(255,255,255,0.85)">
+              {activity.addressText || "Konum"}
+              {dist && <span style={{ marginLeft: 6 }}>· {dist}</span>}
+            </Row>
+
+            {overlayParticipantsRow}
+          </div>
+        </div>
+        <style>{`
+          .activity-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-1px); }
         `}</style>
       </Link>
     );

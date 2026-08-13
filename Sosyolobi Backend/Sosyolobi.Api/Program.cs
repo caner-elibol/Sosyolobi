@@ -5,6 +5,7 @@ using Sosyolobi.Api.Extensions;
 using Sosyolobi.Api.Hubs;
 using Sosyolobi.Api.Options;
 using Sosyolobi.Api.Services;
+using Sosyolobi.Api.Services.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,14 @@ builder.Services.Configure<JwtOptions>(builder.Configuration.GetSection(JwtOptio
 builder.Services.Configure<SmsOptions>(builder.Configuration.GetSection(SmsOptions.SectionName));
 builder.Services.Configure<RedisOptions>(builder.Configuration.GetSection(RedisOptions.SectionName));
 builder.Services.Configure<GeoOptions>(builder.Configuration.GetSection(GeoOptions.SectionName));
+builder.Services.Configure<PexelsOptions>(builder.Configuration.GetSection(PexelsOptions.SectionName));
+
+// Pexels image client
+builder.Services.AddHttpClient<IPexelsImageService, PexelsImageService>(client =>
+{
+    client.BaseAddress = new Uri("https://api.pexels.com/v1/");
+    client.Timeout = TimeSpan.FromSeconds(8);
+});
 
 // Database
 builder.Services.AddDbContext<AppDbContext>(options =>
