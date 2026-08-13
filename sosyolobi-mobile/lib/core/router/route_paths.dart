@@ -1,0 +1,16 @@
+abstract final class RoutePaths {
+  static const splash = '/splash';
+
+  static const login = '/auth/login';
+  static const verify = '/auth/verify';
+
+  static const map = '/app/map';
+  static const activities = '/app/activities';
+  static const activityCreate = '/app/activities/create';
+  static String activityDetail(String id) => '/app/activities/$id';
+  static const activityDetailPattern = '/app/activities/:id';
+
+  static const requests = '/app/requests';
+  static const notifications = '/app/notifications';
+  static const profile = '/app/profile';
+}
