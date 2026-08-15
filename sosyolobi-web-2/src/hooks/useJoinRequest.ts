@@ -1,6 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueries, useQuery, useQueryClient } from "@tanstack/react-query";
 import { userApiClient } from "@/lib/user-api-client";
-import type { ActivityJoinRequest } from "@/types/user";
+import type { ActivityDetail, ActivityJoinRequest } from "@/types/user";
+import { ActivityRequestStatus, ActivityStatus } from "@/types/user";
 
 export function useJoinRequest(activityId: string | null) {
   const qc = useQueryClient();
@@ -53,4 +54,33 @@ export function useSentRequests() {
     queryFn: () => userApiClient<ActivityJoinRequest[]>("/api/activity-requests/sent"),
     staleTime: 15_000,
   });
+}
+
+/** Katılma isteği onaylanmış, henüz geçmemiş etkinlikler. */
+export function useMyJoinedActivities() {
+  const { data: sent = [], isLoading: sentLoading } = useSentRequests();
+  const approvedIds = sent
+    .filter((r) => r.status === ActivityRequestStatus.Approved)
+    .map((r) => r.activityId);
+
+  const results = useQueries({
+    queries: approvedIds.map((id) => ({
+      queryKey: ["activity", id],
+      queryFn: () => userApiClient<ActivityDetail>(`/api/activities/${id}`),
+      staleTime: 30_000,
+    })),
+  });
+
+  const now = Date.now();
+  const data = results
+    .map((r) => r.data)
+    .filter((a): a is ActivityDetail => !!a)
+    .filter(
+      (a) =>
+        (a.status === ActivityStatus.Open || a.status === ActivityStatus.Full) &&
+        new Date(a.eventDate).getTime() >= now
+    )
+    .sort((a, b) => new Date(a.eventDate).getTime() - new Date(b.eventDate).getTime());
+
+  return { data, isLoading: sentLoading || results.some((r) => r.isLoading) };
 }

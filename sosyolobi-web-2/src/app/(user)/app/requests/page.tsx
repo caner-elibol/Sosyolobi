@@ -4,12 +4,54 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app/AppShell";
 import { UserAvatar } from "@/components/app/UserAvatar";
+import { ActivityCard } from "@/components/app/ActivityCard";
 import { LoadingState } from "@/components/app/LoadingState";
 import { EmptyState } from "@/components/app/EmptyState";
-import { useSentRequests, useIncomingRequests } from "@/hooks/useJoinRequest";
+import { useSentRequests, useIncomingRequests, useMyJoinedActivities } from "@/hooks/useJoinRequest";
+import { useActivity } from "@/hooks/useCreateActivity";
+import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { ActivityRequestStatus } from "@/types/user";
 import Link from "next/link";
-import { Inbox, Send, Star } from "lucide-react";
+import { CalendarCheck, Inbox, Send, Star } from "lucide-react";
+
+function RequestActivitySnippet({ activityId }: { activityId: string }) {
+  const { data: activity, isLoading } = useActivity(activityId);
+  if (isLoading || !activity) return null;
+  const Icon = getCategoryIcon(activity.categoryName);
+  const color = getCategoryColor(activity.categoryName);
+
+  return (
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      padding: "8px 10px",
+      background: "#F9FAFB",
+      borderRadius: "var(--radius-sm)",
+    }}>
+      <span style={{
+        width: 28,
+        height: 28,
+        borderRadius: "var(--radius-sm)",
+        background: `color-mix(in srgb, ${color} 16%, white)`,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexShrink: 0,
+      }}>
+        <Icon size={14} color={color} />
+      </span>
+      <div style={{ minWidth: 0, flex: 1 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: "var(--color-foreground)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {activity.title}
+        </div>
+        <div style={{ fontSize: 11, color: "var(--color-muted-foreground)" }}>
+          {activity.categoryName} · {new Date(activity.eventDate).toLocaleDateString("tr-TR", { day: "numeric", month: "short" })}
+        </div>
+      </div>
+    </div>
+  );
+}
 
 const STATUS_LABELS: Record<number, { label: string; color: string }> = {
   [ActivityRequestStatus.Pending]:   { label: "Bekliyor",  color: "#B45309" },
@@ -33,29 +75,27 @@ function SentRequests() {
               background: "var(--color-surface)",
               border: "1px solid var(--color-border)",
               borderRadius: "var(--radius-lg)",
-              padding: "16px",
+              padding: "12px",
               display: "flex",
-              alignItems: "center",
-              gap: 12,
+              flexDirection: "column",
+              gap: 10,
             }}>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)", marginBottom: 4 }}>
-                  Aktivite #{req.activityId.slice(-6)}
-                </div>
+              <RequestActivitySnippet activityId={req.activityId} />
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", padding: "0 2px" }}>
                 <div style={{ fontSize: 12, color: "var(--color-muted-foreground)" }}>
-                  {new Date(req.createdAt).toLocaleDateString("tr-TR")}
+                  İstek: {new Date(req.createdAt).toLocaleDateString("tr-TR")}
                 </div>
+                <span style={{
+                  padding: "4px 10px",
+                  borderRadius: "var(--radius-full)",
+                  fontSize: 12,
+                  fontWeight: 600,
+                  background: `${s?.color}18`,
+                  color: s?.color,
+                }}>
+                  {s?.label ?? "Bilinmiyor"}
+                </span>
               </div>
-              <span style={{
-                padding: "4px 10px",
-                borderRadius: "var(--radius-full)",
-                fontSize: 12,
-                fontWeight: 600,
-                background: `${s?.color}18`,
-                color: s?.color,
-              }}>
-                {s?.label ?? "Bilinmiyor"}
-              </span>
             </div>
           </Link>
         );
@@ -137,6 +177,10 @@ function IncomingRequests() {
               </span>
             </div>
 
+            <div style={{ margin: isPending ? "0 0 12px" : "8px 0 0" }}>
+              <RequestActivitySnippet activityId={req.activityId} />
+            </div>
+
             {req.message && (
               <p style={{
                 fontSize: 13,
@@ -201,8 +245,28 @@ function IncomingRequests() {
   );
 }
 
+function JoinedActivities() {
+  const { data = [], isLoading } = useMyJoinedActivities();
+  if (isLoading) return <LoadingState />;
+  if (!data.length) return (
+    <EmptyState
+      icon={CalendarCheck}
+      title="Yaklaşan etkinliğiniz yok"
+      description="Katılım isteğiniz onaylanan yaklaşan etkinlikler burada görünecek."
+    />
+  );
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+      {data.map((a) => (
+        <ActivityCard key={a.id} activity={a} />
+      ))}
+    </div>
+  );
+}
+
 export default function RequestsPage() {
-  const [tab, setTab] = useState<"sent" | "incoming">("incoming");
+  const [tab, setTab] = useState<"sent" | "incoming" | "joined">("incoming");
 
   return (
     <AppShell>
@@ -219,7 +283,7 @@ export default function RequestsPage() {
           padding: 4,
           marginBottom: 20,
         }}>
-          {(["incoming", "sent"] as const).map((t) => (
+          {(["incoming", "sent", "joined"] as const).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -237,12 +301,12 @@ export default function RequestsPage() {
                 transition: "all 0.15s var(--ease-out)",
               }}
             >
-              {t === "incoming" ? "Gelen İstekler" : "Gönderdiğim"}
+              {t === "incoming" ? "Gelen İstekler" : t === "sent" ? "Gönderdiğim" : "Katıldıklarım"}
             </button>
           ))}
         </div>
 
-        {tab === "incoming" ? <IncomingRequests /> : <SentRequests />}
+        {tab === "incoming" ? <IncomingRequests /> : tab === "sent" ? <SentRequests /> : <JoinedActivities />}
       </div>
     </AppShell>
   );

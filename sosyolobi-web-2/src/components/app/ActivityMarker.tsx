@@ -16,21 +16,21 @@ export function ActivityMarker({ activity, onClick, selected = false }: Activity
       onClick={() => onClick(activity)}
       style={{
         background: color,
-        border: "2.5px solid #fff",
+        border: "3px solid #fff",
         borderRadius: "50%",
-        width: selected ? 40 : 32,
-        height: selected ? 40 : 32,
+        width: selected ? 48 : 38,
+        height: selected ? 48 : 38,
         cursor: "pointer",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        boxShadow: selected ? "0 4px 14px rgba(0,0,0,0.28)" : "var(--shadow-md)",
+        boxShadow: selected ? "0 6px 16px rgba(0,0,0,0.32)" : "0 2px 8px rgba(0,0,0,0.25)",
         transition: "transform 0.15s var(--ease-out), width 0.15s ease, height 0.15s ease",
         transform: selected ? "scale(1.05)" : "scale(1)",
         padding: 0,
       }}
     >
-      <Icon size={selected ? 19 : 15} color="#fff" strokeWidth={2.25} />
+      <Icon size={selected ? 23 : 19} color="#fff" strokeWidth={2.25} />
     </button>
   );
 }

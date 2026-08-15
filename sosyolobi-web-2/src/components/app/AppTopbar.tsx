@@ -3,17 +3,15 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useNotifications } from "@/hooks/useNotifications";
-import { useChatUnread } from "@/hooks/useChatUnread";
 import { getUserFromToken, clearUserToken } from "@/lib/user-auth";
 import { UserAvatar } from "@/components/app/UserAvatar";
-import { Bell, Calendar, Crosshair, Inbox, LogOut, MapPin, Plus, Search, UserPen } from "lucide-react";
+import { NotificationsBell } from "@/components/app/NotificationsBell";
+import { Calendar, Crosshair, Inbox, LogOut, MapPin, Plus, Search, UserPen } from "lucide-react";
 
 const NAV_ITEMS = [
   { href: "/app/map", label: "Keşfet", icon: MapPin },
   { href: "/app/activities", label: "Etkinlikler", icon: Calendar },
   { href: "/app/requests", label: "İstekler", icon: Inbox },
-  { href: "/app/notifications", label: "Bildirimler", icon: Bell },
 ];
 
 export function AppTopbar() {
@@ -24,17 +22,82 @@ export function AppTopbar() {
   );
 }
 
+// Hoisted to module scope on purpose: an inline function component re-created on
+// every parent render gets a new identity, so React unmounts/remounts the <input>
+// DOM node after each keystroke — the input loses focus and needs a re-click to
+// type the next character. Keeping this outside the render body keeps its
+// identity stable across renders.
+function TopSearchBar({
+  className,
+  value,
+  onChange,
+  onSubmit,
+  onLocate,
+}: {
+  className?: string;
+  value: string;
+  onChange: (value: string) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  onLocate: () => void;
+}) {
+  return (
+    <form onSubmit={onSubmit} className={className} style={{
+      flex: 1,
+      maxWidth: 420,
+      display: "flex",
+      alignItems: "center",
+      gap: 8,
+      background: "#F3F4F6",
+      borderRadius: "var(--radius-full)",
+      padding: "8px 8px 8px 16px",
+    }}>
+      <Search size={16} color="var(--color-muted-foreground)" style={{ flexShrink: 0 }} />
+      <input
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder="Etkinlik, kategori veya konum ara..."
+        style={{
+          flex: 1,
+          border: "none",
+          outline: "none",
+          background: "transparent",
+          fontSize: 14,
+          fontFamily: "inherit",
+          color: "var(--color-foreground)",
+        }}
+      />
+      <button
+        type="button"
+        onClick={onLocate}
+        title="Haritada konumumu gör"
+        style={{
+          width: 28,
+          height: 28,
+          borderRadius: "var(--radius-sm)",
+          background: "#E5E7EB",
+          border: "none",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          cursor: "pointer",
+          flexShrink: 0,
+        }}
+      >
+        <Crosshair size={14} color="var(--color-foreground)" />
+      </button>
+    </form>
+  );
+}
+
 function AppTopbarInner() {
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const { unreadCount } = useNotifications();
-  const { totalUnreadRooms } = useChatUnread();
-  const badgeCount = unreadCount + totalUnreadRooms;
   const user = getUserFromToken();
   const [menuOpen, setMenuOpen] = useState(false);
   const [search, setSearch] = useState(searchParams.get("q") ?? "");
   const menuRef = useRef<HTMLDivElement>(null);
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     setSearch(searchParams.get("q") ?? "");
@@ -49,64 +112,36 @@ function AppTopbarInner() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [menuOpen]);
 
+  useEffect(() => {
+    return () => {
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, []);
+
   function logout() {
     clearUserToken();
     router.replace("/auth/login");
   }
 
-  function handleSearchSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    router.push(search.trim() ? `/app/activities?q=${encodeURIComponent(search.trim())}` : "/app/activities");
+  function navigateSearch(value: string) {
+    const q = value.trim();
+    router.push(q ? `/app/activities?q=${encodeURIComponent(q)}` : "/app/activities");
   }
 
-  function SearchBar({ className }: { className?: string }) {
-    return (
-      <form onSubmit={handleSearchSubmit} className={className} style={{
-        flex: 1,
-        maxWidth: 420,
-        display: "flex",
-        alignItems: "center",
-        gap: 8,
-        background: "#F3F4F6",
-        borderRadius: "var(--radius-full)",
-        padding: "8px 8px 8px 16px",
-      }}>
-        <Search size={16} color="var(--color-muted-foreground)" style={{ flexShrink: 0 }} />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Etkinlik, kategori veya konum ara..."
-          style={{
-            flex: 1,
-            border: "none",
-            outline: "none",
-            background: "transparent",
-            fontSize: 14,
-            fontFamily: "inherit",
-            color: "var(--color-foreground)",
-          }}
-        />
-        <button
-          type="button"
-          onClick={() => router.push("/app/map")}
-          title="Haritada konumumu gör"
-          style={{
-            width: 28,
-            height: 28,
-            borderRadius: "var(--radius-sm)",
-            background: "#E5E7EB",
-            border: "none",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            cursor: "pointer",
-            flexShrink: 0,
-          }}
-        >
-          <Crosshair size={14} color="var(--color-foreground)" />
-        </button>
-      </form>
-    );
+  function handleSearchChange(value: string) {
+    setSearch(value);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      if (value.trim() !== (searchParams.get("q") ?? "").trim()) {
+        navigateSearch(value);
+      }
+    }, 400);
+  }
+
+  function handleSearchSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    navigateSearch(search);
   }
 
   return (
@@ -143,7 +178,13 @@ function AppTopbarInner() {
           <span style={{ color: "var(--color-navy)", fontWeight: 700, fontSize: 17 }}>Sosyolobi</span>
         </Link>
 
-        <SearchBar className="hidden-mobile" />
+        <TopSearchBar
+          className="hidden-mobile"
+          value={search}
+          onChange={handleSearchChange}
+          onSubmit={handleSearchSubmit}
+          onLocate={() => router.push("/app/map")}
+        />
 
         <nav style={{ display: "flex", gap: 4, marginLeft: "auto" }} className="hidden-mobile">
         {NAV_ITEMS.map((item) => {
@@ -169,25 +210,6 @@ function AppTopbarInner() {
             >
               <Icon size={16} strokeWidth={active ? 2.4 : 2} />
               {item.label}
-              {item.href === "/app/notifications" && badgeCount > 0 && (
-                <span style={{
-                  position: "absolute",
-                  top: 2,
-                  right: 2,
-                  background: "var(--color-destructive)",
-                  color: "#fff",
-                  borderRadius: "50%",
-                  width: 16,
-                  height: 16,
-                  fontSize: 10,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: 700,
-                }}>
-                  {badgeCount > 9 ? "9+" : badgeCount}
-                </span>
-              )}
             </Link>
           );
         })}
@@ -209,32 +231,8 @@ function AppTopbarInner() {
         }} className="hidden-mobile">
           <Plus size={15} strokeWidth={2.5} /> Oluştur
         </Link>
-        <Link
-          href="/app/notifications"
-          className="show-mobile"
-          style={{ position: "relative", display: "flex", alignItems: "center", justifyContent: "center" }}
-        >
-          <Bell size={21} color="var(--color-foreground)" strokeWidth={2} />
-          {badgeCount > 0 && (
-            <span style={{
-              position: "absolute",
-              top: -3,
-              right: -3,
-              background: "var(--color-destructive)",
-              color: "#fff",
-              borderRadius: "50%",
-              width: 15,
-              height: 15,
-              fontSize: 9,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontWeight: 700,
-            }}>
-              {badgeCount > 9 ? "9+" : badgeCount}
-            </span>
-          )}
-        </Link>
+        <NotificationsBell className="hidden-mobile" />
+        <NotificationsBell className="show-mobile" />
         {user && (
           <div ref={menuRef} style={{ position: "relative" }}>
             <button onClick={() => setMenuOpen((o) => !o)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, borderRadius: "50%" }}>
@@ -287,7 +285,12 @@ function AppTopbarInner() {
       </div>
 
       <div className="show-mobile" style={{ padding: "0 16px 12px" }}>
-        <SearchBar />
+        <TopSearchBar
+          value={search}
+          onChange={handleSearchChange}
+          onSubmit={handleSearchSubmit}
+          onLocate={() => router.push("/app/map")}
+        />
       </div>
     </header>
   );

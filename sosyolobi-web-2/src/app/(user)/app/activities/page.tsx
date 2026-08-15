@@ -6,11 +6,13 @@ import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app/AppShell";
 import { ActivityCard } from "@/components/app/ActivityCard";
 import { FilterChips } from "@/components/app/FilterChips";
+import { FilterSelect, FilterToggle } from "@/components/app/FilterSelect";
 import { LoadingState } from "@/components/app/LoadingState";
 import { EmptyState } from "@/components/app/EmptyState";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useNearbyActivities } from "@/hooks/useNearbyActivities";
 import { userApiClient } from "@/lib/user-api-client";
+import { DATE_FILTER_OPTIONS, getDateRange, isWeekendDate, type DateFilterKey } from "@/lib/date-filters";
 import type { Category } from "@/types/user";
 import { MapPinOff, SearchX } from "lucide-react";
 
@@ -27,6 +29,8 @@ function ActivitiesPageInner() {
   const search = searchParams.get("q") ?? "";
   const { location } = useCurrentLocation();
   const [categoryId, setCategoryId] = useState<string | null>(null);
+  const [dateFilter, setDateFilter] = useState<DateFilterKey>("all");
+  const [weekendOnly, setWeekendOnly] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -34,13 +38,15 @@ function ActivitiesPageInner() {
     staleTime: Infinity,
   });
 
+  const { fromDate, toDate } = getDateRange(dateFilter);
+
   const { data: activities = [], isLoading } = useNearbyActivities(
     location
-      ? { lat: location.lat, lng: location.lng, radiusMeters: 10000, categoryId: categoryId ?? undefined }
+      ? { lat: location.lat, lng: location.lng, radiusMeters: 10000, fromDate, toDate }
       : null
   );
 
-  const filtered = search.trim()
+  const searched = search.trim()
     ? activities.filter((a) => {
         const q = search.toLowerCase();
         return (
@@ -52,6 +58,15 @@ function ActivitiesPageInner() {
       })
     : activities;
 
+  const weekended = weekendOnly ? searched.filter((a) => isWeekendDate(a.eventDate)) : searched;
+
+  const categoryCounts = weekended.reduce<Record<string, number>>((acc, a) => {
+    acc[a.categoryId] = (acc[a.categoryId] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const filtered = categoryId ? weekended.filter((a) => a.categoryId === categoryId) : weekended;
+
   return (
     <AppShell>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -60,7 +75,19 @@ function ActivitiesPageInner() {
           categories={categories}
           selected={categoryId}
           onSelect={setCategoryId}
+          counts={categoryCounts}
         />
+
+        {/* Date / weekend filter */}
+        <div className="no-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 16px 12px" }}>
+          <FilterSelect
+            label="Tarih"
+            value={dateFilter}
+            onChange={(v) => setDateFilter(v as DateFilterKey)}
+            options={DATE_FILTER_OPTIONS}
+          />
+          <FilterToggle label="Hafta Sonu" active={weekendOnly} onClick={() => setWeekendOnly((v) => !v)} />
+        </div>
 
         {/* Results */}
         <div style={{ padding: "0 16px 24px", display: "flex", flexDirection: "column", gap: 12 }}>

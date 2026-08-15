@@ -6,9 +6,13 @@ interface FilterChipsProps {
   categories: Category[];
   selected: string | null;
   onSelect: (id: string | null) => void;
+  /** categoryId -> o kategorideki etkinlik sayısı (rozet olarak gösterilir) */
+  counts?: Record<string, number>;
 }
 
-export function FilterChips({ categories, selected, onSelect }: FilterChipsProps) {
+export function FilterChips({ categories, selected, onSelect, counts }: FilterChipsProps) {
+  const total = counts ? Object.values(counts).reduce((a, b) => a + b, 0) : undefined;
+
   return (
     <div className="no-scrollbar" style={{
       display: "flex",
@@ -21,6 +25,7 @@ export function FilterChips({ categories, selected, onSelect }: FilterChipsProps
         onClick={() => onSelect(null)}
         label="Tümü"
         icon={Globe}
+        count={total}
       />
       {categories.map((cat) => (
         <Chip
@@ -29,13 +34,14 @@ export function FilterChips({ categories, selected, onSelect }: FilterChipsProps
           onClick={() => onSelect(selected === cat.id ? null : cat.id)}
           label={cat.name}
           icon={getCategoryIcon(cat.name)}
+          count={counts?.[cat.id]}
         />
       ))}
     </div>
   );
 }
 
-function Chip({ active, onClick, label, icon: Icon }: { active: boolean; onClick: () => void; label: string; icon: LucideIcon }) {
+function Chip({ active, onClick, label, icon: Icon, count }: { active: boolean; onClick: () => void; label: string; icon: LucideIcon; count?: number }) {
   return (
     <button
       onClick={onClick}
@@ -58,6 +64,23 @@ function Chip({ active, onClick, label, icon: Icon }: { active: boolean; onClick
     >
       <Icon size={14} strokeWidth={2.25} />
       {label}
+      {typeof count === "number" && (
+        <span style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          minWidth: 16,
+          height: 16,
+          padding: "0 4px",
+          borderRadius: "var(--radius-full)",
+          background: active ? "rgba(255,255,255,0.28)" : "var(--color-border)",
+          color: active ? "#fff" : "var(--color-muted-foreground)",
+          fontSize: 10,
+          fontWeight: 700,
+        }}>
+          {count}
+        </span>
+      )}
     </button>
   );
 }

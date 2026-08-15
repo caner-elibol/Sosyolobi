@@ -9,6 +9,8 @@ interface MapActivitiesParams {
   categoryId?: string;
   genderPreference?: GenderPreference;
   isFree?: boolean;
+  fromDate?: string;
+  toDate?: string;
 }
 
 export function useMapActivities(params: MapActivitiesParams | null) {
@@ -23,6 +25,8 @@ export function useMapActivities(params: MapActivitiesParams | null) {
         ...(params.categoryId ? { categoryId: params.categoryId } : {}),
         ...(params.genderPreference !== undefined ? { genderPreference: String(params.genderPreference) } : {}),
         ...(params.isFree !== undefined ? { isFree: String(params.isFree) } : {}),
+        ...(params.fromDate ? { fromDate: params.fromDate } : {}),
+        ...(params.toDate ? { toDate: params.toDate } : {}),
       });
       return userApiClient<ActivityMapItem[]>(`/api/activities/map?${qs}`);
     },

@@ -7,12 +7,14 @@ import { AppShell } from "@/components/app/AppShell";
 import { MapView } from "@/components/app/MapView";
 import { ActivityCard } from "@/components/app/ActivityCard";
 import { FilterChips } from "@/components/app/FilterChips";
+import { FilterSelect, FilterToggle } from "@/components/app/FilterSelect";
 import { LocationPermissionCard } from "@/components/app/LocationPermissionCard";
 import { LoadingState } from "@/components/app/LoadingState";
 import { EmptyState } from "@/components/app/EmptyState";
 import { useCurrentLocation } from "@/hooks/useCurrentLocation";
 import { useMapActivities } from "@/hooks/useMapActivities";
 import { userApiClient } from "@/lib/user-api-client";
+import { DATE_FILTER_OPTIONS, getDateRange, isWeekendDate, type DateFilterKey } from "@/lib/date-filters";
 import { GenderPreference } from "@/types/user";
 import type { Category, ActivityMapItem, Activity } from "@/types/user";
 import Link from "next/link";
@@ -46,6 +48,8 @@ export default function MapPage() {
   const [radiusMeters, setRadiusMeters] = useState(10000);
   const [genderFilter, setGenderFilter] = useState<GenderPreference | "all">("all");
   const [priceFilter, setPriceFilter] = useState<"all" | "free" | "paid">("all");
+  const [dateFilter, setDateFilter] = useState<DateFilterKey>("all");
+  const [weekendOnly, setWeekendOnly] = useState(false);
 
   const { data: categories = [] } = useQuery({
     queryKey: ["categories"],
@@ -53,18 +57,36 @@ export default function MapPage() {
     staleTime: Infinity,
   });
 
-  const { data: mapActivities = [], isLoading } = useMapActivities(
+  const { fromDate, toDate } = getDateRange(dateFilter);
+
+  // categoryId sunucuya gönderilmiyor: kategori rozetlerinde (Futbol 4, Basketbol 2 ...)
+  // sayı gösterebilmek için tüm kategorilerdeki sonuçlar birlikte çekilip
+  // seçili kategoriye göre client-side filtreleniyor.
+  const { data: rawMapActivities = [], isLoading } = useMapActivities(
     location
       ? {
           lat: location.lat,
           lng: location.lng,
-          categoryId: selectedCategoryId ?? undefined,
           radiusMeters,
           genderPreference: genderFilter === "all" ? undefined : genderFilter,
           isFree: priceFilter === "all" ? undefined : priceFilter === "free",
+          fromDate,
+          toDate,
         }
       : null
   );
+
+  const weekended = weekendOnly ? rawMapActivities.filter((a) => isWeekendDate(a.eventDate)) : rawMapActivities;
+
+  const nameToId = new Map(categories.map((c) => [c.name, c.id]));
+  const categoryCounts = weekended.reduce<Record<string, number>>((acc, a) => {
+    const id = nameToId.get(a.categoryName);
+    if (id) acc[id] = (acc[id] ?? 0) + 1;
+    return acc;
+  }, {});
+
+  const selectedCategoryName = selectedCategoryId ? categories.find((c) => c.id === selectedCategoryId)?.name : undefined;
+  const mapActivities = selectedCategoryName ? weekended.filter((a) => a.categoryName === selectedCategoryName) : weekended;
 
   function handleMarkerClick(activity: ActivityMapItem) {
     router.push(`/app/activities/${activity.id}`);
@@ -97,6 +119,7 @@ export default function MapPage() {
             categories={categories}
             selected={selectedCategoryId}
             onSelect={setSelectedCategoryId}
+            counts={categoryCounts}
           />
           <div className="no-scrollbar" style={{ display: "flex", gap: 8, overflowX: "auto", padding: "0 16px 12px" }}>
             <FilterSelect
@@ -105,6 +128,13 @@ export default function MapPage() {
               onChange={(v) => setRadiusMeters(Number(v))}
               options={RADIUS_OPTIONS.map((o) => ({ label: o.label, value: String(o.value) }))}
             />
+            <FilterSelect
+              label="Tarih"
+              value={dateFilter}
+              onChange={(v) => setDateFilter(v as DateFilterKey)}
+              options={DATE_FILTER_OPTIONS}
+            />
+            <FilterToggle label="Hafta Sonu" active={weekendOnly} onClick={() => setWeekendOnly((v) => !v)} />
             <FilterSelect
               label="Kimler"
               value={String(genderFilter)}
@@ -230,49 +260,6 @@ export default function MapPage() {
         }
       `}</style>
     </AppShell>
-  );
-}
-
-function FilterSelect({ label, value, onChange, options }: {
-  label: string;
-  value: string;
-  onChange: (value: string) => void;
-  options: { label: string; value: string }[];
-}) {
-  return (
-    <label style={{
-      display: "inline-flex",
-      alignItems: "center",
-      gap: 6,
-      padding: "6px 10px 6px 12px",
-      borderRadius: "var(--radius-full)",
-      border: "1px solid var(--color-border)",
-      background: "var(--color-surface)",
-      fontSize: 12,
-      fontWeight: 600,
-      color: "var(--color-muted-foreground)",
-      flexShrink: 0,
-      whiteSpace: "nowrap",
-    }}>
-      {label}
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        style={{
-          border: "none",
-          background: "transparent",
-          fontSize: 12,
-          fontWeight: 700,
-          color: "var(--color-foreground)",
-          outline: "none",
-          cursor: "pointer",
-        }}
-      >
-        {options.map((o) => (
-          <option key={o.value} value={o.value}>{o.label}</option>
-        ))}
-      </select>
-    </label>
   );
 }
 

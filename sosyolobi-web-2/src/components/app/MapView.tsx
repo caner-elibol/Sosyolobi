@@ -24,6 +24,11 @@ interface PointProps {
   activity: ActivityMapItem;
 }
 
+interface ClusterProps {
+  /** Kategori adı -> o kümedeki etkinlik sayısı (ör. Futbol: 4, Basketbol: 2) */
+  categoryCounts: Record<string, number>;
+}
+
 function formatDate(iso: string) {
   const d = new Date(iso);
   return d.toLocaleDateString("tr-TR", { day: "numeric", month: "short" }) +
@@ -39,7 +44,16 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
   });
 
   const index = useMemo(() => {
-    const sc = new Supercluster<PointProps>({ radius: 60, maxZoom: 17 });
+    const sc = new Supercluster<PointProps, ClusterProps>({
+      radius: 60,
+      maxZoom: 17,
+      map: (props) => ({ categoryCounts: { [props.activity.categoryName]: 1 } }),
+      reduce: (accumulated, props) => {
+        for (const [name, count] of Object.entries(props.categoryCounts)) {
+          accumulated.categoryCounts[name] = (accumulated.categoryCounts[name] ?? 0) + count;
+        }
+      },
+    });
     const points: Array<Supercluster.PointFeature<PointProps>> = activities.map((activity) => ({
       type: "Feature",
       properties: { activity },
@@ -68,6 +82,7 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
   }
 
   return (
+    <>
     <Map
       ref={mapRef}
       reuseMaps
@@ -86,23 +101,35 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
     >
       <NavigationControl position="top-right" />
 
-      {/* User location dot */}
-      <Marker longitude={center.lng} latitude={center.lat}>
-        <div style={{
-          width: 14,
-          height: 14,
-          background: "var(--color-navy)",
-          border: "3px solid #fff",
-          borderRadius: "50%",
-          boxShadow: "0 0 0 3px rgba(11,23,54,0.25)",
-        }} />
+      {/* Kullanıcının konumu — pulse halkalı, belirgin işaretçi */}
+      <Marker longitude={center.lng} latitude={center.lat} anchor="center">
+        <div title="Buradasın" style={{
+          position: "relative",
+          width: 46,
+          height: 46,
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}>
+          <span className="user-location-pulse" />
+          <div style={{
+            position: "relative",
+            width: 20,
+            height: 20,
+            background: "var(--color-navy)",
+            border: "4px solid #fff",
+            borderRadius: "50%",
+            boxShadow: "0 2px 10px rgba(0,0,0,0.4)",
+            zIndex: 1,
+          }} />
+        </div>
       </Marker>
 
       {clusters.map((feature) => {
         const [longitude, latitude] = feature.geometry.coordinates;
 
         if ("cluster" in feature.properties && feature.properties.cluster) {
-          const clusterFeature = feature as Supercluster.ClusterFeature<PointProps>;
+          const clusterFeature = feature as Supercluster.ClusterFeature<ClusterProps>;
           return (
             <Marker
               key={`cluster-${clusterFeature.properties.cluster_id}`}
@@ -112,6 +139,7 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
             >
               <ClusterMarker
                 count={clusterFeature.properties.point_count}
+                categoryCounts={clusterFeature.properties.categoryCounts}
                 onClick={() => handleClusterClick(clusterFeature.properties.cluster_id, longitude, latitude)}
               />
             </Marker>
@@ -152,6 +180,21 @@ export function MapView({ center, activities, onActivityClick }: MapViewProps) {
         </Popup>
       )}
     </Map>
+    <style>{`
+      .user-location-pulse {
+        position: absolute;
+        width: 46px;
+        height: 46px;
+        border-radius: 50%;
+        background: rgba(11, 23, 54, 0.35);
+        animation: sosyolobi-location-pulse 2.2s ease-out infinite;
+      }
+      @keyframes sosyolobi-location-pulse {
+        0% { transform: scale(0.35); opacity: 0.9; }
+        100% { transform: scale(1); opacity: 0; }
+      }
+    `}</style>
+    </>
   );
 }
 
