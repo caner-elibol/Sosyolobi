@@ -8,8 +8,12 @@ public static class DbInitializer
     {
         using var scope = serviceProvider.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+        var env = scope.ServiceProvider.GetRequiredService<IHostEnvironment>();
 
         await db.Database.MigrateAsync();
         await SeedData.SeedAsync(db);
+
+        if (env.IsDevelopment())
+            await SeedData.SeedDummyActivitiesAsync(db);
     }
 }

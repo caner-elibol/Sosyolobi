@@ -9,8 +9,12 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/user_avatar.dart';
+import '../../../core/widgets/user_link.dart';
+import '../../activities/domain/activity.dart';
+import '../../activities/presentation/widgets/activity_card.dart';
 import '../application/requests_providers.dart';
 import '../domain/activity_join_request.dart';
+import 'widgets/request_activity_preview.dart';
 
 const _statusLabels = {
   ActivityRequestStatus.pending: ('Bekliyor', Color(0xFFB45309)),
@@ -27,8 +31,10 @@ class RequestsScreen extends StatefulWidget {
   State<RequestsScreen> createState() => _RequestsScreenState();
 }
 
+enum _RequestsTab { incoming, sent, joined }
+
 class _RequestsScreenState extends State<RequestsScreen> {
-  bool _incoming = true;
+  _RequestsTab _tab = _RequestsTab.incoming;
 
   @override
   Widget build(BuildContext context) {
@@ -44,13 +50,20 @@ class _RequestsScreenState extends State<RequestsScreen> {
             decoration: BoxDecoration(color: const Color(0xFFF3F4F6), borderRadius: BorderRadius.circular(AppRadius.md)),
             child: Row(
               children: [
-                Expanded(child: _TabButton(label: 'Gelen İstekler', active: _incoming, onTap: () => setState(() => _incoming = true))),
-                Expanded(child: _TabButton(label: 'Gönderdiğim', active: !_incoming, onTap: () => setState(() => _incoming = false))),
+                Expanded(child: _TabButton(label: 'Gelen İstekler', active: _tab == _RequestsTab.incoming, onTap: () => setState(() => _tab = _RequestsTab.incoming))),
+                Expanded(child: _TabButton(label: 'Gönderdiğim', active: _tab == _RequestsTab.sent, onTap: () => setState(() => _tab = _RequestsTab.sent))),
+                Expanded(child: _TabButton(label: 'Katıldıklarım', active: _tab == _RequestsTab.joined, onTap: () => setState(() => _tab = _RequestsTab.joined))),
               ],
             ),
           ),
           const SizedBox(height: 20),
-          Expanded(child: _incoming ? const _IncomingList() : const _SentList()),
+          Expanded(
+            child: switch (_tab) {
+              _RequestsTab.incoming => const _IncomingList(),
+              _RequestsTab.sent => const _SentList(),
+              _RequestsTab.joined => const _JoinedList(),
+            },
+          ),
         ],
       ),
     );
@@ -79,9 +92,43 @@ class _TabButton extends StatelessWidget {
         alignment: Alignment.center,
         child: Text(
           label,
-          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: active ? AppColors.foreground : AppColors.mutedForeground),
+          textAlign: TextAlign.center,
+          style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: active ? AppColors.foreground : AppColors.mutedForeground),
         ),
       ),
+    );
+  }
+}
+
+class _JoinedList extends ConsumerWidget {
+  const _JoinedList();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final joinedAsync = ref.watch(joinedUpcomingActivitiesProvider);
+    return AsyncValueWidget<List<ActivityDetail>>(
+      value: joinedAsync,
+      data: (activities) {
+        if (activities.isEmpty) {
+          return const EmptyStateWidget(
+            icon: Icons.event_available_outlined,
+            title: 'Yaklaşan katıldığınız etkinlik yok',
+            description: 'Onaylanan katılım isteklerinizdeki yaklaşan etkinlikler burada görünecek.',
+          );
+        }
+        return RefreshIndicator(
+          onRefresh: () async => ref.invalidate(joinedUpcomingActivitiesProvider),
+          child: ListView.separated(
+            padding: const EdgeInsets.only(bottom: 24),
+            itemCount: activities.length,
+            separatorBuilder: (context, index) => const SizedBox(height: 12),
+            itemBuilder: (context, index) {
+              final activity = activities[index].toActivity();
+              return ActivityCard(activity: activity, onTap: () => context.push(RoutePaths.activityDetail(activity.id)));
+            },
+          ),
+        );
+      },
     );
   }
 }
@@ -115,24 +162,25 @@ class _SentList extends ConsumerWidget {
                   border: Border.all(color: AppColors.border),
                   borderRadius: BorderRadius.circular(AppRadius.lg),
                 ),
-                child: Row(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text('Aktivite #${req.activityId.length >= 6 ? req.activityId.substring(req.activityId.length - 6) : req.activityId}',
-                              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                          const SizedBox(height: 4),
-                          Text(Formatters.shortDate(req.createdAt), style: const TextStyle(fontSize: 12, color: AppColors.mutedForeground)),
-                        ],
-                      ),
+                    Row(
+                      children: [
+                        Expanded(
+                          child: Text('İstek gönderildi', style: const TextStyle(fontSize: 12, color: AppColors.mutedForeground)),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.full)),
+                          child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
+                        ),
+                      ],
                     ),
-                    Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(color: color.withValues(alpha: 0.1), borderRadius: BorderRadius.circular(AppRadius.full)),
-                      child: Text(label, style: TextStyle(fontSize: 12, fontWeight: FontWeight.w600, color: color)),
-                    ),
+                    const SizedBox(height: 8),
+                    RequestActivityPreview(activityId: req.activityId),
+                    const SizedBox(height: 6),
+                    Text(Formatters.shortDate(req.createdAt), style: const TextStyle(fontSize: 11, color: AppColors.subtleForeground)),
                   ],
                 ),
               ),
@@ -217,25 +265,34 @@ class _IncomingRequestCard extends ConsumerWidget {
         children: [
           Row(
             children: [
-              UserAvatar(displayName: request.user.displayName, avatarUrl: request.user.avatarUrl, size: 44),
-              const SizedBox(width: 12),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(request.user.displayName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
-                    if (request.user.averageRating > 0)
-                      Row(
-                        children: [
-                          const Icon(Icons.star, size: 12, color: Color(0xFFF59E0B)),
-                          const SizedBox(width: 4),
-                          Text(
-                            '${request.user.averageRating.toStringAsFixed(1)} · ${request.user.completedActivityCount} etkinlik',
-                            style: const TextStyle(fontSize: 12, color: AppColors.mutedForeground),
-                          ),
-                        ],
+                child: UserLink(
+                  userId: request.user.userId,
+                  child: Row(
+                    children: [
+                      UserAvatar(displayName: request.user.displayName, avatarUrl: request.user.avatarUrl, size: 44),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(request.user.displayName, style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                            if (request.user.averageRating > 0)
+                              Row(
+                                children: [
+                                  const Icon(Icons.star, size: 12, color: Color(0xFFF59E0B)),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    '${request.user.averageRating.toStringAsFixed(1)} · ${request.user.completedActivityCount} etkinlik',
+                                    style: const TextStyle(fontSize: 12, color: AppColors.mutedForeground),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                       ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               Container(
@@ -245,6 +302,8 @@ class _IncomingRequestCard extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 8),
+          RequestActivityPreview(activityId: request.activityId),
           if (request.message != null && request.message!.isNotEmpty) ...[
             const SizedBox(height: 8),
             Container(

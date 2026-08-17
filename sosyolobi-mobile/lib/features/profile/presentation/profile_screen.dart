@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
 import '../../../core/network/api_exception.dart';
+import '../../../core/router/route_paths.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/trust_badge.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../auth/application/auth_notifier.dart';
+import '../../friends/application/friends_providers.dart';
 import '../application/profile_providers.dart';
 import '../domain/profile.dart';
 
@@ -183,6 +186,10 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
             Expanded(child: _StatCard(icon: Icons.chat_bubble_outline, label: 'Yorum Sayısı', value: '${profile.reviewCount}')),
           ],
         ),
+        const SizedBox(height: 16),
+        const _FriendsEntry(),
+        const SizedBox(height: 12),
+        _ProfileLinkEntry(icon: Icons.flag_outlined, label: 'Raporlarım', onTap: () => context.push(RoutePaths.myReports)),
         if (_editing) ...[
           const SizedBox(height: 16),
           Container(
@@ -223,6 +230,71 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
           label: const Text('Çıkış Yap'),
         ),
       ],
+    );
+  }
+}
+
+/// Entry point into [FriendsScreen] — mobile has no room for a sixth
+/// bottom-nav tab (web adds a dedicated "Arkadaşlar" nav item), so it hangs
+/// off the profile screen instead. Shows an incoming-request count badge so
+/// pending requests aren't missed.
+class _FriendsEntry extends ConsumerWidget {
+  const _FriendsEntry();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final incomingCount = ref.watch(incomingFriendRequestsProvider).valueOrNull?.length ?? 0;
+
+    return InkWell(
+      onTap: () => context.push(RoutePaths.friends),
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(AppRadius.xl)),
+        child: Row(
+          children: [
+            const Icon(Icons.people_outline, size: 20, color: AppColors.accent),
+            const SizedBox(width: 12),
+            const Expanded(child: Text('Arkadaşlarım', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+            if (incomingCount > 0)
+              Container(
+                margin: const EdgeInsets.only(right: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(AppRadius.full)),
+                child: Text('$incomingCount', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+              ),
+            const Icon(Icons.chevron_right, size: 20, color: AppColors.mutedForeground),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileLinkEntry extends StatelessWidget {
+  const _ProfileLinkEntry({required this.icon, required this.label, required this.onTap});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(AppRadius.xl),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(AppRadius.xl)),
+        child: Row(
+          children: [
+            Icon(icon, size: 20, color: AppColors.accent),
+            const SizedBox(width: 12),
+            Expanded(child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
+            const Icon(Icons.chevron_right, size: 20, color: AppColors.mutedForeground),
+          ],
+        ),
+      ),
     );
   }
 }

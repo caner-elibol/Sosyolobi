@@ -28,6 +28,8 @@ class ActivitiesApi {
     required double longitude,
     int radiusMeters = 10000,
     String? categoryId,
+    DateTime? fromDate,
+    DateTime? toDate,
   }) async {
     final response = await guardDio(() => _dio.get<Map<String, dynamic>>(
           '/api/activities/nearby',
@@ -36,6 +38,8 @@ class ActivitiesApi {
             'longitude': longitude,
             'radiusMeters': radiusMeters,
             if (categoryId != null) 'categoryId': categoryId,
+            if (fromDate != null) 'fromDate': fromDate.toUtc().toIso8601String(),
+            if (toDate != null) 'toDate': toDate.toUtc().toIso8601String(),
           },
         ));
     return unwrapList(response, (json) => Activity.fromJson(json as Map<String, dynamic>));

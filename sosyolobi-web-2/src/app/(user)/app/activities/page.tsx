@@ -1,7 +1,6 @@
 "use client";
 
-import { Suspense, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { AppShell } from "@/components/app/AppShell";
 import { ActivityCard } from "@/components/app/ActivityCard";
@@ -14,19 +13,10 @@ import { useNearbyActivities } from "@/hooks/useNearbyActivities";
 import { userApiClient } from "@/lib/user-api-client";
 import { DATE_FILTER_OPTIONS, getDateRange, isWeekendDate, type DateFilterKey } from "@/lib/date-filters";
 import type { Category } from "@/types/user";
-import { MapPinOff, SearchX } from "lucide-react";
+import { MapPinOff, Search, SearchX } from "lucide-react";
 
 export default function ActivitiesPage() {
-  return (
-    <Suspense fallback={<AppShell><LoadingState /></AppShell>}>
-      <ActivitiesPageInner />
-    </Suspense>
-  );
-}
-
-function ActivitiesPageInner() {
-  const searchParams = useSearchParams();
-  const search = searchParams.get("q") ?? "";
+  const [search, setSearch] = useState("");
   const { location } = useCurrentLocation();
   const [categoryId, setCategoryId] = useState<string | null>(null);
   const [dateFilter, setDateFilter] = useState<DateFilterKey>("all");
@@ -70,6 +60,34 @@ function ActivitiesPageInner() {
   return (
     <AppShell>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
+        {/* Search */}
+        <div style={{ padding: "16px 16px 12px" }}>
+          <div style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 8,
+            background: "#F3F4F6",
+            borderRadius: "var(--radius-full)",
+            padding: "10px 14px",
+          }}>
+            <Search size={16} color="var(--color-muted-foreground)" style={{ flexShrink: 0 }} />
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Etkinlik, kategori veya konum ara..."
+              style={{
+                flex: 1,
+                border: "none",
+                outline: "none",
+                background: "transparent",
+                fontSize: 14,
+                fontFamily: "inherit",
+                color: "var(--color-foreground)",
+              }}
+            />
+          </div>
+        </div>
+
         {/* Category filter */}
         <FilterChips
           categories={categories}

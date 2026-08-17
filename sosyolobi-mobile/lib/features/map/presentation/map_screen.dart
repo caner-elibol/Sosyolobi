@@ -8,12 +8,15 @@ import '../../../core/domain/enums.dart';
 import '../../../core/network/api_exception.dart';
 import '../../../core/router/route_paths.dart';
 import '../../../core/theme/colors.dart';
+import '../../../core/utils/date_filters.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../activities/application/categories_provider.dart';
+import '../../activities/domain/activity.dart';
 import '../application/current_location_provider.dart';
 import '../application/map_activities_provider.dart';
 import '../domain/current_location.dart';
 import 'map_explore_screen.dart';
+import 'widgets/date_range_filter_row.dart';
 import 'widgets/filter_chips.dart';
 import 'widgets/location_permission_card.dart';
 import 'widgets/map_filter_dropdowns.dart';
@@ -44,6 +47,21 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   int _radiusMeters = 10000;
   GenderPreference? _genderPreference;
   bool? _isFree;
+  String _search = '';
+  DateFilterKey _dateFilter = DateFilterKey.all;
+  bool _weekendOnly = false;
+
+  List<ActivityMapItem> _applyClientFilters(List<ActivityMapItem> items) {
+    var result = items;
+    final query = _search.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result.where((a) => a.title.toLowerCase().contains(query) || a.categoryName.toLowerCase().contains(query)).toList();
+    }
+    if (_weekendOnly) {
+      result = result.where((a) => DateFilters.isWeekend(a.eventDate)).toList();
+    }
+    return result;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +88,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   }
 
   Widget _buildContent(CurrentLocation location, AsyncValue<List<Category>> categoriesAsync) {
+    final range = DateFilters.rangeFor(_dateFilter);
     final mapActivitiesAsync = ref.watch(
       mapActivitiesProvider(
         latitude: location.latitude,
@@ -78,22 +97,69 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         categoryId: _selectedCategoryId,
         genderPreference: _genderPreference,
         isFree: _isFree,
+        fromDate: range.fromDate,
+        toDate: range.toDate,
       ),
+    );
+    final allCategoriesAsync = ref.watch(
+      mapActivitiesAllCategoriesProvider(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        radiusMeters: _radiusMeters,
+        genderPreference: _genderPreference,
+        isFree: _isFree,
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+      ),
+    );
+    final categoryCounts = allCategoriesAsync.maybeWhen(
+      data: (items) {
+        final map = <String, int>{};
+        for (final item in items) {
+          // ActivityMapItem has no categoryId — group by categoryName since
+          // that's the only category identifier the map DTO carries.
+          map[item.categoryName] = (map[item.categoryName] ?? 0) + 1;
+        }
+        return map;
+      },
+      orElse: () => null,
     );
 
     final userLatLng = LatLng(location.latitude, location.longitude);
     final showPermissionCard = location.isFallback && location.permissionState != LocationPermissionState.deniedForever;
+    final filteredItems = _applyClientFilters(mapActivitiesAsync.valueOrNull ?? const []);
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
       children: [
+        // Free-text activity search — scoped to this screen and the
+        // activities list screen only (see item 2: web removed the global
+        // top-bar search that used to leak onto unrelated screens).
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+          child: TextField(
+            decoration: const InputDecoration(
+              prefixIcon: Icon(Icons.search, size: 20),
+              hintText: 'Etkinlik veya kategori ara...',
+            ),
+            onChanged: (value) => setState(() => _search = value),
+          ),
+        ),
+        const SizedBox(height: 8),
+        DateRangeFilterRow(
+          selected: _dateFilter,
+          onSelect: (key) => setState(() => _dateFilter = key),
+          weekendOnly: _weekendOnly,
+          onWeekendOnlyChanged: (v) => setState(() => _weekendOnly = v),
+        ),
         categoriesAsync.maybeWhen(
           data: (categories) => Padding(
-            padding: const EdgeInsets.only(top: 12),
+            padding: const EdgeInsets.only(top: 4),
             child: FilterChipsRow(
               categories: categories,
               selected: _selectedCategoryId,
               onSelect: (id) => setState(() => _selectedCategoryId = id),
+              counts: categoryCounts == null ? null : {for (final c in categories) c.id: categoryCounts[c.name] ?? 0},
             ),
           ),
           orElse: () => const SizedBox(height: 44),
@@ -116,7 +182,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: MapPreviewCard(
-            activityCount: mapActivitiesAsync.valueOrNull?.length,
+            activityCount: mapActivitiesAsync.valueOrNull == null ? null : filteredItems.length,
             onExpand: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => MapExploreScreen(
@@ -126,6 +192,8 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                   initialRadiusMeters: _radiusMeters,
                   initialGenderPreference: _genderPreference,
                   initialIsFree: _isFree,
+                  initialDateFilter: _dateFilter,
+                  initialWeekendOnly: _weekendOnly,
                 ),
               ),
             ),
@@ -138,14 +206,15 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             children: [
               const Text('Yakındaki Etkinlikler', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               mapActivitiesAsync.maybeWhen(
-                data: (items) => Text('${items.length} etkinlik', style: const TextStyle(fontSize: 13, color: AppColors.mutedForeground)),
+                data: (items) => Text('${filteredItems.length} etkinlik', style: const TextStyle(fontSize: 13, color: AppColors.mutedForeground)),
                 orElse: () => const SizedBox.shrink(),
               ),
             ],
           ),
         ),
         mapActivitiesAsync.when(
-          data: (items) {
+          data: (rawItems) {
+            final items = filteredItems;
             if (items.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),

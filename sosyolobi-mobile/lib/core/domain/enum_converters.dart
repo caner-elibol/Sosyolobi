@@ -54,6 +54,14 @@ class NotificationTypeConverter implements JsonConverter<NotificationType, int> 
   int toJson(NotificationType object) => object.toJson();
 }
 
+class FriendRequestStatusConverter implements JsonConverter<FriendRequestStatus, int> {
+  const FriendRequestStatusConverter();
+  @override
+  FriendRequestStatus fromJson(int json) => FriendRequestStatus.fromJson(json);
+  @override
+  int toJson(FriendRequestStatus object) => object.toJson();
+}
+
 class ReportStatusConverter implements JsonConverter<ReportStatus, int> {
   const ReportStatusConverter();
   @override

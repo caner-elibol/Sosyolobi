@@ -18,7 +18,7 @@ import { DATE_FILTER_OPTIONS, getDateRange, isWeekendDate, type DateFilterKey } 
 import { GenderPreference } from "@/types/user";
 import type { Category, ActivityMapItem, Activity } from "@/types/user";
 import Link from "next/link";
-import { ArrowRight, MapPinned, Users2 } from "lucide-react";
+import { ArrowRight, MapPinned, Search, Users2 } from "lucide-react";
 
 const RADIUS_OPTIONS = [
   { label: "2 km", value: 2000 },
@@ -44,6 +44,7 @@ const PRICE_OPTIONS: { label: string; value: "all" | "free" | "paid" }[] = [
 export default function MapPage() {
   const router = useRouter();
   const { location, permission, request: requestLocation } = useCurrentLocation();
+  const [search, setSearch] = useState("");
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
   const [radiusMeters, setRadiusMeters] = useState(10000);
   const [genderFilter, setGenderFilter] = useState<GenderPreference | "all">("all");
@@ -76,7 +77,14 @@ export default function MapPage() {
       : null
   );
 
-  const weekended = weekendOnly ? rawMapActivities.filter((a) => isWeekendDate(a.eventDate)) : rawMapActivities;
+  const searched = search.trim()
+    ? rawMapActivities.filter((a) => {
+        const q = search.toLowerCase();
+        return a.title.toLowerCase().includes(q) || a.categoryName.toLowerCase().includes(q);
+      })
+    : rawMapActivities;
+
+  const weekended = weekendOnly ? searched.filter((a) => isWeekendDate(a.eventDate)) : searched;
 
   const nameToId = new Map(categories.map((c) => [c.name, c.id]));
   const categoryCounts = weekended.reduce<Record<string, number>>((acc, a) => {
@@ -115,6 +123,32 @@ export default function MapPage() {
 
         {/* Filter chips */}
         <div style={{ background: "var(--color-surface)", borderBottom: "1px solid var(--color-border)", flexShrink: 0 }}>
+          <div style={{ padding: "12px 16px 8px" }}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+              background: "#F3F4F6",
+              borderRadius: "var(--radius-full)",
+              padding: "9px 14px",
+            }}>
+              <Search size={15} color="var(--color-muted-foreground)" style={{ flexShrink: 0 }} />
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Etkinlik veya kategori ara..."
+                style={{
+                  flex: 1,
+                  border: "none",
+                  outline: "none",
+                  background: "transparent",
+                  fontSize: 14,
+                  fontFamily: "inherit",
+                  color: "var(--color-foreground)",
+                }}
+              />
+            </div>
+          </div>
           <FilterChips
             categories={categories}
             selected={selectedCategoryId}

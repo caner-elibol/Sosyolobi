@@ -47,16 +47,42 @@ class _FeedItem {
 
 /// Ports `sosyolobi-web-2/src/app/(user)/app/notifications/page.tsx` — merges
 /// notifications + chat-unread summaries into one feed, sorted newest first.
-class NotificationsScreen extends ConsumerWidget {
+///
+/// Web converted this from a page to a bell-icon dropdown panel where
+/// opening it auto-marks visible notifications as read (no separate
+/// "mark all read" action). A dedicated full-screen view is still a natural
+/// mobile pattern (kept here, unlike web's dropdown), but the auto-mark-on-
+/// open behavior is ported: opening this screen marks every currently
+/// fetched notification read exactly once, and the manual "mark all read"
+/// button is removed as redundant.
+class NotificationsScreen extends ConsumerStatefulWidget {
   const NotificationsScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+  bool _markedThisOpen = false;
+
+  void _maybeAutoMarkRead(List<AppNotification> notifications) {
+    if (_markedThisOpen || !notifications.any((n) => !n.isRead)) return;
+    _markedThisOpen = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ref.read(notificationsControllerProvider.notifier).markAllRead();
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final notificationsAsync = ref.watch(notificationsControllerProvider);
     final chatUnreadAsync = ref.watch(chatUnreadProvider);
     final unreadCount = ref.watch(unreadNotificationsCountProvider);
     final totalUnreadChatRooms = ref.watch(totalUnreadChatRoomsProvider);
     final totalUnread = unreadCount + totalUnreadChatRooms;
+
+    final loadedNotifications = notificationsAsync.valueOrNull;
+    if (loadedNotifications != null) _maybeAutoMarkRead(loadedNotifications);
 
     return Scaffold(
       appBar: AppBar(
@@ -73,13 +99,6 @@ class NotificationsScreen extends ConsumerWidget {
             ],
           ],
         ),
-        actions: [
-          if (unreadCount > 0)
-            TextButton(
-              onPressed: () => ref.read(notificationsControllerProvider.notifier).markAllRead(),
-              child: const Text('Tümünü okundu işaretle'),
-            ),
-        ],
       ),
       body: AsyncValueWidget<List<AppNotification>>(
         value: notificationsAsync,

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useRef, useState } from "react";
 import { use } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import Link from "next/link";
 import { toast } from "sonner";
 import { AppShell } from "@/components/app/AppShell";
 import { UserAvatar } from "@/components/app/UserAvatar";
@@ -274,8 +275,13 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
                     padding: "10px 14px",
                     borderTop: i === 0 ? "none" : "1px solid var(--color-border)",
                   }}>
-                    <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={28} />
-                    <span style={{ fontSize: 13, color: "var(--color-foreground)", flex: 1, fontWeight: 500 }}>{p.displayName}</span>
+                    <Link
+                      href={`/app/profile/${p.userId}`}
+                      style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0, textDecoration: "none" }}
+                    >
+                      <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={28} />
+                      <span style={{ fontSize: 13, color: "var(--color-foreground)", fontWeight: 500 }}>{p.displayName}</span>
+                    </Link>
                     {currentUserId && currentUserId !== p.userId && (
                       <ParticipantActionsMenu userId={p.userId} displayName={p.displayName} />
                     )}

@@ -23,4 +23,12 @@ public class ReportsController : ControllerBase
         var result = await _reportService.CreateAsync(userId, request);
         return Ok(ApiResponse<ReportResponse>.Ok(result));
     }
+
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMine([FromQuery] PagedRequest paged)
+    {
+        var userId = User.GetUserId();
+        var result = await _reportService.GetMyReportsAsync(userId, paged);
+        return Ok(ApiResponse<PagedResponse<ReportResponse>>.Ok(result));
+    }
 }

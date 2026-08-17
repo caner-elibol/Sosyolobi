@@ -2,11 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../core/domain/category.dart';
 import '../../../core/router/route_paths.dart';
+import '../../../core/utils/date_filters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../map/application/current_location_provider.dart';
 import '../../map/domain/current_location.dart';
+import '../../map/presentation/widgets/date_range_filter_row.dart';
 import '../../map/presentation/widgets/filter_chips.dart';
 import '../application/activities_providers.dart';
 import '../application/categories_provider.dart';
@@ -27,6 +30,8 @@ class ActivitiesListScreen extends ConsumerStatefulWidget {
 class _ActivitiesListScreenState extends ConsumerState<ActivitiesListScreen> {
   String? _selectedCategoryId;
   String _search = '';
+  DateFilterKey _dateFilter = DateFilterKey.all;
+  bool _weekendOnly = false;
 
   List<Activity> _applySearch(List<Activity> activities) {
     final query = _search.trim().toLowerCase();
@@ -39,13 +44,23 @@ class _ActivitiesListScreenState extends ConsumerState<ActivitiesListScreen> {
     }).toList();
   }
 
+  List<Activity> _applyWeekend(List<Activity> activities) {
+    if (!_weekendOnly) return activities;
+    return activities.where((a) => DateFilters.isWeekend(a.eventDate)).toList();
+  }
+
   @override
   Widget build(BuildContext context) {
     final locationAsync = ref.watch(currentLocationNotifierProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
+    final range = DateFilters.rangeFor(_dateFilter);
 
     return Column(
       children: [
+        // Free-text activity search — deliberately scoped to this screen and
+        // the map screen only, not a persistent/global app-bar search (web
+        // removed the global top-bar search bar for the same reason: it used
+        // to show on screens unrelated to activities).
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
           child: TextField(
@@ -56,37 +71,52 @@ class _ActivitiesListScreenState extends ConsumerState<ActivitiesListScreen> {
             onChanged: (value) => setState(() => _search = value),
           ),
         ),
+        const SizedBox(height: 8),
+        DateRangeFilterRow(
+          selected: _dateFilter,
+          onSelect: (key) => setState(() => _dateFilter = key),
+          weekendOnly: _weekendOnly,
+          onWeekendOnlyChanged: (v) => setState(() => _weekendOnly = v),
+        ),
         categoriesAsync.maybeWhen(
-          data: (categories) => FilterChipsRow(
-            categories: categories,
-            selected: _selectedCategoryId,
-            onSelect: (id) => setState(() => _selectedCategoryId = id),
+          data: (categories) => locationAsync.maybeWhen(
+            data: (location) => _CategoryChips(
+              categories: categories,
+              selected: _selectedCategoryId,
+              onSelect: (id) => setState(() => _selectedCategoryId = id),
+              location: location,
+              fromDate: range.fromDate,
+              toDate: range.toDate,
+            ),
+            orElse: () => FilterChipsRow(categories: categories, selected: _selectedCategoryId, onSelect: (id) => setState(() => _selectedCategoryId = id)),
           ),
           orElse: () => const SizedBox(height: 44),
         ),
         Expanded(
           child: AsyncValueWidget<CurrentLocation>(
             value: locationAsync,
-            data: (location) => _buildResults(location),
+            data: (location) => _buildResults(location, range.fromDate, range.toDate),
           ),
         ),
       ],
     );
   }
 
-  Widget _buildResults(CurrentLocation location) {
+  Widget _buildResults(CurrentLocation location, DateTime? fromDate, DateTime? toDate) {
     final activitiesAsync = ref.watch(
       nearbyActivitiesProvider(
         latitude: location.latitude,
         longitude: location.longitude,
         categoryId: _selectedCategoryId,
+        fromDate: fromDate,
+        toDate: toDate,
       ),
     );
 
     return AsyncValueWidget<List<Activity>>(
       value: activitiesAsync,
       data: (activities) {
-        final filtered = _applySearch(activities);
+        final filtered = _applyWeekend(_applySearch(activities));
         if (filtered.isEmpty) {
           return const EmptyStateWidget(
             icon: Icons.search_off,
@@ -111,5 +141,51 @@ class _ActivitiesListScreenState extends ConsumerState<ActivitiesListScreen> {
         );
       },
     );
+  }
+}
+
+/// Fetches all categories together (no server-side `categoryId` filter) and
+/// groups results client-side into a `{categoryId: count}` map, then renders
+/// [FilterChipsRow] with those counts as badges — mirrors web's `FilterChips`
+/// count-badge addition (item 5). No new backend count endpoint was added.
+class _CategoryChips extends ConsumerWidget {
+  const _CategoryChips({
+    required this.categories,
+    required this.selected,
+    required this.onSelect,
+    required this.location,
+    required this.fromDate,
+    required this.toDate,
+  });
+
+  final List<Category> categories;
+  final String? selected;
+  final ValueChanged<String?> onSelect;
+  final CurrentLocation location;
+  final DateTime? fromDate;
+  final DateTime? toDate;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final allAsync = ref.watch(
+      nearbyActivitiesAllCategoriesProvider(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        fromDate: fromDate,
+        toDate: toDate,
+      ),
+    );
+    final counts = allAsync.maybeWhen(
+      data: (activities) {
+        final map = <String, int>{};
+        for (final activity in activities) {
+          map[activity.categoryId] = (map[activity.categoryId] ?? 0) + 1;
+        }
+        return map;
+      },
+      orElse: () => null,
+    );
+
+    return FilterChipsRow(categories: categories, selected: selected, onSelect: onSelect, counts: counts);
   }
 }

@@ -19,6 +19,7 @@ public class AppDbContext : DbContext
     public DbSet<Report> Reports => Set<Report>();
     public DbSet<Notification> Notifications => Set<Notification>();
     public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
+    public DbSet<FriendRequest> FriendRequests => Set<FriendRequest>();
     public DbSet<ChatRoom> ChatRooms => Set<ChatRoom>();
     public DbSet<ChatMessage> ChatMessages => Set<ChatMessage>();
     public DbSet<ChatRoomRead> ChatRoomReads => Set<ChatRoomRead>();
@@ -65,6 +66,22 @@ public class AppDbContext : DbContext
             .HasOne(b => b.BlockedUser)
             .WithMany()
             .HasForeignKey(b => b.BlockedUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasIndex(x => new { x.RequesterUserId, x.AddresseeUserId })
+            .IsUnique();
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasOne(r => r.RequesterUser)
+            .WithMany()
+            .HasForeignKey(r => r.RequesterUserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        modelBuilder.Entity<FriendRequest>()
+            .HasOne(r => r.AddresseeUser)
+            .WithMany()
+            .HasForeignKey(r => r.AddresseeUserId)
             .OnDelete(DeleteBehavior.Restrict);
 
         modelBuilder.Entity<Report>()

@@ -10,9 +10,11 @@ import { UserAvatar } from "@/components/app/UserAvatar";
 import { TrustBadge } from "@/components/app/TrustBadge";
 import { LoadingState } from "@/components/app/LoadingState";
 import { useProfile } from "@/hooks/useProfile";
+import { useFriends } from "@/hooks/useFriends";
 import { clearUserToken } from "@/lib/user-auth";
 import { useRouter } from "next/navigation";
-import { Camera, CheckCircle2, LogOut, MessageSquare, Star, type LucideIcon } from "lucide-react";
+import Link from "next/link";
+import { Camera, CheckCircle2, ChevronRight, LogOut, MessageSquare, Star, Users, type LucideIcon } from "lucide-react";
 
 const schema = z.object({
   displayName: z.string().min(2, "En az 2 karakter"),
@@ -23,6 +25,7 @@ type FormValues = z.infer<typeof schema>;
 export default function ProfilePage() {
   const router = useRouter();
   const { data: profile, isLoading, update, uploadAvatar } = useProfile();
+  const { data: friends = [] } = useFriends();
   const [editing, setEditing] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -157,6 +160,31 @@ export default function ProfilePage() {
             </div>
           ))}
         </div>
+
+        {/* Friends shortcut */}
+        <Link href="/app/friends" style={{
+          display: "flex",
+          alignItems: "center",
+          gap: 12,
+          background: "var(--color-surface)",
+          border: "1px solid var(--color-border)",
+          borderRadius: "var(--radius-lg)",
+          padding: "14px 16px",
+          marginBottom: 16,
+          textDecoration: "none",
+        }}>
+          <span style={{
+            width: 36, height: 36, borderRadius: "50%",
+            background: "var(--color-accent-soft-bg)",
+            display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0,
+          }}>
+            <Users size={17} color="var(--color-accent-soft-fg)" />
+          </span>
+          <span style={{ flex: 1, fontSize: 14, fontWeight: 600, color: "var(--color-foreground)" }}>
+            Arkadaşlarım {friends.length > 0 && <span style={{ color: "var(--color-muted-foreground)", fontWeight: 500 }}>({friends.length})</span>}
+          </span>
+          <ChevronRight size={16} color="var(--color-muted-foreground)" />
+        </Link>
 
         {/* Edit form */}
         {editing && (

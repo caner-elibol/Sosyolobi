@@ -12,13 +12,21 @@ namespace Sosyolobi.Api.Services;
 public class ReviewService : IReviewService
 {
     private readonly AppDbContext _db;
+    private readonly INotificationService _notifications;
 
-    public ReviewService(AppDbContext db) => _db = db;
+    public ReviewService(AppDbContext db, INotificationService notifications)
+    {
+        _db = db;
+        _notifications = notifications;
+    }
 
     public async Task<ReviewResponse> CreateAsync(Guid reviewerUserId, CreateReviewRequest request)
     {
         if (request.Rating < 1 || request.Rating > 5)
             throw new ArgumentException("Puan 1-5 arasında olmalıdır.");
+
+        if (reviewerUserId == request.ReviewedUserId)
+            throw new InvalidOperationException("Kendinize yorum yapamazsınız.");
 
         var activity = await _db.Activities.FindAsync(request.ActivityId)
             ?? throw new KeyNotFoundException("Etkinlik bulunamadı.");
@@ -30,6 +38,11 @@ public class ReviewService : IReviewService
             .AnyAsync(p => p.ActivityId == request.ActivityId && p.UserId == reviewerUserId);
         if (!isParticipant)
             throw new InvalidOperationException("Bu etkinliğe katılmadınız.");
+
+        var isReviewedParticipant = await _db.ActivityParticipants
+            .AnyAsync(p => p.ActivityId == request.ActivityId && p.UserId == request.ReviewedUserId);
+        if (!isReviewedParticipant)
+            throw new InvalidOperationException("Yorum yapılan kullanıcı bu etkinliğe katılmadı.");
 
         var alreadyReviewed = await _db.Reviews
             .AnyAsync(r => r.ActivityId == request.ActivityId
@@ -62,6 +75,10 @@ public class ReviewService : IReviewService
         await _db.SaveChangesAsync();
 
         var reviewer = await _db.Users.Include(u => u.Profile).FirstOrDefaultAsync(u => u.Id == reviewerUserId);
+
+        await _notifications.SendAsync(request.ReviewedUserId, NotificationType.NewReview,
+            "Yeni bir yorum aldınız", request.Comment, request.ActivityId);
+
         return new ReviewResponse
         {
             Id = review.Id,

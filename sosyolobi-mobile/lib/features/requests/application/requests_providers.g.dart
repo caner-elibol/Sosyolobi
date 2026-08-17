@@ -47,6 +47,32 @@ final sentRequestsProvider =
 // ignore: unused_element
 typedef SentRequestsRef =
     AutoDisposeFutureProviderRef<List<ActivityJoinRequest>>;
+String _$joinedUpcomingActivitiesHash() =>
+    r'80050a5d8025ced1e7922544a38b6d6befb16ae5';
+
+/// "Katıldıklarım" tab — no dedicated backend endpoint; composed client-side
+/// from the approved subset of `/api/activity-requests/sent` plus a
+/// per-activity `/api/activities/{id}` detail fetch, matching web's
+/// `RequestsPage` "Katıldıklarım" tab exactly. Only upcoming (not yet passed,
+/// not cancelled) activities are kept.
+///
+/// Copied from [joinedUpcomingActivities].
+@ProviderFor(joinedUpcomingActivities)
+final joinedUpcomingActivitiesProvider =
+    AutoDisposeFutureProvider<List<ActivityDetail>>.internal(
+      joinedUpcomingActivities,
+      name: r'joinedUpcomingActivitiesProvider',
+      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+          ? null
+          : _$joinedUpcomingActivitiesHash,
+      dependencies: null,
+      allTransitiveDependencies: null,
+    );
+
+@Deprecated('Will be removed in 3.0. Use Ref instead')
+// ignore: unused_element
+typedef JoinedUpcomingActivitiesRef =
+    AutoDisposeFutureProviderRef<List<ActivityDetail>>;
 String _$requestActionsControllerHash() =>
     r'1c2cf089cc5050d4927237fcade1b3a2c2ad578e';
 

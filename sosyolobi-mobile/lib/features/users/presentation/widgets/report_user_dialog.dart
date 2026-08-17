@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/api_error_snackbar.dart';
 import '../../application/users_actions_provider.dart';
 
 const _reasons = ['Uygunsuz davranış', 'Taciz veya tehdit', 'Sahte profil', 'Spam', 'Diğer'];
@@ -43,11 +44,18 @@ class _ReportUserDialogState extends ConsumerState<ReportUserDialog> {
           details: _detailsController.text.trim().isEmpty ? null : _detailsController.text.trim(),
         );
     if (!mounted) return;
-    final error = ref.read(userActionsControllerProvider).hasError;
+    final state = ref.read(userActionsControllerProvider);
     Navigator.of(context).pop();
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error ? 'Şikayet gönderilemedi.' : 'Şikayetiniz alındı.')),
-    );
+    if (state.hasError) {
+      // Surfaces the backend's real message (e.g. "Kendinize rapor
+      // gönderemezsiniz.", "Etkinliğe katılmamış birine yorum yapamazsınız.",
+      // "Zaten incelenmekte olan bir raporunuz var.") instead of a generic
+      // failure string — these 400s are now backend-enforced (report/review
+      // polish, 2026-08-15).
+      showApiErrorSnackBar(context, state.error!);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Şikayetiniz alındı.')));
   }
 
   @override

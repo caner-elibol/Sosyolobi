@@ -16,12 +16,39 @@ Future<List<Activity>> nearbyActivities(
   required double longitude,
   int radiusMeters = 10000,
   String? categoryId,
+  DateTime? fromDate,
+  DateTime? toDate,
 }) {
   return ref.watch(activitiesApiProvider).getNearby(
         latitude: latitude,
         longitude: longitude,
         radiusMeters: radiusMeters,
         categoryId: categoryId,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+}
+
+/// Fetches nearby activities across **all** categories (no `categoryId`
+/// filter) so category chip counts (item 5) and the category-filtered view
+/// can both derive from one client-side-grouped fetch — mirrors web's
+/// "fetch all categories together, group client-side" approach (no new
+/// backend count endpoint).
+@riverpod
+Future<List<Activity>> nearbyActivitiesAllCategories(
+  Ref ref, {
+  required double latitude,
+  required double longitude,
+  int radiusMeters = 10000,
+  DateTime? fromDate,
+  DateTime? toDate,
+}) {
+  return ref.watch(activitiesApiProvider).getNearby(
+        latitude: latitude,
+        longitude: longitude,
+        radiusMeters: radiusMeters,
+        fromDate: fromDate,
+        toDate: toDate,
       );
 }
 

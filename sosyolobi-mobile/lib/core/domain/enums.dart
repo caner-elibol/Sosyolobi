@@ -101,6 +101,22 @@ enum NotificationType {
   int toJson() => value;
 }
 
+enum FriendRequestStatus {
+  pending(1),
+  accepted(2),
+  rejected(3),
+  cancelled(4);
+
+  const FriendRequestStatus(this.value);
+  final int value;
+
+  static FriendRequestStatus fromJson(int value) => FriendRequestStatus.values.firstWhere(
+        (e) => e.value == value,
+        orElse: () => FriendRequestStatus.pending,
+      );
+  int toJson() => value;
+}
+
 enum ReportStatus {
   pending(1),
   reviewing(2),

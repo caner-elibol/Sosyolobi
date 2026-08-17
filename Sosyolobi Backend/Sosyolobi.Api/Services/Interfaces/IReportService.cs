@@ -8,6 +8,7 @@ namespace Sosyolobi.Api.Services.Interfaces;
 public interface IReportService
 {
     Task<ReportResponse> CreateAsync(Guid reporterUserId, CreateReportRequest request);
+    Task<PagedResponse<ReportResponse>> GetMyReportsAsync(Guid reporterUserId, PagedRequest paged);
     Task<PagedResponse<ReportResponse>> GetAllAsync(AdminReportFilterRequest filter);
     Task<ReportResponse> GetByIdAsync(Guid reportId);
     Task ResolveAsync(Guid reportId);

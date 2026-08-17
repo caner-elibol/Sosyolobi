@@ -17,6 +17,8 @@ Future<List<ActivityMapItem>> mapActivities(
   String? categoryId,
   GenderPreference? genderPreference,
   bool? isFree,
+  DateTime? fromDate,
+  DateTime? toDate,
 }) {
   return ref.watch(mapActivitiesApiProvider).getMapItems(
         latitude: latitude,
@@ -25,5 +27,32 @@ Future<List<ActivityMapItem>> mapActivities(
         categoryId: categoryId,
         genderPreference: genderPreference,
         isFree: isFree,
+        fromDate: fromDate,
+        toDate: toDate,
+      );
+}
+
+/// All-categories variant (no `categoryId`) so map category chip counts
+/// (item 5) can be derived client-side, same rationale as
+/// `nearbyActivitiesAllCategories`.
+@riverpod
+Future<List<ActivityMapItem>> mapActivitiesAllCategories(
+  Ref ref, {
+  required double latitude,
+  required double longitude,
+  int radiusMeters = 10000,
+  GenderPreference? genderPreference,
+  bool? isFree,
+  DateTime? fromDate,
+  DateTime? toDate,
+}) {
+  return ref.watch(mapActivitiesApiProvider).getMapItems(
+        latitude: latitude,
+        longitude: longitude,
+        radiusMeters: radiusMeters,
+        genderPreference: genderPreference,
+        isFree: isFree,
+        fromDate: fromDate,
+        toDate: toDate,
       );
 }

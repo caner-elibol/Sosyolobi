@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/colors.dart';
+import '../../../../core/widgets/api_error_snackbar.dart';
 import '../../application/users_actions_provider.dart';
 import 'report_user_dialog.dart';
 
@@ -28,10 +29,12 @@ class ParticipantActionsMenu extends ConsumerWidget {
 
     await ref.read(userActionsControllerProvider.notifier).block(userId);
     if (!context.mounted) return;
-    final error = ref.read(userActionsControllerProvider).hasError;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(error ? 'Kullanıcı engellenemedi.' : 'Kullanıcı engellendi.')),
-    );
+    final state = ref.read(userActionsControllerProvider);
+    if (state.hasError) {
+      showApiErrorSnackBar(context, state.error!);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kullanıcı engellendi.')));
   }
 
   @override

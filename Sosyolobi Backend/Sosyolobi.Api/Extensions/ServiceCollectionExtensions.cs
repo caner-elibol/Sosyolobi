@@ -55,6 +55,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IActivityRequestService, ActivityRequestService>();
         services.AddScoped<IReviewService, ReviewService>();
         services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IFriendService, FriendService>();
         services.AddScoped<INotificationService, NotificationService>();
         services.AddScoped<IGeoService, GeoService>();
         services.AddScoped<IAdminService, AdminService>();

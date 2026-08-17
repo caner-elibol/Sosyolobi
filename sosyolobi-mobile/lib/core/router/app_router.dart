@@ -10,10 +10,13 @@ import '../../features/auth/application/auth_notifier.dart';
 import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/auth/presentation/verify_screen.dart';
+import '../../features/friends/presentation/friends_screen.dart';
 import '../../features/map/presentation/map_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/profile/presentation/public_profile_screen.dart';
 import '../../features/requests/presentation/requests_screen.dart';
+import '../../features/users/presentation/my_reports_screen.dart';
 import '../widgets/app_shell.dart';
 import 'route_paths.dart';
 
@@ -101,6 +104,18 @@ GoRouter appRouter(Ref ref) {
           GoRoute(
             path: RoutePaths.profile,
             builder: (context, state) => const ProfileScreen(),
+          ),
+          GoRoute(
+            path: RoutePaths.publicProfilePattern,
+            builder: (context, state) => PublicProfileScreen(userId: state.pathParameters['userId']!),
+          ),
+          GoRoute(
+            path: RoutePaths.friends,
+            builder: (context, state) => const FriendsScreen(),
+          ),
+          GoRoute(
+            path: RoutePaths.myReports,
+            builder: (context, state) => const MyReportsScreen(),
           ),
         ],
       ),

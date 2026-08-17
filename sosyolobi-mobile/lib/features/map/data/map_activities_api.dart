@@ -26,6 +26,8 @@ class MapActivitiesApi {
     String? categoryId,
     GenderPreference? genderPreference,
     bool? isFree,
+    DateTime? fromDate,
+    DateTime? toDate,
   }) async {
     final response = await guardDio(() => _dio.get<Map<String, dynamic>>(
           '/api/activities/map',
@@ -36,6 +38,8 @@ class MapActivitiesApi {
             if (categoryId != null) 'categoryId': categoryId,
             if (genderPreference != null) 'genderPreference': genderPreference.toJson(),
             if (isFree != null) 'isFree': isFree,
+            if (fromDate != null) 'fromDate': fromDate.toUtc().toIso8601String(),
+            if (toDate != null) 'toDate': toDate.toUtc().toIso8601String(),
           },
         ));
     return unwrapList(response, (json) => ActivityMapItem.fromJson(json as Map<String, dynamic>));

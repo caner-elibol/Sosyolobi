@@ -70,6 +70,36 @@ abstract class ActivityDetail with _$ActivityDetail {
   factory ActivityDetail.fromJson(Map<String, dynamic> json) => _$ActivityDetailFromJson(json);
 }
 
+/// Drops the detail-only fields (`addressDetailPrivate`, `participants`) so
+/// an [ActivityDetail] fetched by id can be rendered with the same
+/// [ActivityCard] used for list/summary views (e.g. the "Katıldıklarım" tab
+/// on [RequestsScreen], built client-side from per-activity detail fetches).
+extension ActivityDetailSummary on ActivityDetail {
+  Activity toActivity() => Activity(
+        id: id,
+        createdByUserId: createdByUserId,
+        createdByDisplayName: createdByDisplayName,
+        createdByAvatarUrl: createdByAvatarUrl,
+        categoryId: categoryId,
+        categoryName: categoryName,
+        categoryImageUrl: categoryImageUrl,
+        title: title,
+        description: description,
+        eventDate: eventDate,
+        neededPeopleCount: neededPeopleCount,
+        currentPeopleCount: currentPeopleCount,
+        pricePerPerson: pricePerPerson,
+        skillLevel: skillLevel,
+        genderPreference: genderPreference,
+        status: status,
+        latitude: latitude,
+        longitude: longitude,
+        addressText: addressText,
+        distanceMeters: distanceMeters,
+        createdAt: createdAt,
+      );
+}
+
 /// Mirrors `Sosyolobi.Api/DTOs/Activities/ActivityMapItemResponse.cs` — the
 /// lightweight shape `GET /api/activities/map` returns for pins/clustering.
 @freezed

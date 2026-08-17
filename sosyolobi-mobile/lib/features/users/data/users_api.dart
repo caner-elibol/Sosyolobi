@@ -28,4 +28,13 @@ class UsersApi {
   Future<void> report(CreateReportRequest request) async {
     await guardDio(() => _dio.post<Map<String, dynamic>>('/api/reports', data: request.toJson()));
   }
+
+  /// Mirrors `ReportsController.GetMine` (`GET /api/reports/mine`, paged).
+  Future<PagedResult<ReportResponse>> getMyReports({int page = 1, int pageSize = 50}) async {
+    final response = await guardDio(() => _dio.get<Map<String, dynamic>>(
+          '/api/reports/mine',
+          queryParameters: {'page': page, 'pageSize': pageSize},
+        ));
+    return unwrapPaged(response, (json) => ReportResponse.fromJson(json as Map<String, dynamic>));
+  }
 }

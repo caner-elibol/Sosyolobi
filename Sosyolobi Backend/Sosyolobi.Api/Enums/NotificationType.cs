@@ -8,5 +8,7 @@ public enum NotificationType
     ActivityCancelled = 4,
     ActivityCompleted = 5,
     NewReview = 6,
-    NewReport = 7
+    NewReport = 7,
+    FriendRequestReceived = 8,
+    FriendRequestAccepted = 9
 }

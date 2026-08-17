@@ -13,4 +13,9 @@ abstract final class RoutePaths {
   static const requests = '/app/requests';
   static const notifications = '/app/notifications';
   static const profile = '/app/profile';
+  static String publicProfile(String userId) => '/app/profile/$userId';
+  static const publicProfilePattern = '/app/profile/:userId';
+
+  static const friends = '/app/friends';
+  static const myReports = '/app/reports';
 }

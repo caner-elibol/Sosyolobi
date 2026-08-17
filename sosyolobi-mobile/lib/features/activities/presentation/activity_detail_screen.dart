@@ -8,6 +8,7 @@ import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/user_avatar.dart';
+import '../../../core/widgets/user_link.dart';
 import '../../auth/application/auth_notifier.dart';
 import '../../chat/presentation/chat_panel.dart';
 import '../../requests/application/requests_providers.dart';
@@ -238,21 +239,30 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
                   ),
                   child: Row(
                     children: [
-                      UserAvatar(displayName: activity.createdByDisplayName, avatarUrl: activity.createdByAvatarUrl, size: 42),
-                      const SizedBox(width: 10),
                       Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(activity.createdByDisplayName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                            const Row(
-                              children: [
-                                Icon(Icons.star, size: 12, color: Color(0xFFF59E0B)),
-                                SizedBox(width: 3),
-                                Text('Etkinlik sahibi', style: TextStyle(fontSize: 12, color: AppColors.mutedForeground)),
-                              ],
-                            ),
-                          ],
+                        child: UserLink(
+                          userId: activity.createdByUserId,
+                          child: Row(
+                            children: [
+                              UserAvatar(displayName: activity.createdByDisplayName, avatarUrl: activity.createdByAvatarUrl, size: 42),
+                              const SizedBox(width: 10),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(activity.createdByDisplayName, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
+                                    const Row(
+                                      children: [
+                                        Icon(Icons.star, size: 12, color: Color(0xFFF59E0B)),
+                                        SizedBox(width: 3),
+                                        Text('Etkinlik sahibi', style: TextStyle(fontSize: 12, color: AppColors.mutedForeground)),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
                       if (currentUserId != null && currentUserId != activity.createdByUserId)
@@ -311,10 +321,19 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
                             ),
                             child: Row(
                               children: [
-                                UserAvatar(displayName: activity.participants[i].displayName, avatarUrl: activity.participants[i].avatarUrl, size: 28),
-                                const SizedBox(width: 8),
                                 Expanded(
-                                  child: Text(activity.participants[i].displayName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                  child: UserLink(
+                                    userId: activity.participants[i].userId,
+                                    child: Row(
+                                      children: [
+                                        UserAvatar(displayName: activity.participants[i].displayName, avatarUrl: activity.participants[i].avatarUrl, size: 28),
+                                        const SizedBox(width: 8),
+                                        Expanded(
+                                          child: Text(activity.participants[i].displayName, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
                                 ),
                                 if (currentUserId != null && currentUserId != activity.participants[i].userId)
                                   ParticipantActionsMenu(userId: activity.participants[i].userId, displayName: activity.participants[i].displayName),

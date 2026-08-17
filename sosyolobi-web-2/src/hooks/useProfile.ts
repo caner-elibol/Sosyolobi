@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { userApiClient } from "@/lib/user-api-client";
-import type { UserProfile } from "@/types/user";
+import type { PublicProfile, UserProfile } from "@/types/user";
 
 interface UpdateProfilePayload {
   displayName: string;
@@ -49,7 +49,7 @@ export function useProfile() {
 export function usePublicProfile(userId: string | null) {
   return useQuery({
     queryKey: ["public-profile", userId],
-    queryFn: () => userApiClient<UserProfile>(`/api/profiles/${userId}`),
+    queryFn: () => userApiClient<PublicProfile>(`/api/profiles/${userId}`),
     enabled: !!userId,
     staleTime: 120_000,
   });

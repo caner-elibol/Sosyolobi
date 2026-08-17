@@ -348,6 +348,46 @@ namespace Sosyolobi.Api.Migrations
                     b.ToTable("chat_room_reads", (string)null);
                 });
 
+            modelBuilder.Entity("Sosyolobi.Api.Entities.FriendRequest", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("AddresseeUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("addressee_user_id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid>("RequesterUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("requester_user_id");
+
+                    b.Property<DateTime?>("RespondedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("responded_at");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("integer")
+                        .HasColumnName("status");
+
+                    b.HasKey("Id")
+                        .HasName("pk_friend_requests");
+
+                    b.HasIndex("AddresseeUserId")
+                        .HasDatabaseName("ix_friend_requests_addressee_user_id");
+
+                    b.HasIndex("RequesterUserId", "AddresseeUserId")
+                        .IsUnique()
+                        .HasDatabaseName("ix_friend_requests_requester_user_id_addressee_user_id");
+
+                    b.ToTable("friend_requests", (string)null);
+                });
+
             modelBuilder.Entity("Sosyolobi.Api.Entities.Notification", b =>
                 {
                     b.Property<Guid>("Id")
@@ -834,6 +874,27 @@ namespace Sosyolobi.Api.Migrations
                     b.Navigation("ChatRoom");
 
                     b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Sosyolobi.Api.Entities.FriendRequest", b =>
+                {
+                    b.HasOne("Sosyolobi.Api.Entities.User", "AddresseeUser")
+                        .WithMany()
+                        .HasForeignKey("AddresseeUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_friend_requests_users_addressee_user_id");
+
+                    b.HasOne("Sosyolobi.Api.Entities.User", "RequesterUser")
+                        .WithMany()
+                        .HasForeignKey("RequesterUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_friend_requests_users_requester_user_id");
+
+                    b.Navigation("AddresseeUser");
+
+                    b.Navigation("RequesterUser");
                 });
 
             modelBuilder.Entity("Sosyolobi.Api.Entities.Notification", b =>

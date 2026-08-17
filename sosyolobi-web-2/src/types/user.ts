@@ -33,6 +33,13 @@ export enum ChatRoomStatus {
   Closed = 2,
 }
 
+export enum FriendRequestStatus {
+  Pending = 1,
+  Accepted = 2,
+  Rejected = 3,
+  Cancelled = 4,
+}
+
 // ── Common ─────────────────────────────────────────────────────────────────
 
 export interface ApiResponse<T> {
@@ -162,6 +169,21 @@ export interface ActivityJoinRequest {
   status: ActivityRequestStatus;
   createdAt: string;
   respondedAt?: string;
+}
+
+// ── Friends ────────────────────────────────────────────────────────────────
+
+export interface FriendRequest {
+  id: string;
+  status: FriendRequestStatus;
+  createdAt: string;
+  respondedAt?: string;
+  user: PublicProfile;
+}
+
+export interface Friend {
+  friendsSinceUtc: string;
+  user: PublicProfile;
 }
 
 // ── Chat ───────────────────────────────────────────────────────────────────
