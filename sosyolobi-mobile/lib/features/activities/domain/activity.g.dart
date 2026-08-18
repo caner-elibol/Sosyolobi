@@ -97,6 +97,11 @@ _$ActivityDetailImpl _$$ActivityDetailImplFromJson(Map<String, dynamic> json) =>
       participants: (json['participants'] as List<dynamic>)
           .map((e) => PublicProfile.fromJson(e as Map<String, dynamic>))
           .toList(),
+      myRequestStatus: json['myRequestStatus'] == null
+          ? null
+          : const ActivityRequestStatusConverter().fromJson(
+              (json['myRequestStatus'] as num).toInt(),
+            ),
     );
 
 Map<String, dynamic> _$$ActivityDetailImplToJson(
@@ -127,6 +132,11 @@ Map<String, dynamic> _$$ActivityDetailImplToJson(
   'createdAt': instance.createdAt.toIso8601String(),
   'addressDetailPrivate': instance.addressDetailPrivate,
   'participants': instance.participants,
+  'myRequestStatus': instance.myRequestStatus == null
+      ? null
+      : const ActivityRequestStatusConverter().toJson(
+          instance.myRequestStatus!,
+        ),
 };
 
 _$ActivityMapItemImpl _$$ActivityMapItemImplFromJson(

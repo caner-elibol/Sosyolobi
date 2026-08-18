@@ -34,7 +34,8 @@ abstract class Activity with _$Activity {
     required DateTime createdAt,
   }) = _Activity;
 
-  factory Activity.fromJson(Map<String, dynamic> json) => _$ActivityFromJson(json);
+  factory Activity.fromJson(Map<String, dynamic> json) =>
+      _$ActivityFromJson(json);
 }
 
 /// Mirrors `Sosyolobi.Api/DTOs/Activities/ActivityDetailResponse.cs`
@@ -65,9 +66,11 @@ abstract class ActivityDetail with _$ActivityDetail {
     required DateTime createdAt,
     String? addressDetailPrivate,
     required List<PublicProfile> participants,
+    @ActivityRequestStatusConverter() ActivityRequestStatus? myRequestStatus,
   }) = _ActivityDetail;
 
-  factory ActivityDetail.fromJson(Map<String, dynamic> json) => _$ActivityDetailFromJson(json);
+  factory ActivityDetail.fromJson(Map<String, dynamic> json) =>
+      _$ActivityDetailFromJson(json);
 }
 
 /// Drops the detail-only fields (`addressDetailPrivate`, `participants`) so
@@ -76,28 +79,28 @@ abstract class ActivityDetail with _$ActivityDetail {
 /// on [RequestsScreen], built client-side from per-activity detail fetches).
 extension ActivityDetailSummary on ActivityDetail {
   Activity toActivity() => Activity(
-        id: id,
-        createdByUserId: createdByUserId,
-        createdByDisplayName: createdByDisplayName,
-        createdByAvatarUrl: createdByAvatarUrl,
-        categoryId: categoryId,
-        categoryName: categoryName,
-        categoryImageUrl: categoryImageUrl,
-        title: title,
-        description: description,
-        eventDate: eventDate,
-        neededPeopleCount: neededPeopleCount,
-        currentPeopleCount: currentPeopleCount,
-        pricePerPerson: pricePerPerson,
-        skillLevel: skillLevel,
-        genderPreference: genderPreference,
-        status: status,
-        latitude: latitude,
-        longitude: longitude,
-        addressText: addressText,
-        distanceMeters: distanceMeters,
-        createdAt: createdAt,
-      );
+    id: id,
+    createdByUserId: createdByUserId,
+    createdByDisplayName: createdByDisplayName,
+    createdByAvatarUrl: createdByAvatarUrl,
+    categoryId: categoryId,
+    categoryName: categoryName,
+    categoryImageUrl: categoryImageUrl,
+    title: title,
+    description: description,
+    eventDate: eventDate,
+    neededPeopleCount: neededPeopleCount,
+    currentPeopleCount: currentPeopleCount,
+    pricePerPerson: pricePerPerson,
+    skillLevel: skillLevel,
+    genderPreference: genderPreference,
+    status: status,
+    latitude: latitude,
+    longitude: longitude,
+    addressText: addressText,
+    distanceMeters: distanceMeters,
+    createdAt: createdAt,
+  );
 }
 
 /// Mirrors `Sosyolobi.Api/DTOs/Activities/ActivityMapItemResponse.cs` — the
@@ -118,5 +121,6 @@ abstract class ActivityMapItem with _$ActivityMapItem {
     required double distanceMeters,
   }) = _ActivityMapItem;
 
-  factory ActivityMapItem.fromJson(Map<String, dynamic> json) => _$ActivityMapItemFromJson(json);
+  factory ActivityMapItem.fromJson(Map<String, dynamic> json) =>
+      _$ActivityMapItemFromJson(json);
 }

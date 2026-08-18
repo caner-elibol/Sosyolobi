@@ -15,7 +15,7 @@ import { useActivity } from "@/hooks/useCreateActivity";
 import { useJoinRequest } from "@/hooks/useJoinRequest";
 import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { formatDistanceMeters } from "@/lib/format";
-import { ActivityStatus } from "@/types/user";
+import { ActivityStatus, ActivityRequestStatus } from "@/types/user";
 import { getUserFromToken } from "@/lib/user-auth";
 import {
   ArrowLeft,
@@ -85,6 +85,7 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
   const isFull = activity.status === ActivityStatus.Full;
   const currentUserId = getUserFromToken()?.sub;
   const isParticipant = !!currentUserId && activity.participants.some((p) => p.userId === currentUserId);
+  const hasPendingRequest = activity.myRequestStatus === ActivityRequestStatus.Pending;
 
   async function handleJoin() {
     try {
@@ -304,7 +305,28 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
             border: "1px solid var(--color-border)",
             marginBottom: 12,
           }}>
-            {showMessageInput ? (
+            {hasPendingRequest ? (
+              <button
+                disabled
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: 8,
+                  width: "100%",
+                  padding: "14px",
+                  background: "var(--color-muted-background, #F3F4F6)",
+                  color: "var(--color-muted-foreground)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-md)",
+                  fontSize: 15,
+                  fontWeight: 600,
+                  cursor: "not-allowed",
+                }}
+              >
+                <Users size={17} /> İstek Bekliyor
+              </button>
+            ) : showMessageInput ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
                 <textarea
                   value={joinMessage}

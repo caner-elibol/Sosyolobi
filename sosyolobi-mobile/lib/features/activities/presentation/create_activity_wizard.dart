@@ -23,7 +23,8 @@ class CreateActivityWizard extends ConsumerStatefulWidget {
   const CreateActivityWizard({super.key});
 
   @override
-  ConsumerState<CreateActivityWizard> createState() => _CreateActivityWizardState();
+  ConsumerState<CreateActivityWizard> createState() =>
+      _CreateActivityWizardState();
 }
 
 class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
@@ -66,7 +67,9 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
   }
 
   bool _validateStep1() {
-    setState(() => _categoryError = _categoryId == null ? 'Kategori seçin' : null);
+    setState(
+      () => _categoryError = _categoryId == null ? 'Kategori seçin' : null,
+    );
     return _categoryId != null;
   }
 
@@ -96,21 +99,36 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
 
   Future<void> _submit() async {
     final addressOk = _addressController.text.trim().length >= 5;
-    setState(() => _addressError = addressOk ? null : 'Adres açıklaması zorunlu');
+    setState(
+      () => _addressError = addressOk ? null : 'Adres açıklaması zorunlu',
+    );
     if (!addressOk || _pin == null) {
       if (_pin == null) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Haritadan bir konum seçin.')));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Haritadan bir konum seçin.')),
+        );
       }
       return;
     }
 
     setState(() => _submitting = true);
-    final eventDate = DateTime(_date.year, _date.month, _date.day, _time.hour, _time.minute);
-    final price = double.tryParse(_priceController.text.replaceAll(',', '.'));
+    final eventDate = DateTime(
+      _date.year,
+      _date.month,
+      _date.day,
+      _time.hour,
+      _time.minute,
+    );
+    // Boş bırakılırsa "ücretsiz" anlamına gelir, varsayılan 0'dır — web
+    // `CreateActivityForm.tsx` ile aynı (bkz. o dosyadaki `setValueAs`).
+    final price =
+        double.tryParse(_priceController.text.replaceAll(',', '.')) ?? 0;
     final request = CreateActivityRequest(
       categoryId: _categoryId!,
       title: _titleController.text.trim(),
-      description: _descriptionController.text.trim().isEmpty ? null : _descriptionController.text.trim(),
+      description: _descriptionController.text.trim().isEmpty
+          ? null
+          : _descriptionController.text.trim(),
       eventDate: eventDate.toUtc(),
       neededPeopleCount: int.parse(_neededController.text),
       pricePerPerson: price,
@@ -119,11 +137,15 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
       latitude: _pin!.latitude,
       longitude: _pin!.longitude,
       addressText: _addressController.text.trim(),
-      addressDetailPrivate: _addressDetailController.text.trim().isEmpty ? null : _addressDetailController.text.trim(),
+      addressDetailPrivate: _addressDetailController.text.trim().isEmpty
+          ? null
+          : _addressDetailController.text.trim(),
     );
 
     try {
-      final activity = await ref.read(createActivityControllerProvider.notifier).submit(request);
+      final activity = await ref
+          .read(createActivityControllerProvider.notifier)
+          .submit(request);
       if (!mounted) return;
       // Shown via the root messenger (not ScaffoldMessenger.of(context)):
       // the immediately-following pushReplacement tears down this route's
@@ -146,7 +168,10 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
 
     return Scaffold(
       appBar: AppBar(
-        leading: IconButton(icon: const Icon(Icons.arrow_back), onPressed: _goBack),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: _goBack,
+        ),
         title: const Text('Etkinlik Oluştur'),
       ),
       body: Column(
@@ -160,49 +185,61 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
               padding: const EdgeInsets.symmetric(horizontal: 16),
               child: switch (_step) {
                 1 => categoriesAsync.when(
-                    data: (categories) => _CategoryStep(
-                      categories: categories,
-                      selectedId: _categoryId,
-                      error: _categoryError,
-                      onSelect: (id) => setState(() {
-                        _categoryId = id;
-                        _categoryError = null;
-                      }),
-                    ),
-                    loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
-                    error: (err, _) => const Text('Kategoriler yüklenemedi.'),
+                  data: (categories) => _CategoryStep(
+                    categories: categories,
+                    selectedId: _categoryId,
+                    error: _categoryError,
+                    onSelect: (id) => setState(() {
+                      _categoryId = id;
+                      _categoryError = null;
+                    }),
                   ),
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
+                  ),
+                  error: (err, _) => const Text('Kategoriler yüklenemedi.'),
+                ),
                 2 => _DetailsStep(
-                    titleController: _titleController,
-                    descriptionController: _descriptionController,
-                    priceController: _priceController,
-                    neededController: _neededController,
-                    titleError: _titleError,
-                    neededError: _neededError,
-                    date: _date,
-                    time: _time,
-                    skillLevel: _skillLevel,
-                    onDateChanged: (d) => setState(() => _date = d),
-                    onTimeChanged: (t) => setState(() => _time = t),
-                    onSkillLevelChanged: (s) => setState(() => _skillLevel = s),
-                  ),
+                  titleController: _titleController,
+                  descriptionController: _descriptionController,
+                  priceController: _priceController,
+                  neededController: _neededController,
+                  titleError: _titleError,
+                  neededError: _neededError,
+                  date: _date,
+                  time: _time,
+                  skillLevel: _skillLevel,
+                  onDateChanged: (d) => setState(() => _date = d),
+                  onTimeChanged: (t) => setState(() => _time = t),
+                  onSkillLevelChanged: (s) => setState(() => _skillLevel = s),
+                ),
                 _ => locationAsync.when(
-                    data: (location) {
-                      _seedPinIfNeeded(LatLng(location.latitude, location.longitude));
-                      return _LocationStep(
-                        initialCenter: LatLng(location.latitude, location.longitude),
-                        pin: _pin,
-                        addressController: _addressController,
-                        addressDetailController: _addressDetailController,
-                        addressError: _addressError,
-                        genderPreference: _genderPreference,
-                        onPinSet: (p) => setState(() => _pin = p),
-                        onGenderChanged: (g) => setState(() => _genderPreference = g),
-                      );
-                    },
-                    loading: () => const Padding(padding: EdgeInsets.all(32), child: Center(child: CircularProgressIndicator())),
-                    error: (err, _) => const Text('Konum alınamadı.'),
+                  data: (location) {
+                    _seedPinIfNeeded(
+                      LatLng(location.latitude, location.longitude),
+                    );
+                    return _LocationStep(
+                      initialCenter: LatLng(
+                        location.latitude,
+                        location.longitude,
+                      ),
+                      pin: _pin,
+                      addressController: _addressController,
+                      addressDetailController: _addressDetailController,
+                      addressError: _addressError,
+                      genderPreference: _genderPreference,
+                      onPinSet: (p) => setState(() => _pin = p),
+                      onGenderChanged: (g) =>
+                          setState(() => _genderPreference = g),
+                    );
+                  },
+                  loading: () => const Padding(
+                    padding: EdgeInsets.all(32),
+                    child: Center(child: CircularProgressIndicator()),
                   ),
+                  error: (err, _) => const Text('Konum alınamadı.'),
+                ),
               },
             ),
           ),
@@ -231,7 +268,10 @@ class _StepIndicator extends StatelessWidget {
         for (var i = 1; i <= 3; i++) ...[
           if (i > 1)
             Expanded(
-              child: Container(height: 2, color: i <= step ? AppColors.accentBright : AppColors.border),
+              child: Container(
+                height: 2,
+                color: i <= step ? AppColors.accentBright : AppColors.border,
+              ),
             ),
           Container(
             width: 26,
@@ -257,7 +297,12 @@ class _StepIndicator extends StatelessWidget {
 }
 
 class _CategoryStep extends StatelessWidget {
-  const _CategoryStep({required this.categories, required this.selectedId, required this.error, required this.onSelect});
+  const _CategoryStep({
+    required this.categories,
+    required this.selectedId,
+    required this.error,
+    required this.onSelect,
+  });
 
   final List<Category> categories;
   final String? selectedId;
@@ -270,7 +315,10 @@ class _CategoryStep extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const SizedBox(height: 8),
-        const Text('Etkinliğinizi hangi kategoriye ait?', style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700)),
+        const Text(
+          'Etkinliğinizi hangi kategoriye ait?',
+          style: TextStyle(fontSize: 17, fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 4),
         const Text(
           'Etkinliğinizin temasını en iyi yansıtan kategoriyi seçin.',
@@ -290,7 +338,10 @@ class _CategoryStep extends StatelessWidget {
           itemBuilder: (context, index) {
             final category = categories[index];
             final active = category.id == selectedId;
-            final color = CategoryIcons.colorFor(category.name, override: category.color);
+            final color = CategoryIcons.colorFor(
+              category.name,
+              override: category.color,
+            );
             return InkWell(
               onTap: () => onSelect(category.id),
               borderRadius: BorderRadius.circular(AppRadius.lg),
@@ -298,22 +349,38 @@ class _CategoryStep extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: active ? AppColors.accentSoftBg : AppColors.surface,
                   borderRadius: BorderRadius.circular(AppRadius.lg),
-                  border: Border.all(color: active ? AppColors.accentBright : AppColors.border, width: active ? 1.5 : 1),
+                  border: Border.all(
+                    color: active ? AppColors.accentBright : AppColors.border,
+                    width: active ? 1.5 : 1,
+                  ),
                 ),
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 6),
+                padding: const EdgeInsets.symmetric(
+                  vertical: 12,
+                  horizontal: 6,
+                ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                       width: 36,
                       height: 36,
-                      decoration: BoxDecoration(color: color.withValues(alpha: 0.16), shape: BoxShape.circle),
-                      child: Icon(CategoryIcons.iconFor(category.name), size: 18, color: color),
+                      decoration: BoxDecoration(
+                        color: color.withValues(alpha: 0.16),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        CategoryIcons.iconFor(category.name),
+                        size: 18,
+                        color: color,
+                      ),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       category.name,
-                      style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600),
+                      style: const TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                      ),
                       textAlign: TextAlign.center,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -326,7 +393,10 @@ class _CategoryStep extends StatelessWidget {
         ),
         if (error != null) ...[
           const SizedBox(height: 12),
-          Text(error!, style: const TextStyle(fontSize: 12, color: AppColors.destructive)),
+          Text(
+            error!,
+            style: const TextStyle(fontSize: 12, color: AppColors.destructive),
+          ),
         ],
         const SizedBox(height: 24),
       ],
@@ -378,14 +448,19 @@ class _DetailsStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           _FieldLabel('Etkinlik Başlığı'),
-          TextField(controller: titleController, decoration: const InputDecoration(hintText: 'Örn. Dağ Yürüyüşü')),
+          TextField(
+            controller: titleController,
+            decoration: const InputDecoration(hintText: 'Örn. Dağ Yürüyüşü'),
+          ),
           if (titleError != null) _FieldError(titleError!),
           const SizedBox(height: 16),
           _FieldLabel('Açıklama (opsiyonel)'),
           TextField(
             controller: descriptionController,
             maxLines: 3,
-            decoration: const InputDecoration(hintText: 'Etkinliğiniz hakkında bilgi verin...'),
+            decoration: const InputDecoration(
+              hintText: 'Etkinliğiniz hakkında bilgi verin...',
+            ),
           ),
           const SizedBox(height: 16),
           Row(
@@ -403,7 +478,9 @@ class _DetailsStep extends StatelessWidget {
                           context: context,
                           initialDate: date,
                           firstDate: DateTime.now(),
-                          lastDate: DateTime.now().add(const Duration(days: 365)),
+                          lastDate: DateTime.now().add(
+                            const Duration(days: 365),
+                          ),
                         );
                         if (picked != null) onDateChanged(picked);
                       },
@@ -421,7 +498,10 @@ class _DetailsStep extends StatelessWidget {
                       icon: const Icon(Icons.access_time, size: 15),
                       label: Text(time.format(context)),
                       onPressed: () async {
-                        final picked = await showTimePicker(context: context, initialTime: time);
+                        final picked = await showTimePicker(
+                          context: context,
+                          initialTime: time,
+                        );
                         if (picked != null) onTimeChanged(picked);
                       },
                     ),
@@ -453,10 +533,12 @@ class _DetailsStep extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _FieldLabel('Kişi Başı Ücret (Opsiyonel)'),
+                    _FieldLabel('Kişi Başı Ücret'),
                     TextField(
                       controller: priceController,
-                      keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                      keyboardType: const TextInputType.numberWithOptions(
+                        decimal: true,
+                      ),
                       decoration: const InputDecoration(hintText: '0 ₺'),
                     ),
                   ],
@@ -470,7 +552,10 @@ class _DetailsStep extends StatelessWidget {
             initialValue: skillLevel,
             items: [
               for (final level in SkillLevel.values)
-                DropdownMenuItem(value: level, child: Text(_skillLabels[level]!)),
+                DropdownMenuItem(
+                  value: level,
+                  child: Text(_skillLabels[level]!),
+                ),
             ],
             onChanged: (value) {
               if (value != null) onSkillLevelChanged(value);
@@ -521,23 +606,40 @@ class _LocationStep extends StatelessWidget {
           _FieldLabel('Haritadan Seç'),
           SizedBox(
             height: 240,
-            child: PinDropMap(initialCenter: initialCenter, pin: pin, onPinSet: onPinSet),
+            child: PinDropMap(
+              initialCenter: initialCenter,
+              pin: pin,
+              onPinSet: onPinSet,
+            ),
           ),
           if (pin != null)
             Padding(
               padding: const EdgeInsets.only(top: 4),
               child: Text(
                 'Konum belirlendi: ${pin!.latitude.toStringAsFixed(5)}, ${pin!.longitude.toStringAsFixed(5)}',
-                style: const TextStyle(fontSize: 12, color: AppColors.mutedForeground),
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: AppColors.mutedForeground,
+                ),
               ),
             ),
           const SizedBox(height: 16),
           _FieldLabel('Konum Adı'),
-          TextField(controller: addressController, decoration: const InputDecoration(hintText: 'Örn. Çekmeköy Spor Kompleksi')),
+          TextField(
+            controller: addressController,
+            decoration: const InputDecoration(
+              hintText: 'Örn. Çekmeköy Spor Kompleksi',
+            ),
+          ),
           if (addressError != null) _FieldError(addressError!),
           const SizedBox(height: 16),
           _FieldLabel('Gizli Adres Detayı (onaylı katılımcılara gösterilir)'),
-          TextField(controller: addressDetailController, decoration: const InputDecoration(hintText: 'Kapı numarası, detaylı adres...')),
+          TextField(
+            controller: addressDetailController,
+            decoration: const InputDecoration(
+              hintText: 'Kapı numarası, detaylı adres...',
+            ),
+          ),
           const SizedBox(height: 16),
           _FieldLabel('Kimler Katılabilir?'),
           DropdownButtonFormField<GenderPreference>(
@@ -566,7 +668,14 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 6),
-      child: Text(text, style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF374151))),
+      child: Text(
+        text,
+        style: const TextStyle(
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+          color: Color(0xFF374151),
+        ),
+      ),
     );
   }
 }
@@ -580,13 +689,22 @@ class _FieldError extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.only(top: 4),
-      child: Text(text, style: const TextStyle(fontSize: 12, color: AppColors.destructive)),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 12, color: AppColors.destructive),
+      ),
     );
   }
 }
 
 class _WizardFooter extends StatelessWidget {
-  const _WizardFooter({required this.step, required this.submitting, required this.onBack, required this.onNext, required this.onSubmit});
+  const _WizardFooter({
+    required this.step,
+    required this.submitting,
+    required this.onBack,
+    required this.onNext,
+    required this.onSubmit,
+  });
 
   final int step;
   final bool submitting;
@@ -615,19 +733,36 @@ class _WizardFooter extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('Adım $step / 3', style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
-                  Text(_helper[step - 1], style: const TextStyle(fontSize: 11, color: AppColors.mutedForeground)),
+                  Text(
+                    'Adım $step / 3',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    _helper[step - 1],
+                    style: const TextStyle(
+                      fontSize: 11,
+                      color: AppColors.mutedForeground,
+                    ),
+                  ),
                 ],
               ),
             ),
-            OutlinedButton(onPressed: onBack, child: Text(step == 1 ? 'İptal' : 'Geri')),
+            OutlinedButton(
+              onPressed: onBack,
+              child: Text(step == 1 ? 'İptal' : 'Geri'),
+            ),
             const SizedBox(width: 8),
             if (step < 3)
               ElevatedButton(onPressed: onNext, child: const Text('Devam Et'))
             else
               ElevatedButton(
                 onPressed: submitting ? null : onSubmit,
-                child: Text(submitting ? 'Oluşturuluyor...' : 'Etkinliği Oluştur'),
+                child: Text(
+                  submitting ? 'Oluşturuluyor...' : 'Etkinliği Oluştur',
+                ),
               ),
           ],
         ),

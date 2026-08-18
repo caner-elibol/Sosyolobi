@@ -24,7 +24,10 @@ const schema = z.object({
   description: z.string().optional(),
   eventDate: z.string().min(1, "Tarih seçin"),
   neededPeopleCount: z.number().min(1, "En az 1 kişi"),
-  pricePerPerson: z.number().min(0).optional(),
+  // Gerçekten opsiyonel değil — boş bırakılırsa "ücretsiz" anlamına gelir,
+  // varsayılan 0'dır (bkz. aşağıdaki `setValueAs`). `z.number()` (optional
+  // değil) burada bilinçli: alan artık asla `undefined`/`NaN` üretmiyor.
+  pricePerPerson: z.number().min(0, "0 veya üzeri olmalı"),
   skillLevel: z.number(),
   genderPreference: z.number(),
   addressText: z.string().min(5, "Adres açıklaması zorunlu"),
@@ -44,7 +47,7 @@ export function CreateActivityForm() {
   const create = useCreateActivity();
   const [step, setStep] = useState(1);
   const [pin, setPin] = useState<{ lat: number; lng: number } | null>(null);
-  const { location, permission } = useCurrentLocation();
+  const { location, permission, request: requestLocation } = useCurrentLocation();
   const nowLocal = nowForDatetimeLocal();
   const [dateStr, setDateStr] = useState(nowLocal.slice(0, 10));
   const [timeStr, setTimeStr] = useState(nowLocal.slice(11, 16));
@@ -62,6 +65,7 @@ export function CreateActivityForm() {
       skillLevel: SkillLevel.Any,
       genderPreference: GenderPreference.Any,
       neededPeopleCount: 1,
+      pricePerPerson: 0,
       eventDate: nowLocal,
     },
   });
@@ -80,6 +84,18 @@ export function CreateActivityForm() {
       setPin(location);
     }
   }, [location, pin]);
+
+  // 3. adımda (harita) konum bir soft-ask kartının arkasına saklanamaz — pin
+  // olmadan form tamamlanamıyor. `useCurrentLocation` bilerek "prompt"
+  // durumunda otomatik izin istemiyor (bkz. o dosyadaki yorum, map sayfasının
+  // dismissible kartı için); ama burada, konum gerçekten zorunlu olduğu için
+  // adım 3'e gelindiğinde izni doğrudan iste — aksi halde `location` hiç
+  // dolmaz, pin hiç yerleşmez, "Etkinliği Oluştur" sessizce hiçbir şey yapmaz.
+  useEffect(() => {
+    if (step === 3 && permission === "prompt") {
+      requestLocation();
+    }
+  }, [step, permission, requestLocation]);
 
   const categoryId = watch("categoryId");
 
@@ -181,8 +197,14 @@ export function CreateActivityForm() {
                   <Field label="Kaç kişi katılabilir?" error={errors.neededPeopleCount?.message} style={{ flex: 1 }}>
                     <input {...register("neededPeopleCount", { valueAsNumber: true })} type="number" min={1} style={inputStyle} />
                   </Field>
-                  <Field label="Kişi Başı Ücret (Opsiyonel)" style={{ flex: 1 }}>
-                    <input {...register("pricePerPerson", { valueAsNumber: true })} type="number" min={0} placeholder="0 ₺" style={inputStyle} />
+                  <Field label="Kişi Başı Ücret" error={errors.pricePerPerson?.message} style={{ flex: 1 }}>
+                    <input
+                      {...register("pricePerPerson", { setValueAs: (v) => (v === "" || v === null ? 0 : Number(v)) })}
+                      type="number"
+                      min={0}
+                      placeholder="0 ₺"
+                      style={inputStyle}
+                    />
                   </Field>
                 </div>
                 <Field label="Seviye">

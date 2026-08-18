@@ -238,6 +238,15 @@ public class ActivityService : IActivityService
         if (isParticipant)
             response.AddressDetailPrivate = activity.AddressDetailPrivate;
 
+        if (requestingUserId.HasValue)
+        {
+            response.MyRequestStatus = await _db.ActivityRequests
+                .Where(r => r.ActivityId == id && r.UserId == requestingUserId.Value)
+                .OrderByDescending(r => r.CreatedAt)
+                .Select(r => (ActivityRequestStatus?)r.Status)
+                .FirstOrDefaultAsync();
+        }
+
         return response;
     }
 

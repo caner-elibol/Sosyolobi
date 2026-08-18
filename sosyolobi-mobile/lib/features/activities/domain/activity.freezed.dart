@@ -659,6 +659,9 @@ mixin _$ActivityDetail {
   DateTime get createdAt => throw _privateConstructorUsedError;
   String? get addressDetailPrivate => throw _privateConstructorUsedError;
   List<PublicProfile> get participants => throw _privateConstructorUsedError;
+  @ActivityRequestStatusConverter()
+  ActivityRequestStatus? get myRequestStatus =>
+      throw _privateConstructorUsedError;
 
   /// Serializes this ActivityDetail to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -701,6 +704,7 @@ abstract class $ActivityDetailCopyWith<$Res> {
     DateTime createdAt,
     String? addressDetailPrivate,
     List<PublicProfile> participants,
+    @ActivityRequestStatusConverter() ActivityRequestStatus? myRequestStatus,
   });
 }
 
@@ -742,6 +746,7 @@ class _$ActivityDetailCopyWithImpl<$Res, $Val extends ActivityDetail>
     Object? createdAt = null,
     Object? addressDetailPrivate = freezed,
     Object? participants = null,
+    Object? myRequestStatus = freezed,
   }) {
     return _then(
       _value.copyWith(
@@ -837,6 +842,10 @@ class _$ActivityDetailCopyWithImpl<$Res, $Val extends ActivityDetail>
                 ? _value.participants
                 : participants // ignore: cast_nullable_to_non_nullable
                       as List<PublicProfile>,
+            myRequestStatus: freezed == myRequestStatus
+                ? _value.myRequestStatus
+                : myRequestStatus // ignore: cast_nullable_to_non_nullable
+                      as ActivityRequestStatus?,
           )
           as $Val,
     );
@@ -876,6 +885,7 @@ abstract class _$$ActivityDetailImplCopyWith<$Res>
     DateTime createdAt,
     String? addressDetailPrivate,
     List<PublicProfile> participants,
+    @ActivityRequestStatusConverter() ActivityRequestStatus? myRequestStatus,
   });
 }
 
@@ -916,6 +926,7 @@ class __$$ActivityDetailImplCopyWithImpl<$Res>
     Object? createdAt = null,
     Object? addressDetailPrivate = freezed,
     Object? participants = null,
+    Object? myRequestStatus = freezed,
   }) {
     return _then(
       _$ActivityDetailImpl(
@@ -1011,6 +1022,10 @@ class __$$ActivityDetailImplCopyWithImpl<$Res>
             ? _value._participants
             : participants // ignore: cast_nullable_to_non_nullable
                   as List<PublicProfile>,
+        myRequestStatus: freezed == myRequestStatus
+            ? _value.myRequestStatus
+            : myRequestStatus // ignore: cast_nullable_to_non_nullable
+                  as ActivityRequestStatus?,
       ),
     );
   }
@@ -1043,6 +1058,7 @@ class _$ActivityDetailImpl implements _ActivityDetail {
     required this.createdAt,
     this.addressDetailPrivate,
     required final List<PublicProfile> participants,
+    @ActivityRequestStatusConverter() this.myRequestStatus,
   }) : _participants = participants;
 
   factory _$ActivityDetailImpl.fromJson(Map<String, dynamic> json) =>
@@ -1104,8 +1120,12 @@ class _$ActivityDetailImpl implements _ActivityDetail {
   }
 
   @override
+  @ActivityRequestStatusConverter()
+  final ActivityRequestStatus? myRequestStatus;
+
+  @override
   String toString() {
-    return 'ActivityDetail(id: $id, createdByUserId: $createdByUserId, createdByDisplayName: $createdByDisplayName, createdByAvatarUrl: $createdByAvatarUrl, categoryId: $categoryId, categoryName: $categoryName, categoryImageUrl: $categoryImageUrl, title: $title, description: $description, eventDate: $eventDate, neededPeopleCount: $neededPeopleCount, currentPeopleCount: $currentPeopleCount, pricePerPerson: $pricePerPerson, skillLevel: $skillLevel, genderPreference: $genderPreference, status: $status, latitude: $latitude, longitude: $longitude, addressText: $addressText, distanceMeters: $distanceMeters, createdAt: $createdAt, addressDetailPrivate: $addressDetailPrivate, participants: $participants)';
+    return 'ActivityDetail(id: $id, createdByUserId: $createdByUserId, createdByDisplayName: $createdByDisplayName, createdByAvatarUrl: $createdByAvatarUrl, categoryId: $categoryId, categoryName: $categoryName, categoryImageUrl: $categoryImageUrl, title: $title, description: $description, eventDate: $eventDate, neededPeopleCount: $neededPeopleCount, currentPeopleCount: $currentPeopleCount, pricePerPerson: $pricePerPerson, skillLevel: $skillLevel, genderPreference: $genderPreference, status: $status, latitude: $latitude, longitude: $longitude, addressText: $addressText, distanceMeters: $distanceMeters, createdAt: $createdAt, addressDetailPrivate: $addressDetailPrivate, participants: $participants, myRequestStatus: $myRequestStatus)';
   }
 
   @override
@@ -1157,7 +1177,9 @@ class _$ActivityDetailImpl implements _ActivityDetail {
             const DeepCollectionEquality().equals(
               other._participants,
               _participants,
-            ));
+            ) &&
+            (identical(other.myRequestStatus, myRequestStatus) ||
+                other.myRequestStatus == myRequestStatus));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1187,6 +1209,7 @@ class _$ActivityDetailImpl implements _ActivityDetail {
     createdAt,
     addressDetailPrivate,
     const DeepCollectionEquality().hash(_participants),
+    myRequestStatus,
   ]);
 
   /// Create a copy of ActivityDetail
@@ -1232,6 +1255,7 @@ abstract class _ActivityDetail implements ActivityDetail {
     required final DateTime createdAt,
     final String? addressDetailPrivate,
     required final List<PublicProfile> participants,
+    @ActivityRequestStatusConverter() final ActivityRequestStatus? myRequestStatus,
   }) = _$ActivityDetailImpl;
 
   factory _ActivityDetail.fromJson(Map<String, dynamic> json) =
@@ -1286,6 +1310,9 @@ abstract class _ActivityDetail implements ActivityDetail {
   String? get addressDetailPrivate;
   @override
   List<PublicProfile> get participants;
+  @override
+  @ActivityRequestStatusConverter()
+  ActivityRequestStatus? get myRequestStatus;
 
   /// Create a copy of ActivityDetail
   /// with the given fields replaced by the non-null parameter values.

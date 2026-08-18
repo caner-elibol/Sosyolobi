@@ -118,6 +118,8 @@ export interface Activity {
 export interface ActivityDetail extends Activity {
   addressDetailPrivate?: string;
   participants: PublicProfile[];
+  /** İstek gönderdiysem en güncel durumu (yoksa null/undefined). */
+  myRequestStatus?: ActivityRequestStatus | null;
 }
 
 export interface ActivityMapItem {

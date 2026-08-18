@@ -85,6 +85,14 @@ export function useCurrentLocation() {
           setPermission("denied");
           setLocation({ lat: 41.0082, lng: 28.9784 });
         } else {
+          // "prompt" (izin henüz hiç sorulmamış) — bilinçli olarak burada
+          // `request()` çağrılmıyor: `map/page.tsx` bu durumda dismissible
+          // `LocationPermissionCard`'ı gösterip kullanıcı "Konumu Paylaş"a
+          // basana kadar tarayıcının native izin diyaloğunu açmıyor. `location`
+          // bu yüzden bilerek null kalabiliyor — ama bu, konumu *zorunlu*
+          // kılan ekranlarda (örn. `CreateActivityForm`) ayrıca ele alınmalı,
+          // aksi halde pin hiç yerleşmez ve gönderim sessizce hiçbir şey
+          // yapmaz (bkz. o dosyadaki `useEffect`).
           setPermission("prompt");
         }
       })
