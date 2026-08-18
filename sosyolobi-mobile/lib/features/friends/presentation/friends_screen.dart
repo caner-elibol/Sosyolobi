@@ -14,10 +14,9 @@ import '../domain/friend.dart';
 enum _FriendsTab { list, incoming, sent }
 
 /// Ports `sosyolobi-web-2/src/app/(user)/app/friends/page.tsx` — three-tab
-/// friends list / incoming requests / sent requests screen. Reached from
-/// [ProfileScreen]'s "Arkadaşlarım" entry (mobile has no room for a sixth
-/// bottom-nav tab, unlike web's dedicated nav item — see assumption note in
-/// the task summary).
+/// friends list / incoming requests / sent requests screen. Reached via the
+/// "Arkadaşlar" bottom-nav tab (`AppShell`), matching web's dedicated nav
+/// item — Profil moved to a top-bar icon to make room.
 class FriendsScreen extends ConsumerStatefulWidget {
   const FriendsScreen({super.key});
 

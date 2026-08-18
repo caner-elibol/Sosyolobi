@@ -45,24 +45,26 @@ class _FeedItem {
   final VoidCallback onOpen;
 }
 
-/// Ports `sosyolobi-web-2/src/app/(user)/app/notifications/page.tsx` — merges
-/// notifications + chat-unread summaries into one feed, sorted newest first.
+/// Ports `sosyolobi-web-2/src/components/app/*` bell-icon dropdown panel —
+/// merges notifications + chat-unread summaries into one feed, sorted newest
+/// first. Opening it auto-marks visible notifications as read (no separate
+/// "mark all read" action), matching web exactly.
 ///
-/// Web converted this from a page to a bell-icon dropdown panel where
-/// opening it auto-marks visible notifications as read (no separate
-/// "mark all read" action). A dedicated full-screen view is still a natural
-/// mobile pattern (kept here, unlike web's dropdown), but the auto-mark-on-
-/// open behavior is ported: opening this screen marks every currently
-/// fetched notification read exactly once, and the manual "mark all read"
-/// button is removed as redundant.
-class NotificationsScreen extends ConsumerStatefulWidget {
-  const NotificationsScreen({super.key});
+/// Rendered as the content of a `showModalBottomSheet` from [AppShell]'s
+/// bell button, which owns open/close *toggle* state — this widget itself
+/// has no `Scaffold`/`AppBar`, just a header row + list, so it drops
+/// straight into the sheet. This used to be a dedicated full-screen route
+/// (`NotificationsScreen`, pushed via `context.push`), but a plain push
+/// stacked a new screen on every tap instead of toggling one panel closed;
+/// the bottom-sheet approach mirrors web's single-instance dropdown.
+class NotificationsPanel extends ConsumerStatefulWidget {
+  const NotificationsPanel({super.key});
 
   @override
-  ConsumerState<NotificationsScreen> createState() => _NotificationsScreenState();
+  ConsumerState<NotificationsPanel> createState() => _NotificationsPanelState();
 }
 
-class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
+class _NotificationsPanelState extends ConsumerState<NotificationsPanel> {
   bool _markedThisOpen = false;
 
   void _maybeAutoMarkRead(List<AppNotification> notifications) {
@@ -84,33 +86,100 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final loadedNotifications = notificationsAsync.valueOrNull;
     if (loadedNotifications != null) _maybeAutoMarkRead(loadedNotifications);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Row(
-          children: [
-            const Text('Bildirimler'),
-            if (totalUnread > 0) ...[
-              const SizedBox(width: 8),
+    return DraggableScrollableSheet(
+      initialChildSize: 0.75,
+      minChildSize: 0.4,
+      maxChildSize: 0.92,
+      expand: false,
+      builder: (context, scrollController) {
+        return DecoratedBox(
+          decoration: const BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.vertical(
+              top: Radius.circular(AppRadius.xl),
+            ),
+          ),
+          child: Column(
+            children: [
+              const SizedBox(height: 10),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(AppRadius.full)),
-                child: Text('$totalUnread', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.border,
+                  borderRadius: BorderRadius.circular(AppRadius.full),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 14, 12, 8),
+                child: Row(
+                  children: [
+                    const Text(
+                      'Bildirimler',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    if (totalUnread > 0) ...[
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.accent,
+                          borderRadius: BorderRadius.circular(AppRadius.full),
+                        ),
+                        child: Text(
+                          '$totalUnread',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      ),
+                    ],
+                    const Spacer(),
+                    IconButton(
+                      onPressed: () => Navigator.of(context).maybePop(),
+                      icon: const Icon(Icons.close, size: 20),
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: AsyncValueWidget<List<AppNotification>>(
+                  value: notificationsAsync,
+                  data: (notifications) =>
+                      AsyncValueWidget<List<ChatUnreadSummary>>(
+                        value: chatUnreadAsync,
+                        data: (chatUnread) => _buildList(
+                          context,
+                          ref,
+                          notifications,
+                          chatUnread,
+                          scrollController,
+                        ),
+                      ),
+                ),
               ),
             ],
-          ],
-        ),
-      ),
-      body: AsyncValueWidget<List<AppNotification>>(
-        value: notificationsAsync,
-        data: (notifications) => AsyncValueWidget<List<ChatUnreadSummary>>(
-          value: chatUnreadAsync,
-          data: (chatUnread) => _buildList(context, ref, notifications, chatUnread),
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
-  Widget _buildList(BuildContext context, WidgetRef ref, List<AppNotification> notifications, List<ChatUnreadSummary> chatUnread) {
+  Widget _buildList(
+    BuildContext context,
+    WidgetRef ref,
+    List<AppNotification> notifications,
+    List<ChatUnreadSummary> chatUnread,
+    ScrollController scrollController,
+  ) {
     final now = DateTime.now();
     final items = <_FeedItem>[
       for (final n in notifications)
@@ -123,8 +192,12 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           isRead: n.isRead,
           createdAt: n.createdAt,
           onOpen: () {
-            if (!n.isRead) ref.read(notificationsControllerProvider.notifier).markRead(n.id);
-            if (n.relatedActivityId != null) context.push(RoutePaths.activityDetail(n.relatedActivityId!));
+            if (!n.isRead)
+              ref.read(notificationsControllerProvider.notifier).markRead(n.id);
+            if (n.relatedActivityId != null) {
+              Navigator.of(context).pop();
+              context.push(RoutePaths.activityDetail(n.relatedActivityId!));
+            }
           },
         ),
       for (final c in chatUnread)
@@ -137,6 +210,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           createdAt: now,
           onOpen: () {
             ref.read(chatUnreadProvider.notifier).markRead(c.chatRoomId);
+            Navigator.of(context).pop();
             context.push(RoutePaths.activityDetail(c.activityId));
           },
         ),
@@ -146,11 +220,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       return const EmptyStateWidget(
         icon: Icons.notifications_none,
         title: 'Henüz bildirim yok',
-        description: 'Etkinlik istekleri, sohbet mesajları ve güncellemeler burada görünecek.',
+        description:
+            'Etkinlik istekleri, sohbet mesajları ve güncellemeler burada görünecek.',
       );
     }
 
     return ListView.separated(
+      controller: scrollController,
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
       separatorBuilder: (context, index) => const SizedBox(height: 8),
@@ -163,7 +239,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: item.isRead ? AppColors.surface : AppColors.accentSoftBg,
-              border: Border.all(color: item.isRead ? AppColors.border : const Color(0xFFFFD580)),
+              border: Border.all(
+                color: item.isRead ? AppColors.border : const Color(0xFFFFD580),
+              ),
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
             child: Row(
@@ -173,24 +251,55 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                   width: 36,
                   height: 36,
                   decoration: BoxDecoration(
-                    color: item.isRead ? const Color(0xFFF3F4F6) : AppColors.surface,
+                    color: item.isRead
+                        ? const Color(0xFFF3F4F6)
+                        : AppColors.surface,
                     shape: BoxShape.circle,
                   ),
-                  child: Icon(item.icon, size: 17, color: item.isRead ? AppColors.mutedForeground : AppColors.accent),
+                  child: Icon(
+                    item.icon,
+                    size: 17,
+                    color: item.isRead
+                        ? AppColors.mutedForeground
+                        : AppColors.accent,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(item.title, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600)),
-                      if (item.message != null) Text(item.message!, style: const TextStyle(fontSize: 13, color: AppColors.mutedForeground)),
+                      Text(
+                        item.title,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      if (item.message != null)
+                        Text(
+                          item.message!,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.mutedForeground,
+                          ),
+                        ),
                       if (item.activityTitle != null)
-                        Text(item.activityTitle!, style: const TextStyle(fontSize: 12, color: AppColors.accent, fontWeight: FontWeight.w600)),
+                        Text(
+                          item.activityTitle!,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: AppColors.accent,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       const SizedBox(height: 4),
                       Text(
                         Formatters.dateTimeShort(item.createdAt),
-                        style: const TextStyle(fontSize: 11, color: AppColors.subtleForeground),
+                        style: const TextStyle(
+                          fontSize: 11,
+                          color: AppColors.subtleForeground,
+                        ),
                       ),
                     ],
                   ),
@@ -200,7 +309,10 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     margin: const EdgeInsets.only(top: 6),
                     width: 8,
                     height: 8,
-                    decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                    decoration: const BoxDecoration(
+                      color: AppColors.accent,
+                      shape: BoxShape.circle,
+                    ),
                   ),
               ],
             ),

@@ -28,12 +28,15 @@ export async function apiClient<T>(
 ): Promise<T> {
   const token = getToken();
 
+  const isFormData = options?.body instanceof FormData;
+
   const response = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}${url}`,
     {
       ...options,
       headers: {
-        "Content-Type": "application/json",
+        // FormData sets its own multipart boundary — an explicit Content-Type here would break it.
+        ...(isFormData ? {} : { "Content-Type": "application/json" }),
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
         ...(options?.headers ?? {}),
       },

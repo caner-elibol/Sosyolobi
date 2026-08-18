@@ -12,8 +12,9 @@ public static class DbInitializer
 
         await db.Database.MigrateAsync();
         await SeedData.SeedAsync(db);
+        await SeedData.SeedDummyActivitiesAsync(db);
 
-        if (env.IsDevelopment())
-            await SeedData.SeedDummyActivitiesAsync(db);
+        //if (env.IsDevelopment())
+        //    await SeedData.SeedDummyActivitiesAsync(db);
     }
 }

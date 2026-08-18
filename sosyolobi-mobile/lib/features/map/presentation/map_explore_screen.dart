@@ -17,7 +17,7 @@ import 'widgets/filter_chips.dart';
 import 'widgets/map_filter_dropdowns.dart';
 
 /// Full-screen, stable version of the map — pushed from [MapScreen]'s
-/// "Haritayı Büyüt" button (the small embedded preview is intentionally
+/// "Haritada Görüntüle" button (the small embedded preview is intentionally
 /// non-interactive; a live map inside that screen's scrolling list lost its
 /// markers on scroll). Has its own "küçült" (collapse/back) control to
 /// return to the list, per explicit request.

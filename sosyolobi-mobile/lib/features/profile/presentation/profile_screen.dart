@@ -10,7 +10,6 @@ import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/trust_badge.dart';
 import '../../../core/widgets/user_avatar.dart';
 import '../../auth/application/auth_notifier.dart';
-import '../../friends/application/friends_providers.dart';
 import '../application/profile_providers.dart';
 import '../domain/profile.dart';
 
@@ -72,14 +71,24 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
   }
 
   Future<void> _pickAvatar() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery, imageQuality: 85, maxWidth: 1024);
+    final picked = await ImagePicker().pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 85,
+      maxWidth: 1024,
+    );
     if (picked == null) return;
     setState(() => _uploadingAvatar = true);
     try {
       await ref.read(myProfileProvider.notifier).uploadAvatar(picked.path);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil fotoğrafı güncellendi.')));
+      if (mounted)
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Profil fotoğrafı güncellendi.')),
+        );
     } on ApiException {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Fotoğraf yüklenemedi.')));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Fotoğraf yüklenemedi.')));
     } finally {
       if (mounted) setState(() => _uploadingAvatar = false);
     }
@@ -96,16 +105,25 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
       _saving = true;
     });
     try {
-      await ref.read(myProfileProvider.notifier).updateProfile(
+      await ref
+          .read(myProfileProvider.notifier)
+          .updateProfile(
             displayName: name,
-            bio: _bioController.text.trim().isEmpty ? null : _bioController.text.trim(),
+            bio: _bioController.text.trim().isEmpty
+                ? null
+                : _bioController.text.trim(),
           );
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Profil güncellendi.')));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Profil güncellendi.')));
         setState(() => _editing = false);
       }
     } on ApiException {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Güncellenemedi.')));
+      if (mounted)
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Güncellenemedi.')));
     } finally {
       if (mounted) setState(() => _saving = false);
     }
@@ -130,7 +148,11 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
             children: [
               Stack(
                 children: [
-                  UserAvatar(displayName: profile.displayName, avatarUrl: profile.avatarUrl, size: 72),
+                  UserAvatar(
+                    displayName: profile.displayName,
+                    avatarUrl: profile.avatarUrl,
+                    size: 72,
+                  ),
                   Positioned(
                     bottom: -2,
                     right: -2,
@@ -147,8 +169,19 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                         ),
                         alignment: Alignment.center,
                         child: _uploadingAvatar
-                            ? const SizedBox(width: 12, height: 12, child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                            : const Icon(Icons.camera_alt, size: 14, color: Colors.white),
+                            ? const SizedBox(
+                                width: 12,
+                                height: 12,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(
+                                Icons.camera_alt,
+                                size: 14,
+                                color: Colors.white,
+                              ),
                       ),
                     ),
                   ),
@@ -159,13 +192,28 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(profile.displayName, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w700)),
+                    Text(
+                      profile.displayName,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
                     if (profile.bio != null && profile.bio!.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      Text(profile.bio!, style: const TextStyle(fontSize: 14, color: AppColors.mutedForeground)),
+                      Text(
+                        profile.bio!,
+                        style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.mutedForeground,
+                        ),
+                      ),
                     ],
                     const SizedBox(height: 8),
-                    TrustBadge(isPhoneVerified: profile.isPhoneVerified, rating: profile.averageRating),
+                    TrustBadge(
+                      isPhoneVerified: profile.isPhoneVerified,
+                      rating: profile.averageRating,
+                    ),
                   ],
                 ),
               ),
@@ -179,17 +227,37 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
         const SizedBox(height: 16),
         Row(
           children: [
-            Expanded(child: _StatCard(icon: Icons.check_circle_outline, label: 'Tamamlanan', value: '${profile.completedActivityCount}')),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.check_circle_outline,
+                label: 'Tamamlanan',
+                value: '${profile.completedActivityCount}',
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(icon: Icons.star_outline, label: 'Değerlendirme', value: profile.averageRating.toStringAsFixed(1))),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.star_outline,
+                label: 'Değerlendirme',
+                value: profile.averageRating.toStringAsFixed(1),
+              ),
+            ),
             const SizedBox(width: 12),
-            Expanded(child: _StatCard(icon: Icons.chat_bubble_outline, label: 'Yorum Sayısı', value: '${profile.reviewCount}')),
+            Expanded(
+              child: _StatCard(
+                icon: Icons.chat_bubble_outline,
+                label: 'Yorum Sayısı',
+                value: '${profile.reviewCount}',
+              ),
+            ),
           ],
         ),
         const SizedBox(height: 16),
-        const _FriendsEntry(),
-        const SizedBox(height: 12),
-        _ProfileLinkEntry(icon: Icons.flag_outlined, label: 'Raporlarım', onTap: () => context.push(RoutePaths.myReports)),
+        _ProfileLinkEntry(
+          icon: Icons.flag_outlined,
+          label: 'Raporlarım',
+          onTap: () => context.push(RoutePaths.myReports),
+        ),
         if (_editing) ...[
           const SizedBox(height: 16),
           Container(
@@ -202,15 +270,31 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text('Profili Düzenle', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                const Text(
+                  'Profili Düzenle',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+                ),
                 const SizedBox(height: 16),
-                const Text('İsim Soyisim', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                const Text(
+                  'İsim Soyisim',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(height: 6),
-                TextField(controller: _nameController, decoration: InputDecoration(errorText: _nameError)),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(errorText: _nameError),
+                ),
                 const SizedBox(height: 14),
-                const Text('Hakkımda', style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500)),
+                const Text(
+                  'Hakkımda',
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                ),
                 const SizedBox(height: 6),
-                TextField(controller: _bioController, maxLines: 3, maxLength: 200),
+                TextField(
+                  controller: _bioController,
+                  maxLines: 3,
+                  maxLength: 200,
+                ),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
@@ -225,7 +309,9 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
         const SizedBox(height: 16),
         OutlinedButton.icon(
           onPressed: () => ref.read(authNotifierProvider.notifier).logout(),
-          style: OutlinedButton.styleFrom(foregroundColor: AppColors.destructive),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.destructive,
+          ),
           icon: const Icon(Icons.logout, size: 16),
           label: const Text('Çıkış Yap'),
         ),
@@ -234,45 +320,12 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
   }
 }
 
-/// Entry point into [FriendsScreen] — mobile has no room for a sixth
-/// bottom-nav tab (web adds a dedicated "Arkadaşlar" nav item), so it hangs
-/// off the profile screen instead. Shows an incoming-request count badge so
-/// pending requests aren't missed.
-class _FriendsEntry extends ConsumerWidget {
-  const _FriendsEntry();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final incomingCount = ref.watch(incomingFriendRequestsProvider).valueOrNull?.length ?? 0;
-
-    return InkWell(
-      onTap: () => context.push(RoutePaths.friends),
-      borderRadius: BorderRadius.circular(AppRadius.xl),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(AppRadius.xl)),
-        child: Row(
-          children: [
-            const Icon(Icons.people_outline, size: 20, color: AppColors.accent),
-            const SizedBox(width: 12),
-            const Expanded(child: Text('Arkadaşlarım', style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
-            if (incomingCount > 0)
-              Container(
-                margin: const EdgeInsets.only(right: 8),
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
-                decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(AppRadius.full)),
-                child: Text('$incomingCount', style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w600)),
-              ),
-            const Icon(Icons.chevron_right, size: 20, color: AppColors.mutedForeground),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _ProfileLinkEntry extends StatelessWidget {
-  const _ProfileLinkEntry({required this.icon, required this.label, required this.onTap});
+  const _ProfileLinkEntry({
+    required this.icon,
+    required this.label,
+    required this.onTap,
+  });
 
   final IconData icon;
   final String label;
@@ -285,13 +338,29 @@ class _ProfileLinkEntry extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppRadius.xl),
       child: Container(
         padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(AppRadius.xl)),
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppRadius.xl),
+        ),
         child: Row(
           children: [
             Icon(icon, size: 20, color: AppColors.accent),
             const SizedBox(width: 12),
-            Expanded(child: Text(label, style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600))),
-            const Icon(Icons.chevron_right, size: 20, color: AppColors.mutedForeground),
+            Expanded(
+              child: Text(
+                label,
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            const Icon(
+              Icons.chevron_right,
+              size: 20,
+              color: AppColors.mutedForeground,
+            ),
           ],
         ),
       ),
@@ -300,7 +369,11 @@ class _ProfileLinkEntry extends StatelessWidget {
 }
 
 class _StatCard extends StatelessWidget {
-  const _StatCard({required this.icon, required this.label, required this.value});
+  const _StatCard({
+    required this.icon,
+    required this.label,
+    required this.value,
+  });
 
   final IconData icon;
   final String label;
@@ -319,9 +392,19 @@ class _StatCard extends StatelessWidget {
         children: [
           Icon(icon, size: 20, color: AppColors.accent),
           const SizedBox(height: 6),
-          Text(value, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700)),
+          Text(
+            value,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w700),
+          ),
           const SizedBox(height: 2),
-          Text(label, style: const TextStyle(fontSize: 11, color: AppColors.mutedForeground), textAlign: TextAlign.center),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 11,
+              color: AppColors.mutedForeground,
+            ),
+            textAlign: TextAlign.center,
+          ),
         ],
       ),
     );

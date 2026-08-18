@@ -104,7 +104,9 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
         <div style={{
           position: "relative",
           height: 180,
-          background: `linear-gradient(135deg, ${categoryColor} 0%, color-mix(in srgb, ${categoryColor} 70%, black) 100%)`,
+          background: activity.categoryImageUrl
+            ? `linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.25) 100%), url(${activity.categoryImageUrl}) center/cover no-repeat`
+            : `linear-gradient(135deg, ${categoryColor} 0%, color-mix(in srgb, ${categoryColor} 70%, black) 100%)`,
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
@@ -130,7 +132,7 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
           >
             <ArrowLeft size={18} color="var(--color-foreground)" />
           </button>
-          <CategoryIcon size={56} color="rgba(255,255,255,0.85)" strokeWidth={1.75} />
+          {!activity.categoryImageUrl && <CategoryIcon size={56} color="rgba(255,255,255,0.85)" strokeWidth={1.75} />}
         </div>
 
         <div style={{ padding: "16px 16px 0" }}>

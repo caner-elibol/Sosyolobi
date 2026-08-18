@@ -209,6 +209,8 @@ export interface AdminCategoryItem {
   sortOrder: number;
   isActive: boolean;
   activityCount: number;
+  imageUrl?: string | null;
+  imageIsCustom?: boolean;
 }
 
 export interface AdminCategoryRequest {

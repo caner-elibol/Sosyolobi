@@ -44,3 +44,29 @@ export function useUpdateCategoryStatus() {
     onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "categories"] }),
   });
 }
+
+export function useUploadCategoryImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, file }: { id: string; file: File }) => {
+      const formData = new FormData();
+      formData.append("File", file);
+      return apiClient<AdminCategoryItem>(`/api/admin/categories/${id}/image`, {
+        method: "POST",
+        body: formData,
+      });
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "categories"] }),
+  });
+}
+
+export function useRemoveCategoryImage() {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) =>
+      apiClient<AdminCategoryItem>(`/api/admin/categories/${id}/image`, {
+        method: "DELETE",
+      }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "categories"] }),
+  });
+}

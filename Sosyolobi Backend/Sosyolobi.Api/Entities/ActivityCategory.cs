@@ -9,6 +9,7 @@ public class ActivityCategory
     public string? Color { get; set; }
     public string? ImageUrl { get; set; }
     public DateTime? ImageFetchedAt { get; set; }
+    public bool ImageIsCustom { get; set; }
     public bool IsActive { get; set; } = true;
     public int SortOrder { get; set; }
 

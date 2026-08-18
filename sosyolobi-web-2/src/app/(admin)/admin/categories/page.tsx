@@ -1,14 +1,21 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { toast } from "sonner";
-import { Plus, Pencil, Tag } from "lucide-react";
+import { Plus, Pencil, Tag, ImageIcon, X } from "lucide-react";
 import { BooleanBadge } from "@/components/admin/StatusBadge";
 import { EmptyState } from "@/components/admin/EmptyState";
-import { useCategories, useCreateCategory, useUpdateCategory, useUpdateCategoryStatus } from "@/features/admin/categories/useCategories";
+import {
+  useCategories,
+  useCreateCategory,
+  useUpdateCategory,
+  useUpdateCategoryStatus,
+  useUploadCategoryImage,
+  useRemoveCategoryImage,
+} from "@/features/admin/categories/useCategories";
 import type { AdminCategoryItem, AdminCategoryRequest } from "@/types/admin";
 
 const schema = z.object({
@@ -32,24 +39,52 @@ export default function CategoriesPage() {
   const createCategory = useCreateCategory();
   const updateCategory = useUpdateCategory();
   const updateStatus = useUpdateCategoryStatus();
+  const uploadImage = useUploadCategoryImage();
+  const removeImage = useRemoveCategoryImage();
 
   const [panelOpen, setPanelOpen] = useState(false);
   const [editing, setEditing] = useState<AdminCategoryItem | null>(null);
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(schema),
     defaultValues: { isActive: true, sortOrder: 0 },
   });
 
+  // Keep `editing` in sync with the latest fetched list (e.g. after an image upload/remove)
+  // so the side-panel preview reflects the new imageUrl without a manual re-open.
+  useEffect(() => {
+    if (!editing) return;
+    const fresh = categories?.find((c) => c.id === editing.id);
+    if (fresh && fresh !== editing) setEditing(fresh);
+  }, [categories, editing]);
+
+  function resetImageSelection() {
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    setImageFile(null);
+    setImagePreviewUrl(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  }
+
   function openCreate() {
     setEditing(null);
+    resetImageSelection();
     form.reset({ name: "", slug: "", iconName: "", color: "", sortOrder: 0, isActive: true });
     setPanelOpen(true);
   }
   function openEdit(cat: AdminCategoryItem) {
     setEditing(cat);
+    resetImageSelection();
     form.reset({ name: cat.name, slug: cat.slug, iconName: cat.iconName ?? "", color: cat.color ?? "", sortOrder: cat.sortOrder, isActive: cat.isActive });
     setPanelOpen(true);
+  }
+
+  function onImageSelected(file: File | null) {
+    if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+    setImageFile(file);
+    setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
   }
 
   async function onSubmit(values: FormValues) {
@@ -64,6 +99,21 @@ export default function CategoriesPage() {
   async function toggleStatus(cat: AdminCategoryItem) {
     try { await updateStatus.mutateAsync({ id: cat.id, isActive: !cat.isActive }); toast.success("Durum güncellendi."); }
     catch { toast.error("İşlem başarısız."); }
+  }
+
+  async function uploadSelectedImage() {
+    if (!editing || !imageFile) return;
+    try {
+      await uploadImage.mutateAsync({ id: editing.id, file: imageFile });
+      resetImageSelection();
+      toast.success("Resim yüklendi.");
+    } catch { toast.error("Resim yüklenemedi."); }
+  }
+
+  async function removeCurrentImage() {
+    if (!editing) return;
+    try { await removeImage.mutateAsync(editing.id); toast.success("Resim kaldırıldı, otomatik görsele dönüldü."); }
+    catch { toast.error("Resim kaldırılamadı."); }
   }
 
   const cats = categories ?? [];
@@ -106,8 +156,16 @@ export default function CategoriesPage() {
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}>
                   <td style={{ padding: "13px 18px", fontSize: 13, color: "#6B7280" }}>{cat.sortOrder}</td>
                   <td style={{ padding: "13px 18px" }}>
-                    <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                      {cat.color && <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: cat.color }} />}
+                    <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                      {cat.imageUrl ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={cat.imageUrl} alt="" style={{ width: 28, height: 28, borderRadius: 8, objectFit: "cover", flexShrink: 0 }} />
+                      ) : (
+                        <div style={{ width: 28, height: 28, borderRadius: 8, backgroundColor: "#F4F5F9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                          <ImageIcon size={13} color="#C7CAD6" />
+                        </div>
+                      )}
+                      {cat.color && <div style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: cat.color, flexShrink: 0 }} />}
                       <span style={{ fontSize: 14, fontWeight: 600, color: "#1B1D29" }}>{cat.name}</span>
                     </div>
                   </td>
@@ -162,6 +220,55 @@ export default function CategoriesPage() {
                   <input {...form.register(name)} placeholder={placeholder} style={INPUT} />
                 </div>
               ))}
+
+              <div>
+                <label style={{ fontSize: 12, fontWeight: 500, color: "#6B7280", display: "block", marginBottom: 5 }}>
+                  Kategori Resmi {editing?.imageIsCustom && <span style={{ color: "#5B5FE9", fontWeight: 600 }}>(Özel)</span>}
+                </label>
+                <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+                  {imagePreviewUrl || editing?.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={imagePreviewUrl ?? editing!.imageUrl!} alt="" style={{ width: 64, height: 64, borderRadius: 10, objectFit: "cover", flexShrink: 0, border: "1px solid #EBEBF0" }} />
+                  ) : (
+                    <div style={{ width: 64, height: 64, borderRadius: 10, backgroundColor: "#F4F5F9", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      <ImageIcon size={20} color="#C7CAD6" />
+                    </div>
+                  )}
+                  <div style={{ display: "flex", flexDirection: "column", gap: 6, flex: 1 }}>
+                    <input
+                      ref={fileInputRef}
+                      type="file"
+                      accept="image/jpeg,image/png,image/webp"
+                      onChange={(e) => onImageSelected(e.target.files?.[0] ?? null)}
+                      style={{ fontSize: 11 }}
+                    />
+                    {!editing && <span style={{ fontSize: 11, color: "#9CA3AF" }}>Resim yüklemek için önce kategoriyi oluşturun.</span>}
+                    {editing && (
+                      <div style={{ display: "flex", gap: 6 }}>
+                        {imageFile && (
+                          <>
+                            <button type="button" onClick={uploadSelectedImage} disabled={uploadImage.isPending}
+                              style={{ height: 28, padding: "0 10px", borderRadius: 6, border: "none", backgroundColor: "#5B5FE9", color: "#fff", fontSize: 11, fontWeight: 600, cursor: "pointer" }}>
+                              {uploadImage.isPending ? "Yükleniyor..." : "Yükle"}
+                            </button>
+                            <button type="button" onClick={resetImageSelection}
+                              style={{ height: 28, width: 28, borderRadius: 6, border: "1px solid #F0F1F5", backgroundColor: "#fff", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center", color: "#6B7280" }}>
+                              <X size={12} />
+                            </button>
+                          </>
+                        )}
+                        {!imageFile && editing.imageUrl && (
+                          <button type="button" onClick={removeCurrentImage} disabled={removeImage.isPending}
+                            style={{ height: 28, padding: "0 10px", borderRadius: 6, border: "1px solid #F0F1F5", backgroundColor: "#fff", fontSize: 11, fontWeight: 500, cursor: "pointer", color: "#DC2626" }}>
+                            Resmi Kaldır
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+
               <div>
                 <label style={{ fontSize: 12, fontWeight: 500, color: "#6B7280", display: "block", marginBottom: 5 }}>Sıralama</label>
                 <input type="number" {...form.register("sortOrder", { valueAsNumber: true })} style={INPUT} />

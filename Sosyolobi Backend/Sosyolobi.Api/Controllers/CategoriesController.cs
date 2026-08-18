@@ -32,7 +32,7 @@ public class CategoriesController : ControllerBase
             .ToListAsync();
 
         var stale = categories
-            .Where(c => c.ImageUrl is null || c.ImageFetchedAt is null || c.ImageFetchedAt < DateTime.UtcNow - ImageCacheDuration)
+            .Where(c => !c.ImageIsCustom && (c.ImageUrl is null || c.ImageFetchedAt is null || c.ImageFetchedAt < DateTime.UtcNow - ImageCacheDuration))
             .ToList();
 
         if (stale.Count > 0)

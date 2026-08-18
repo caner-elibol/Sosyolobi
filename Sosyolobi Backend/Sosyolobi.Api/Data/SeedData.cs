@@ -69,7 +69,7 @@ public static class SeedData
             var user = new User
             {
                 Id = Guid.CreateVersion7(),
-                PhoneNumber = $"{DummyPhonePrefix}{i:D4}",
+                PhoneNumber = $"{DummyPhonePrefix}{i:D7}",
                 IsPhoneVerified = true,
                 Role = "User",
                 Status = UserStatus.Active,

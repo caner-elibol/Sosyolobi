@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http;
 using Sosyolobi.Api.DTOs.Activities;
 using Sosyolobi.Api.DTOs.Admin;
 using Sosyolobi.Api.DTOs.Common;
@@ -27,4 +28,6 @@ public interface IAdminService
     Task<AdminCategoryResponse> CreateCategoryAsync(AdminCategoryRequest request);
     Task UpdateCategoryAsync(Guid categoryId, AdminCategoryRequest request);
     Task UpdateCategoryStatusAsync(Guid categoryId, bool isActive);
+    Task<AdminCategoryResponse> UploadCategoryImageAsync(Guid categoryId, IFormFile file, string baseUrl);
+    Task<AdminCategoryResponse> RemoveCategoryImageAsync(Guid categoryId);
 }

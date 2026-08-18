@@ -11,8 +11,10 @@ import '../../features/auth/presentation/login_screen.dart';
 import '../../features/auth/presentation/splash_screen.dart';
 import '../../features/auth/presentation/verify_screen.dart';
 import '../../features/friends/presentation/friends_screen.dart';
+import '../../features/map/application/current_location_provider.dart';
+import '../../features/map/domain/current_location.dart';
+import '../../features/map/presentation/location_gate_screen.dart';
 import '../../features/map/presentation/map_screen.dart';
-import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
 import '../../features/requests/presentation/requests_screen.dart';
@@ -23,12 +25,22 @@ import 'route_paths.dart';
 part 'app_router.g.dart';
 
 /// Async-aware [Listenable] that notifies `go_router` whenever
-/// [authNotifierProvider] settles into a new value, so `redirect` re-runs
-/// without the router needing to poll or the app needing an extra rebuild.
+/// [authNotifierProvider] or [currentLocationNotifierProvider] settles into
+/// a new value, so `redirect` re-runs without the router needing to poll or
+/// the app needing an extra rebuild. The location listener also has a side
+/// effect: since this listenable lives as long as the (keepAlive) router
+/// provider, it keeps `currentLocationNotifierProvider` from auto-disposing
+/// for the whole app session — needed so permission state resolved on
+/// [LocationGateScreen] survives navigating away from it.
 class _AuthRefreshListenable extends ChangeNotifier {
   _AuthRefreshListenable(Ref ref) {
     ref.listen(authNotifierProvider, (previous, next) {
       if (previous?.value?.isAuthenticated != next.value?.isAuthenticated) {
+        notifyListeners();
+      }
+    });
+    ref.listen(currentLocationNotifierProvider, (previous, next) {
+      if (previous?.value?.permissionState != next.value?.permissionState) {
         notifyListeners();
       }
     });
@@ -50,15 +62,34 @@ GoRouter appRouter(Ref ref) {
       // flash a real screen (e.g. /app/map, with real side effects like a
       // location-permission prompt) before the auth check resolves.
       if (!authState.hasValue) {
-        return state.matchedLocation == RoutePaths.splash ? null : RoutePaths.splash;
+        return state.matchedLocation == RoutePaths.splash
+            ? null
+            : RoutePaths.splash;
       }
 
       final loggedIn = authState.value?.isAuthenticated ?? false;
       final onAuthRoute = state.matchedLocation.startsWith('/auth');
       final onSplash = state.matchedLocation == RoutePaths.splash;
+      final onLocationGate = state.matchedLocation == RoutePaths.locationGate;
 
       if (!loggedIn && (!onAuthRoute || onSplash)) return RoutePaths.login;
-      if (loggedIn && (onAuthRoute || onSplash)) return RoutePaths.map;
+
+      if (loggedIn) {
+        // Location is mandatory: every authenticated user is funneled through
+        // the gate first, on every cold start, until permission is granted —
+        // not just once at signup. `ref.read` here (not watch) is fine
+        // because `currentLocationNotifierProvider` changes are what drive
+        // `_AuthRefreshListenable` to re-trigger this whole callback.
+        final locationGranted =
+            ref
+                .read(currentLocationNotifierProvider)
+                .valueOrNull
+                ?.permissionState ==
+            LocationPermissionState.granted;
+        if (!locationGranted)
+          return onLocationGate ? null : RoutePaths.locationGate;
+        if (onAuthRoute || onSplash || onLocationGate) return RoutePaths.map;
+      }
       return null;
     },
     routes: [
@@ -72,10 +103,16 @@ GoRouter appRouter(Ref ref) {
       ),
       GoRoute(
         path: RoutePaths.verify,
-        builder: (context, state) => VerifyScreen(phoneNumber: state.extra as String? ?? ''),
+        builder: (context, state) =>
+            VerifyScreen(phoneNumber: state.extra as String? ?? ''),
+      ),
+      GoRoute(
+        path: RoutePaths.locationGate,
+        builder: (context, state) => const LocationGateScreen(),
       ),
       ShellRoute(
-        builder: (context, state, child) => AppShell(location: state.matchedLocation, child: child),
+        builder: (context, state, child) =>
+            AppShell(location: state.matchedLocation, child: child),
         routes: [
           GoRoute(
             path: RoutePaths.map,
@@ -91,15 +128,12 @@ GoRouter appRouter(Ref ref) {
           ),
           GoRoute(
             path: RoutePaths.activityDetailPattern,
-            builder: (context, state) => ActivityDetailScreen(activityId: state.pathParameters['id']!),
+            builder: (context, state) =>
+                ActivityDetailScreen(activityId: state.pathParameters['id']!),
           ),
           GoRoute(
             path: RoutePaths.requests,
             builder: (context, state) => const RequestsScreen(),
-          ),
-          GoRoute(
-            path: RoutePaths.notifications,
-            builder: (context, state) => const NotificationsScreen(),
           ),
           GoRoute(
             path: RoutePaths.profile,
@@ -107,7 +141,8 @@ GoRouter appRouter(Ref ref) {
           ),
           GoRoute(
             path: RoutePaths.publicProfilePattern,
-            builder: (context, state) => PublicProfileScreen(userId: state.pathParameters['userId']!),
+            builder: (context, state) =>
+                PublicProfileScreen(userId: state.pathParameters['userId']!),
           ),
           GoRoute(
             path: RoutePaths.friends,

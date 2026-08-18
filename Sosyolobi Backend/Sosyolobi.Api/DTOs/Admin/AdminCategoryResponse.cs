@@ -10,4 +10,6 @@ public class AdminCategoryResponse
     public int SortOrder { get; set; }
     public bool IsActive { get; set; }
     public int ActivityCount { get; set; }
+    public string? ImageUrl { get; set; }
+    public bool ImageIsCustom { get; set; }
 }

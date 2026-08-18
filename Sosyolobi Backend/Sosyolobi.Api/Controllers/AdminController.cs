@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Sosyolobi.Api.DTOs.Activities;
 using Sosyolobi.Api.DTOs.Admin;
@@ -167,5 +168,27 @@ public class AdminController : ControllerBase
     {
         await _adminService.UpdateCategoryStatusAsync(id, isActive);
         return Ok(ApiResponse<object>.Ok(null, "Kategori durumu güncellendi."));
+    }
+
+    public sealed class UploadCategoryImageRequest
+    {
+        public IFormFile File { get; set; } = default!;
+    }
+
+    [HttpPost("categories/{id:guid}/image")]
+    [Consumes("multipart/form-data")]
+    [RequestSizeLimit(5_000_000)]
+    public async Task<IActionResult> UploadCategoryImage(Guid id, [FromForm] UploadCategoryImageRequest request)
+    {
+        var baseUrl = $"{Request.Scheme}://{Request.Host}";
+        var result = await _adminService.UploadCategoryImageAsync(id, request.File, baseUrl);
+        return Ok(ApiResponse<AdminCategoryResponse>.Ok(result, "Kategori resmi yüklendi."));
+    }
+
+    [HttpDelete("categories/{id:guid}/image")]
+    public async Task<IActionResult> RemoveCategoryImage(Guid id)
+    {
+        var result = await _adminService.RemoveCategoryImageAsync(id);
+        return Ok(ApiResponse<AdminCategoryResponse>.Ok(result, "Kategori resmi kaldırıldı."));
     }
 }

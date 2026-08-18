@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Sosyolobi.Api.Data;
 using Sosyolobi.Api.DTOs.Activities;
@@ -11,9 +13,20 @@ namespace Sosyolobi.Api.Services;
 
 public class AdminService : IAdminService
 {
-    private readonly AppDbContext _db;
+    private static readonly HashSet<string> AllowedImageContentTypes = new(StringComparer.OrdinalIgnoreCase)
+    {
+        "image/jpeg", "image/png", "image/webp"
+    };
+    private const long MaxCategoryImageSizeBytes = 5 * 1024 * 1024;
 
-    public AdminService(AppDbContext db) => _db = db;
+    private readonly AppDbContext _db;
+    private readonly IWebHostEnvironment _env;
+
+    public AdminService(AppDbContext db, IWebHostEnvironment env)
+    {
+        _db = db;
+        _env = env;
+    }
 
     // ── Dashboard ─────────────────────────────────────────────────────────
 
@@ -342,7 +355,9 @@ public class AdminService : IAdminService
                 Color = c.Color,
                 SortOrder = c.SortOrder,
                 IsActive = c.IsActive,
-                ActivityCount = c.Activities.Count
+                ActivityCount = c.Activities.Count,
+                ImageUrl = c.ImageUrl,
+                ImageIsCustom = c.ImageIsCustom
             })
             .ToListAsync();
     }
@@ -371,7 +386,9 @@ public class AdminService : IAdminService
             Color = category.Color,
             SortOrder = category.SortOrder,
             IsActive = category.IsActive,
-            ActivityCount = 0
+            ActivityCount = 0,
+            ImageUrl = null,
+            ImageIsCustom = false
         };
     }
 
@@ -396,5 +413,78 @@ public class AdminService : IAdminService
 
         category.IsActive = isActive;
         await _db.SaveChangesAsync();
+    }
+
+    public async Task<AdminCategoryResponse> UploadCategoryImageAsync(Guid categoryId, IFormFile file, string baseUrl)
+    {
+        if (file.Length == 0)
+            throw new ArgumentException("Dosya boş.");
+        if (file.Length > MaxCategoryImageSizeBytes)
+            throw new ArgumentException("Dosya boyutu 5 MB'ı aşamaz.");
+        if (!AllowedImageContentTypes.Contains(file.ContentType))
+            throw new ArgumentException("Sadece JPEG, PNG veya WEBP yüklenebilir.");
+
+        var category = await _db.ActivityCategories.FindAsync(categoryId)
+            ?? throw new KeyNotFoundException("Kategori bulunamadı.");
+
+        var extension = file.ContentType switch
+        {
+            "image/jpeg" => ".jpg",
+            "image/png" => ".png",
+            "image/webp" => ".webp",
+            _ => ".jpg"
+        };
+        var fileName = $"{Guid.CreateVersion7()}{extension}";
+        var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+        var categoriesDir = Path.Combine(webRoot, "categories");
+        Directory.CreateDirectory(categoriesDir);
+        var filePath = Path.Combine(categoriesDir, fileName);
+
+        using (var stream = new FileStream(filePath, FileMode.Create))
+            await file.CopyToAsync(stream);
+
+        category.ImageUrl = $"{baseUrl}/categories/{fileName}";
+        category.ImageFetchedAt = DateTime.UtcNow;
+        category.ImageIsCustom = true;
+        await _db.SaveChangesAsync();
+
+        return new AdminCategoryResponse
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Slug = category.Slug,
+            IconName = category.IconName,
+            Color = category.Color,
+            SortOrder = category.SortOrder,
+            IsActive = category.IsActive,
+            ActivityCount = await _db.Activities.CountAsync(a => a.CategoryId == category.Id),
+            ImageUrl = category.ImageUrl,
+            ImageIsCustom = category.ImageIsCustom
+        };
+    }
+
+    public async Task<AdminCategoryResponse> RemoveCategoryImageAsync(Guid categoryId)
+    {
+        var category = await _db.ActivityCategories.FindAsync(categoryId)
+            ?? throw new KeyNotFoundException("Kategori bulunamadı.");
+
+        category.ImageUrl = null;
+        category.ImageFetchedAt = null;
+        category.ImageIsCustom = false;
+        await _db.SaveChangesAsync();
+
+        return new AdminCategoryResponse
+        {
+            Id = category.Id,
+            Name = category.Name,
+            Slug = category.Slug,
+            IconName = category.IconName,
+            Color = category.Color,
+            SortOrder = category.SortOrder,
+            IsActive = category.IsActive,
+            ActivityCount = await _db.Activities.CountAsync(a => a.CategoryId == category.Id),
+            ImageUrl = null,
+            ImageIsCustom = false
+        };
     }
 }

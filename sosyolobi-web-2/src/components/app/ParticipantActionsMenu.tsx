@@ -3,8 +3,14 @@
 import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { useBlockUser } from "@/hooks/useUserActions";
+import {
+  useFriendStatus,
+  useSendFriendRequest,
+  useIncomingFriendRequests,
+  useSentFriendRequests,
+} from "@/hooks/useFriends";
 import { ReportUserModal } from "@/components/app/ReportUserModal";
-import { Flag, MoreVertical, ShieldOff } from "lucide-react";
+import { Flag, MoreVertical, ShieldOff, UserCheck, UserPlus, UserX } from "lucide-react";
 
 interface ParticipantActionsMenuProps {
   userId: string;
@@ -16,6 +22,11 @@ export function ParticipantActionsMenu({ userId, displayName }: ParticipantActio
   const [reportOpen, setReportOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const block = useBlockUser();
+
+  const { status: friendStatus, request: friendRequest } = useFriendStatus(userId);
+  const sendFriendRequest = useSendFriendRequest();
+  const { accept: acceptFriendRequest } = useIncomingFriendRequests();
+  const { cancel: cancelFriendRequest } = useSentFriendRequests();
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -33,6 +44,16 @@ export function ParticipantActionsMenu({ userId, displayName }: ParticipantActio
       onSuccess: () => toast.success("Kullanıcı engellendi."),
       onError: () => toast.error("Kullanıcı engellenemedi."),
     });
+  }
+
+  async function handleFriendAction(fn: () => Promise<unknown>, success: string) {
+    setMenuOpen(false);
+    try {
+      await fn();
+      toast.success(success);
+    } catch {
+      toast.error("İşlem başarısız.");
+    }
   }
 
   return (
@@ -66,9 +87,33 @@ export function ParticipantActionsMenu({ userId, displayName }: ParticipantActio
           overflow: "hidden",
           border: "1px solid var(--color-border)",
         }}>
+          {friendStatus === "pending-sent" && friendRequest && (
+            <button
+              onClick={() => handleFriendAction(() => cancelFriendRequest.mutateAsync(friendRequest.id), "İstek iptal edildi.")}
+              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", cursor: "pointer" }}
+            >
+              <UserX size={14} /> İsteği İptal Et
+            </button>
+          )}
+          {friendStatus === "pending-incoming" && friendRequest && (
+            <button
+              onClick={() => handleFriendAction(() => acceptFriendRequest.mutateAsync(friendRequest.id), "Arkadaşlık isteği kabul edildi.")}
+              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", cursor: "pointer" }}
+            >
+              <UserCheck size={14} /> İsteği Kabul Et
+            </button>
+          )}
+          {friendStatus === "none" && (
+            <button
+              onClick={() => handleFriendAction(() => sendFriendRequest.mutateAsync(userId), "Arkadaşlık isteği gönderildi.")}
+              style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", cursor: "pointer" }}
+            >
+              <UserPlus size={14} /> Arkadaş Ekle
+            </button>
+          )}
           <button
             onClick={() => { setReportOpen(true); setMenuOpen(false); }}
-            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", borderTop: friendStatus !== "friends" ? "1px solid var(--color-border)" : "none", cursor: "pointer" }}
           >
             <Flag size={14} /> Şikayet Et
           </button>

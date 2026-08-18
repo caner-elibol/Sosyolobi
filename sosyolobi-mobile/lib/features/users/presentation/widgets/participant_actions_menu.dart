@@ -3,15 +3,30 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/api_error_snackbar.dart';
+import '../../../friends/application/friends_providers.dart';
 import '../../application/users_actions_provider.dart';
 import 'report_user_dialog.dart';
 
-/// Ports `sosyolobi-web-2/src/components/app/ParticipantActionsMenu.tsx`.
+/// Ports `sosyolobi-web-2/src/components/app/ParticipantActionsMenu.tsx` —
+/// including its friend-request item, added alongside report/block so that
+/// adding a friend is reachable from the same one-tap menu instead of only
+/// from the full profile screen ([FriendActionButton]).
 class ParticipantActionsMenu extends ConsumerWidget {
   const ParticipantActionsMenu({required this.userId, required this.displayName, super.key});
 
   final String userId;
   final String displayName;
+
+  Future<void> _handleFriendAction(BuildContext context, WidgetRef ref, Future<void> Function() action, String successMessage) async {
+    await action();
+    if (!context.mounted) return;
+    final state = ref.read(friendActionsControllerProvider);
+    if (state.hasError) {
+      showApiErrorSnackBar(context, state.error!);
+      return;
+    }
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(successMessage)));
+  }
 
   Future<void> _handleBlock(BuildContext context, WidgetRef ref) async {
     final confirmed = await showDialog<bool>(
@@ -39,6 +54,9 @@ class ParticipantActionsMenu extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final friendInfo = ref.watch(friendStatusProvider(userId));
+    final friendActions = ref.read(friendActionsControllerProvider.notifier);
+
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, size: 18, color: AppColors.mutedForeground),
       onSelected: (value) {
@@ -46,9 +64,27 @@ class ParticipantActionsMenu extends ConsumerWidget {
           showReportUserDialog(context, userId: userId, displayName: displayName);
         } else if (value == 'block') {
           _handleBlock(context, ref);
+        } else if (value == 'friend-add') {
+          _handleFriendAction(context, ref, () => friendActions.sendRequest(userId), 'Arkadaşlık isteği gönderildi.');
+        } else if (value == 'friend-cancel') {
+          final requestId = friendInfo.request?.id;
+          if (requestId != null) {
+            _handleFriendAction(context, ref, () => friendActions.cancel(requestId, userId: userId), 'İstek iptal edildi.');
+          }
+        } else if (value == 'friend-accept') {
+          final requestId = friendInfo.request?.id;
+          if (requestId != null) {
+            _handleFriendAction(context, ref, () => friendActions.accept(requestId, userId: userId), 'Arkadaşlık isteği kabul edildi.');
+          }
         }
       },
       itemBuilder: (context) => [
+        if (friendInfo.status == FriendStatus.none)
+          const PopupMenuItem(value: 'friend-add', child: Row(children: [Icon(Icons.person_add_alt_1, size: 16), SizedBox(width: 8), Text('Arkadaş Ekle')])),
+        if (friendInfo.status == FriendStatus.pendingSent)
+          const PopupMenuItem(value: 'friend-cancel', child: Row(children: [Icon(Icons.person_remove_outlined, size: 16), SizedBox(width: 8), Text('İsteği İptal Et')])),
+        if (friendInfo.status == FriendStatus.pendingIncoming)
+          const PopupMenuItem(value: 'friend-accept', child: Row(children: [Icon(Icons.how_to_reg, size: 16), SizedBox(width: 8), Text('İsteği Kabul Et')])),
         const PopupMenuItem(value: 'report', child: Row(children: [Icon(Icons.flag_outlined, size: 16), SizedBox(width: 8), Text('Şikayet Et')])),
         const PopupMenuItem(
           value: 'block',

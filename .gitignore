@@ -12,6 +12,7 @@ Sosyolobi Backend/Sosyolobi.Api/wwwroot/categories/*
 # Build outputs
 bin/
 obj/
+.shots
 
 # .NET
 *.user

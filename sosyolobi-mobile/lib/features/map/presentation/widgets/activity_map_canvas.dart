@@ -11,30 +11,48 @@ import 'cluster_breakdown_sheet.dart';
 
 const _openFreeMapStyle = 'https://tiles.openfreemap.org/styles/liberty';
 
-/// A group of nearby [ActivityMapItem]s collapsed into a single marker.
+/// A group of nearby, **same-category** [ActivityMapItem]s collapsed into a
+/// single marker. Clustering is now done per category first (see
+/// [ActivityMapCanvasState._rebuildMarkers]), so every group is homogeneous —
 /// `items.length == 1` renders as a normal pin; more than that renders as a
-/// cluster bubble showing a per-category breakdown on tap.
+/// cluster bubble in that category's color showing just that category's
+/// count (ports web's `MapView`/`ClusterMarker` category-first redesign,
+/// replacing the old cross-category "12" bubble + breakdown tooltip).
 class _MarkerGroup {
-  _MarkerGroup(this.items)
+  _MarkerGroup(this.items, this.categoryName)
       : center = LatLng(
           items.map((i) => i.latitude).reduce((a, b) => a + b) / items.length,
           items.map((i) => i.longitude).reduce((a, b) => a + b) / items.length,
         );
 
   final List<ActivityMapItem> items;
+  final String categoryName;
   final LatLng center;
-
-  Map<String, int> get categoryCounts {
-    final map = <String, int>{};
-    for (final item in items) {
-      map[item.categoryName] = (map[item.categoryName] ?? 0) + 1;
-    }
-    return map;
-  }
 }
 
+/// Web Mercator piksel projeksiyonu (tile matematiği) — kategori bazlı
+/// kümelerin ekran-pikselinde ne kadar yakın düştüğünü tespit edip yan yana
+/// dizmek için; `sosyolobi-web-2/src/components/app/MapView.tsx`'teki
+/// `projectToPixel` ile aynı formül.
+({double x, double y}) _projectToPixel(double lng, double lat, double zoom) {
+  final worldSize = 256 * math.pow(2, zoom).toDouble();
+  final x = (lng + 180) / 360 * worldSize;
+  final latRad = lat * math.pi / 180;
+  final y = (0.5 - math.log((1 + math.sin(latRad)) / (1 - math.sin(latRad))) / (4 * math.pi)) * worldSize;
+  return (x: x, y: y);
+}
+
+double _degLngPerPixel(double zoom) => 360 / (256 * math.pow(2, zoom).toDouble());
+
+double _clusterRadius(int count) => count >= 50 ? 26.0 : (count >= 10 ? 22.0 : 18.0);
+
+const _collisionGridPx = 46.0;
+const _markerGapPx = 6.0;
+const _maxSideBySide = 5;
+
 /// The live, interactive map — activity markers, user-location dot,
-/// marker-tap preview, and grid-based client-side clustering (item 3).
+/// marker-tap preview, and category-first client-side clustering (item 3,
+/// later redesigned to be category-based — see [_MarkerGroup]).
 /// Extracted out of `MapScreen` so the exact same widget runs both as the
 /// (removed) small preview and full-screen in [MapExploreScreen].
 ///
@@ -212,16 +230,16 @@ class ActivityMapCanvasState extends State<ActivityMapCanvas> {
     return 1.5;
   }
 
-  List<_MarkerGroup> _cluster(List<ActivityMapItem> items, double zoom) {
+  List<_MarkerGroup> _cluster(List<ActivityMapItem> items, double zoom, String categoryName) {
     final grid = _gridSizeDegrees(zoom);
-    if (grid <= 0) return [for (final item in items) _MarkerGroup([item])];
+    if (grid <= 0) return [for (final item in items) _MarkerGroup([item], categoryName)];
 
     final buckets = <String, List<ActivityMapItem>>{};
     for (final item in items) {
       final key = '${(item.latitude / grid).round()}_${(item.longitude / grid).round()}';
       buckets.putIfAbsent(key, () => []).add(item);
     }
-    return [for (final bucket in buckets.values) _MarkerGroup(bucket)];
+    return [for (final bucket in buckets.values) _MarkerGroup(bucket, categoryName)];
   }
 
   Future<void> _rebuildMarkers() async {
@@ -237,43 +255,126 @@ class ActivityMapCanvasState extends State<ActivityMapCanvas> {
       _clusterLabels = [];
     }
 
-    final groups = _cluster(widget.items, _zoom);
+    // Kategori bazlı kümeleme: önce her kategoriyi kendi içinde ayrı ayrı grid-cluster'a
+    // sok — böylece aynı bölgedeki farklı kategoriler otomatik olarak tek bir "toplam
+    // sayı" baloncuğunda birleşmiyor, her biri kendi kategori renginde ayrı bir grup
+    // olarak kalıyor (ports web `MapView`'ın per-category supercluster index'leri).
+    final byCategory = <String, List<ActivityMapItem>>{};
+    for (final item in widget.items) {
+      byCategory.putIfAbsent(item.categoryName, () => []).add(item);
+    }
+    final allGroups = <_MarkerGroup>[
+      for (final entry in byCategory.entries) ..._cluster(entry.value, _zoom, entry.key),
+    ];
+
     _groupsByMarkerKey = {};
-    if (groups.isEmpty) return;
+    if (allGroups.isEmpty) return;
 
     final circleOptions = <CircleOptions>[];
     final circleData = <Map<String, dynamic>>[];
     final symbolOptions = <SymbolOptions>[];
     final symbolData = <Map<String, dynamic>>[];
+    var markerIndex = 0;
 
-    for (var i = 0; i < groups.length; i++) {
-      final group = groups[i];
-      final key = 'g$i';
-      _groupsByMarkerKey[key] = group;
+    // Tekil pinler (küme olmayan) eskisi gibi kendi tam konumunda, ofsetsiz render edilir.
+    for (final single in allGroups.where((g) => g.items.length == 1)) {
+      final key = 'g${markerIndex++}';
+      _groupsByMarkerKey[key] = single;
+      final activity = single.items.single;
+      final isSelected = activity.id == _selectedActivityId;
+      circleOptions.add(
+        CircleOptions(
+          geometry: single.center,
+          // Bigger, more tappable pins — was a flat 9px radius regardless
+          // of selection; selected pin now grows further so tap feedback
+          // is visible (item 3).
+          circleRadius: isSelected ? 19 : 13,
+          circleColor: _hexColor(CategoryIcons.colorFor(single.categoryName)),
+          circleStrokeWidth: isSelected ? 3 : 2,
+          circleStrokeColor: '#ffffff',
+        ),
+      );
+      circleData.add({'type': 'activity', 'markerKey': key});
+    }
 
-      if (group.items.length == 1) {
-        final item = group.items.single;
-        final isSelected = item.id == _selectedActivityId;
+    // Gerçek kümeler (>1 öğe): aynı ekran-hücresine düşen farklı kategori kümelerini
+    // merkez noktadan başlayarak yatay bir sırada yan yana diz (web ile aynı piksel
+    // projeksiyonu + derece ofseti mantığı — bkz. `_projectToPixel`/`_degLngPerPixel`).
+    final degLngPerPixel = _degLngPerPixel(_zoom);
+    final clusters = allGroups.where((g) => g.items.length > 1).toList();
+    final withPixels = [
+      for (final group in clusters) (group: group, pixel: _projectToPixel(group.center.longitude, group.center.latitude, _zoom)),
+    ];
+    final grid = <String, List<({_MarkerGroup group, ({double x, double y}) pixel})>>{};
+    for (final c in withPixels) {
+      final key = '${(c.pixel.x / _collisionGridPx).round()}_${(c.pixel.y / _collisionGridPx).round()}';
+      grid.putIfAbsent(key, () => []).add(c);
+    }
+
+    for (final bucket in grid.values) {
+      bucket.sort((a, b) => b.group.items.length.compareTo(a.group.items.length));
+      final visible = bucket.take(_maxSideBySide).toList();
+      final overflow = bucket.skip(_maxSideBySide).toList();
+
+      final widths = [for (final c in visible) _clusterRadius(c.group.items.length) * 2];
+      if (overflow.isNotEmpty) widths.add(36.0);
+      final totalWidth = widths.fold<double>(0, (a, b) => a + b) + _markerGapPx * (widths.length - 1);
+      var cursor = -totalWidth / 2;
+      final baseLatitude = bucket.first.group.center.latitude;
+
+      for (var i = 0; i < visible.length; i++) {
+        final c = visible[i];
+        final w = widths[i];
+        final centerOffsetPx = bucket.length > 1 ? cursor + w / 2 : 0.0;
+        cursor += w + _markerGapPx;
+        final position = LatLng(baseLatitude, c.group.center.longitude + centerOffsetPx * degLngPerPixel);
+        final count = c.group.items.length;
+
+        final key = 'g${markerIndex++}';
+        _groupsByMarkerKey[key] = c.group;
         circleOptions.add(
           CircleOptions(
-            geometry: group.center,
-            // Bigger, more tappable pins — was a flat 9px radius regardless
-            // of selection; selected pin now grows further so tap feedback
-            // is visible (item 3).
-            circleRadius: isSelected ? 19 : 13,
-            circleColor: _hexColor(CategoryIcons.colorFor(item.categoryName)),
-            circleStrokeWidth: isSelected ? 3 : 2,
+            geometry: position,
+            circleRadius: _clusterRadius(count),
+            circleColor: _hexColor(CategoryIcons.colorFor(c.group.categoryName)),
+            circleStrokeWidth: 3,
             circleStrokeColor: '#ffffff',
+            circleOpacity: 0.92,
           ),
         );
-        circleData.add({'type': 'activity', 'markerKey': key});
-      } else {
-        final count = group.items.length;
-        final radius = count >= 50 ? 26.0 : (count >= 10 ? 22.0 : 18.0);
+        circleData.add({'type': 'cluster', 'markerKey': key});
+        symbolOptions.add(
+          SymbolOptions(
+            geometry: position,
+            textField: '$count',
+            // OpenFreeMap "liberty" stilinin glyph fontstack'inde sadece bu isimler var
+            // (Noto Sans Regular/Bold/Italic) — belirtilmezse maplibre_gl'nin varsayılan
+            // font adı bu stilde bulunamıyor ve metin sessizce hiç render olmuyordu.
+            // (SymbolOptions'ta bu alanın adı `fontNames`, web/mapbox stilindeki
+            // `text-font` isminden farklı — `flutter analyze` ile yakalandı.)
+            fontNames: const ['Noto Sans Regular'],
+            textSize: count >= 10 ? 14 : 13,
+            textColor: '#ffffff',
+          ),
+        );
+        symbolData.add({'type': 'cluster', 'markerKey': key});
+      }
+
+      if (overflow.isNotEmpty) {
+        final w = widths.last;
+        final centerOffsetPx = cursor + w / 2;
+        final overflowCount = overflow.fold<int>(0, (sum, c) => sum + c.group.items.length);
+        // Tıklanınca çakışan kümelerden en büyüğüne yakınlaştırır — tam liste yerine
+        // basit bir davranış (web'deki overflow chip'iyle aynı yaklaşım).
+        final anchor = overflow.first.group;
+        final position = LatLng(baseLatitude, bucket.first.group.center.longitude + centerOffsetPx * degLngPerPixel);
+
+        final key = 'g${markerIndex++}';
+        _groupsByMarkerKey[key] = anchor;
         circleOptions.add(
           CircleOptions(
-            geometry: group.center,
-            circleRadius: radius,
+            geometry: position,
+            circleRadius: 18,
             circleColor: '#081B4B',
             circleStrokeWidth: 3,
             circleStrokeColor: '#ffffff',
@@ -283,9 +384,10 @@ class ActivityMapCanvasState extends State<ActivityMapCanvas> {
         circleData.add({'type': 'cluster', 'markerKey': key});
         symbolOptions.add(
           SymbolOptions(
-            geometry: group.center,
-            textField: '$count',
-            textSize: count >= 10 ? 14 : 13,
+            geometry: position,
+            textField: '+$overflowCount',
+            fontNames: const ['Noto Sans Regular'],
+            textSize: 12,
             textColor: '#ffffff',
           ),
         );
@@ -348,8 +450,8 @@ class ActivityMapCanvasState extends State<ActivityMapCanvas> {
     showModalBottomSheet<void>(
       context: context,
       builder: (context) => ClusterBreakdownSheet(
-        categoryCounts: group.categoryCounts,
-        totalCount: group.items.length,
+        categoryName: group.categoryName,
+        count: group.items.length,
         onZoomIn: () {
           Navigator.of(context).pop();
           _controller?.animateCamera(CameraUpdate.newLatLngZoom(group.center, math.min(_zoom + 2.5, 17)));

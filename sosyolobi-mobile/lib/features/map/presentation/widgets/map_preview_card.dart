@@ -49,7 +49,7 @@ class MapPreviewCard extends StatelessWidget {
                     children: [
                       const Icon(Icons.open_in_full, size: 13, color: Colors.white),
                       const SizedBox(width: 6),
-                      const Text('Haritayı Büyüt', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
+                      const Text('Haritada Görüntüle', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w700, color: Colors.white)),
                     ],
                   ),
                 ),

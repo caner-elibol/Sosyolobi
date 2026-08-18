@@ -5,6 +5,7 @@ import '../../../core/domain/enums.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/category_icons.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/utils/image_url.dart';
 import '../../../core/widgets/async_value_widget.dart';
 import '../../../core/widgets/empty_state.dart';
 import '../../../core/widgets/user_avatar.dart';
@@ -112,17 +113,13 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
           expandedHeight: 180,
           leading: const BackButton(color: Colors.white),
           flexibleSpace: FlexibleSpaceBar(
-            background: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [color, Color.lerp(color, Colors.black, 0.3)!],
-                ),
-              ),
-              alignment: Alignment.center,
-              child: Icon(CategoryIcons.iconFor(activity.categoryName), size: 56, color: Colors.white.withValues(alpha: 0.85)),
-            ),
+            background: activity.categoryImageUrl.resolved != null
+                ? Image.network(
+                    activity.categoryImageUrl.resolved!,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stack) => _CategoryHeroFallback(activity: activity, color: color),
+                  )
+                : _CategoryHeroFallback(activity: activity, color: color),
           ),
         ),
         SliverToBoxAdapter(
@@ -511,6 +508,28 @@ class _InfoChip extends StatelessWidget {
           Text(label, style: TextStyle(fontSize: 11, color: color, fontWeight: tone == _ChipTone.none ? FontWeight.normal : FontWeight.w600)),
         ],
       ),
+    );
+  }
+}
+
+class _CategoryHeroFallback extends StatelessWidget {
+  const _CategoryHeroFallback({required this.activity, required this.color});
+
+  final ActivityDetail activity;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [color, Color.lerp(color, Colors.black, 0.3)!],
+        ),
+      ),
+      alignment: Alignment.center,
+      child: Icon(CategoryIcons.iconFor(activity.categoryName), size: 56, color: Colors.white.withValues(alpha: 0.85)),
     );
   }
 }
