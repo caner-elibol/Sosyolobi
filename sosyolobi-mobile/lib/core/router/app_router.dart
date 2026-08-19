@@ -25,21 +25,21 @@ import 'route_paths.dart';
 part 'app_router.g.dart';
 
 /// Async-aware [Listenable] that notifies `go_router` whenever
-/// [authNotifierProvider] or [currentLocationNotifierProvider] settles into
+/// [authProvider] or [currentLocationProvider] settles into
 /// a new value, so `redirect` re-runs without the router needing to poll or
 /// the app needing an extra rebuild. The location listener also has a side
 /// effect: since this listenable lives as long as the (keepAlive) router
-/// provider, it keeps `currentLocationNotifierProvider` from auto-disposing
+/// provider, it keeps `currentLocationProvider` from auto-disposing
 /// for the whole app session — needed so permission state resolved on
 /// [LocationGateScreen] survives navigating away from it.
 class _AuthRefreshListenable extends ChangeNotifier {
   _AuthRefreshListenable(Ref ref) {
-    ref.listen(authNotifierProvider, (previous, next) {
+    ref.listen(authProvider, (previous, next) {
       if (previous?.value?.isAuthenticated != next.value?.isAuthenticated) {
         notifyListeners();
       }
     });
-    ref.listen(currentLocationNotifierProvider, (previous, next) {
+    ref.listen(currentLocationProvider, (previous, next) {
       if (previous?.value?.permissionState != next.value?.permissionState) {
         notifyListeners();
       }
@@ -55,7 +55,7 @@ GoRouter appRouter(Ref ref) {
     initialLocation: RoutePaths.splash,
     refreshListenable: refreshListenable,
     redirect: (context, state) {
-      final authState = ref.read(authNotifierProvider);
+      final authState = ref.read(authProvider);
       // While the initial token-restore is still loading, park on /splash —
       // returning null here would leave the *current* route on screen as-is,
       // which (since initialLocation must be something) would otherwise
@@ -78,12 +78,12 @@ GoRouter appRouter(Ref ref) {
         // Location is mandatory: every authenticated user is funneled through
         // the gate first, on every cold start, until permission is granted —
         // not just once at signup. `ref.read` here (not watch) is fine
-        // because `currentLocationNotifierProvider` changes are what drive
+        // because `currentLocationProvider` changes are what drive
         // `_AuthRefreshListenable` to re-trigger this whole callback.
         final locationGranted =
             ref
-                .read(currentLocationNotifierProvider)
-                .valueOrNull
+                .read(currentLocationProvider)
+                .value
                 ?.permissionState ==
             LocationPermissionState.granted;
         if (!locationGranted)

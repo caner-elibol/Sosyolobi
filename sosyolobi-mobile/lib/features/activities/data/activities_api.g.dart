@@ -6,22 +6,46 @@ part of 'activities_api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$activitiesApiHash() => r'58776b16f8ca551ce2f7f9e3643d097325b0cf7a';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [activitiesApi].
 @ProviderFor(activitiesApi)
-final activitiesApiProvider = AutoDisposeProvider<ActivitiesApi>.internal(
-  activitiesApi,
-  name: r'activitiesApiProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$activitiesApiHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final activitiesApiProvider = ActivitiesApiProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ActivitiesApiRef = AutoDisposeProviderRef<ActivitiesApi>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ActivitiesApiProvider
+    extends $FunctionalProvider<ActivitiesApi, ActivitiesApi, ActivitiesApi>
+    with $Provider<ActivitiesApi> {
+  ActivitiesApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'activitiesApiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$activitiesApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<ActivitiesApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ActivitiesApi create(Ref ref) {
+    return activitiesApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ActivitiesApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ActivitiesApi>(value),
+    );
+  }
+}
+
+String _$activitiesApiHash() => r'58776b16f8ca551ce2f7f9e3643d097325b0cf7a';

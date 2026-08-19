@@ -40,7 +40,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
     final phone = _phoneController.text.replaceAll(RegExp(r'\D'), '');
     try {
-      await ref.read(authNotifierProvider.notifier).sendOtp(phone);
+      await ref.read(authProvider.notifier).sendOtp(phone);
       if (!mounted) return;
       context.push(RoutePaths.verify, extra: phone);
     } on ApiException catch (e) {

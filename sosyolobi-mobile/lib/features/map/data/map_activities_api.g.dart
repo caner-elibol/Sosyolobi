@@ -6,22 +6,51 @@ part of 'map_activities_api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$mapActivitiesApiHash() => r'8ef7ca53a78d2e637daa0d345f91c5c41a0c3c5b';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [mapActivitiesApi].
 @ProviderFor(mapActivitiesApi)
-final mapActivitiesApiProvider = AutoDisposeProvider<MapActivitiesApi>.internal(
-  mapActivitiesApi,
-  name: r'mapActivitiesApiProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$mapActivitiesApiHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final mapActivitiesApiProvider = MapActivitiesApiProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef MapActivitiesApiRef = AutoDisposeProviderRef<MapActivitiesApi>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class MapActivitiesApiProvider
+    extends
+        $FunctionalProvider<
+          MapActivitiesApi,
+          MapActivitiesApi,
+          MapActivitiesApi
+        >
+    with $Provider<MapActivitiesApi> {
+  MapActivitiesApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'mapActivitiesApiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$mapActivitiesApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<MapActivitiesApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  MapActivitiesApi create(Ref ref) {
+    return mapActivitiesApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(MapActivitiesApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<MapActivitiesApi>(value),
+    );
+  }
+}
+
+String _$mapActivitiesApiHash() => r'8ef7ca53a78d2e637daa0d345f91c5c41a0c3c5b';

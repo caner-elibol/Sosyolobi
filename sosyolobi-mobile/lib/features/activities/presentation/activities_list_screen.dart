@@ -51,7 +51,7 @@ class _ActivitiesListScreenState extends ConsumerState<ActivitiesListScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locationAsync = ref.watch(currentLocationNotifierProvider);
+    final locationAsync = ref.watch(currentLocationProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
     final range = DateFilters.rangeFor(_dateFilter);
 

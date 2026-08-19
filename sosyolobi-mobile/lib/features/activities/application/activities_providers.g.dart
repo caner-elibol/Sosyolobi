@@ -6,47 +6,121 @@ part of 'activities_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$nearbyActivitiesHash() => r'09f2d0f8f1104c1d085a74cf6462a12d24bbebea';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
+@ProviderFor(nearbyActivities)
+final nearbyActivitiesProvider = NearbyActivitiesFamily._();
 
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
+/// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
+
+final class NearbyActivitiesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Activity>>,
+          List<Activity>,
+          FutureOr<List<Activity>>
+        >
+    with $FutureModifier<List<Activity>>, $FutureProvider<List<Activity>> {
+  /// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
+  NearbyActivitiesProvider._({
+    required NearbyActivitiesFamily super.from,
+    required ({
+      double latitude,
+      double longitude,
+      int radiusMeters,
+      String? categoryId,
+      DateTime? fromDate,
+      DateTime? toDate,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'nearbyActivitiesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$nearbyActivitiesHash();
+
+  @override
+  String toString() {
+    return r'nearbyActivitiesProvider'
+        ''
+        '$argument';
   }
 
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
+  @$internal
+  @override
+  $FutureProviderElement<List<Activity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Activity>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              double latitude,
+              double longitude,
+              int radiusMeters,
+              String? categoryId,
+              DateTime? fromDate,
+              DateTime? toDate,
+            });
+    return nearbyActivities(
+      ref,
+      latitude: argument.latitude,
+      longitude: argument.longitude,
+      radiusMeters: argument.radiusMeters,
+      categoryId: argument.categoryId,
+      fromDate: argument.fromDate,
+      toDate: argument.toDate,
+    );
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is NearbyActivitiesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
   }
 }
 
-/// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
-///
-/// Copied from [nearbyActivities].
-@ProviderFor(nearbyActivities)
-const nearbyActivitiesProvider = NearbyActivitiesFamily();
+String _$nearbyActivitiesHash() => r'09f2d0f8f1104c1d085a74cf6462a12d24bbebea';
 
 /// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
-///
-/// Copied from [nearbyActivities].
-class NearbyActivitiesFamily extends Family<AsyncValue<List<Activity>>> {
-  /// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
-  ///
-  /// Copied from [nearbyActivities].
-  const NearbyActivitiesFamily();
+
+final class NearbyActivitiesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<Activity>>,
+          ({
+            double latitude,
+            double longitude,
+            int radiusMeters,
+            String? categoryId,
+            DateTime? fromDate,
+            DateTime? toDate,
+          })
+        > {
+  NearbyActivitiesFamily._()
+    : super(
+        retry: null,
+        name: r'nearbyActivitiesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   /// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
-  ///
-  /// Copied from [nearbyActivities].
+
   NearbyActivitiesProvider call({
     required double latitude,
     required double longitude,
@@ -54,201 +128,116 @@ class NearbyActivitiesFamily extends Family<AsyncValue<List<Activity>>> {
     String? categoryId,
     DateTime? fromDate,
     DateTime? toDate,
-  }) {
-    return NearbyActivitiesProvider(
+  }) => NearbyActivitiesProvider._(
+    argument: (
       latitude: latitude,
       longitude: longitude,
       radiusMeters: radiusMeters,
       categoryId: categoryId,
       fromDate: fromDate,
       toDate: toDate,
-    );
-  }
+    ),
+    from: this,
+  );
 
   @override
-  NearbyActivitiesProvider getProviderOverride(
-    covariant NearbyActivitiesProvider provider,
-  ) {
-    return call(
-      latitude: provider.latitude,
-      longitude: provider.longitude,
-      radiusMeters: provider.radiusMeters,
-      categoryId: provider.categoryId,
-      fromDate: provider.fromDate,
-      toDate: provider.toDate,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'nearbyActivitiesProvider';
+  String toString() => r'nearbyActivitiesProvider';
 }
 
-/// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
-///
-/// Copied from [nearbyActivities].
-class NearbyActivitiesProvider
-    extends AutoDisposeFutureProvider<List<Activity>> {
-  /// Mirrors `sosyolobi-web-2/src/hooks/useNearbyActivities.ts`.
-  ///
-  /// Copied from [nearbyActivities].
-  NearbyActivitiesProvider({
-    required double latitude,
-    required double longitude,
-    int radiusMeters = 10000,
-    String? categoryId,
-    DateTime? fromDate,
-    DateTime? toDate,
-  }) : this._internal(
-         (ref) => nearbyActivities(
-           ref as NearbyActivitiesRef,
-           latitude: latitude,
-           longitude: longitude,
-           radiusMeters: radiusMeters,
-           categoryId: categoryId,
-           fromDate: fromDate,
-           toDate: toDate,
-         ),
-         from: nearbyActivitiesProvider,
-         name: r'nearbyActivitiesProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$nearbyActivitiesHash,
-         dependencies: NearbyActivitiesFamily._dependencies,
-         allTransitiveDependencies:
-             NearbyActivitiesFamily._allTransitiveDependencies,
-         latitude: latitude,
-         longitude: longitude,
-         radiusMeters: radiusMeters,
-         categoryId: categoryId,
-         fromDate: fromDate,
-         toDate: toDate,
+/// Fetches nearby activities across **all** categories (no `categoryId`
+/// filter) so category chip counts (item 5) and the category-filtered view
+/// can both derive from one client-side-grouped fetch — mirrors web's
+/// "fetch all categories together, group client-side" approach (no new
+/// backend count endpoint).
+
+@ProviderFor(nearbyActivitiesAllCategories)
+final nearbyActivitiesAllCategoriesProvider =
+    NearbyActivitiesAllCategoriesFamily._();
+
+/// Fetches nearby activities across **all** categories (no `categoryId`
+/// filter) so category chip counts (item 5) and the category-filtered view
+/// can both derive from one client-side-grouped fetch — mirrors web's
+/// "fetch all categories together, group client-side" approach (no new
+/// backend count endpoint).
+
+final class NearbyActivitiesAllCategoriesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Activity>>,
+          List<Activity>,
+          FutureOr<List<Activity>>
+        >
+    with $FutureModifier<List<Activity>>, $FutureProvider<List<Activity>> {
+  /// Fetches nearby activities across **all** categories (no `categoryId`
+  /// filter) so category chip counts (item 5) and the category-filtered view
+  /// can both derive from one client-side-grouped fetch — mirrors web's
+  /// "fetch all categories together, group client-side" approach (no new
+  /// backend count endpoint).
+  NearbyActivitiesAllCategoriesProvider._({
+    required NearbyActivitiesAllCategoriesFamily super.from,
+    required ({
+      double latitude,
+      double longitude,
+      int radiusMeters,
+      DateTime? fromDate,
+      DateTime? toDate,
+    })
+    super.argument,
+  }) : super(
+         retry: null,
+         name: r'nearbyActivitiesAllCategoriesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  NearbyActivitiesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.latitude,
-    required this.longitude,
-    required this.radiusMeters,
-    required this.categoryId,
-    required this.fromDate,
-    required this.toDate,
-  }) : super.internal();
-
-  final double latitude;
-  final double longitude;
-  final int radiusMeters;
-  final String? categoryId;
-  final DateTime? fromDate;
-  final DateTime? toDate;
+  @override
+  String debugGetCreateSourceHash() => _$nearbyActivitiesAllCategoriesHash();
 
   @override
-  Override overrideWith(
-    FutureOr<List<Activity>> Function(NearbyActivitiesRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: NearbyActivitiesProvider._internal(
-        (ref) => create(ref as NearbyActivitiesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        latitude: latitude,
-        longitude: longitude,
-        radiusMeters: radiusMeters,
-        categoryId: categoryId,
-        fromDate: fromDate,
-        toDate: toDate,
-      ),
-    );
+  String toString() {
+    return r'nearbyActivitiesAllCategoriesProvider'
+        ''
+        '$argument';
   }
 
+  @$internal
   @override
-  AutoDisposeFutureProviderElement<List<Activity>> createElement() {
-    return _NearbyActivitiesProviderElement(this);
+  $FutureProviderElement<List<Activity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Activity>> create(Ref ref) {
+    final argument =
+        this.argument
+            as ({
+              double latitude,
+              double longitude,
+              int radiusMeters,
+              DateTime? fromDate,
+              DateTime? toDate,
+            });
+    return nearbyActivitiesAllCategories(
+      ref,
+      latitude: argument.latitude,
+      longitude: argument.longitude,
+      radiusMeters: argument.radiusMeters,
+      fromDate: argument.fromDate,
+      toDate: argument.toDate,
+    );
   }
 
   @override
   bool operator ==(Object other) {
-    return other is NearbyActivitiesProvider &&
-        other.latitude == latitude &&
-        other.longitude == longitude &&
-        other.radiusMeters == radiusMeters &&
-        other.categoryId == categoryId &&
-        other.fromDate == fromDate &&
-        other.toDate == toDate;
+    return other is NearbyActivitiesAllCategoriesProvider &&
+        other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, latitude.hashCode);
-    hash = _SystemHash.combine(hash, longitude.hashCode);
-    hash = _SystemHash.combine(hash, radiusMeters.hashCode);
-    hash = _SystemHash.combine(hash, categoryId.hashCode);
-    hash = _SystemHash.combine(hash, fromDate.hashCode);
-    hash = _SystemHash.combine(hash, toDate.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin NearbyActivitiesRef on AutoDisposeFutureProviderRef<List<Activity>> {
-  /// The parameter `latitude` of this provider.
-  double get latitude;
-
-  /// The parameter `longitude` of this provider.
-  double get longitude;
-
-  /// The parameter `radiusMeters` of this provider.
-  int get radiusMeters;
-
-  /// The parameter `categoryId` of this provider.
-  String? get categoryId;
-
-  /// The parameter `fromDate` of this provider.
-  DateTime? get fromDate;
-
-  /// The parameter `toDate` of this provider.
-  DateTime? get toDate;
-}
-
-class _NearbyActivitiesProviderElement
-    extends AutoDisposeFutureProviderElement<List<Activity>>
-    with NearbyActivitiesRef {
-  _NearbyActivitiesProviderElement(super.provider);
-
-  @override
-  double get latitude => (origin as NearbyActivitiesProvider).latitude;
-  @override
-  double get longitude => (origin as NearbyActivitiesProvider).longitude;
-  @override
-  int get radiusMeters => (origin as NearbyActivitiesProvider).radiusMeters;
-  @override
-  String? get categoryId => (origin as NearbyActivitiesProvider).categoryId;
-  @override
-  DateTime? get fromDate => (origin as NearbyActivitiesProvider).fromDate;
-  @override
-  DateTime? get toDate => (origin as NearbyActivitiesProvider).toDate;
 }
 
 String _$nearbyActivitiesAllCategoriesHash() =>
@@ -259,391 +248,190 @@ String _$nearbyActivitiesAllCategoriesHash() =>
 /// can both derive from one client-side-grouped fetch — mirrors web's
 /// "fetch all categories together, group client-side" approach (no new
 /// backend count endpoint).
-///
-/// Copied from [nearbyActivitiesAllCategories].
-@ProviderFor(nearbyActivitiesAllCategories)
-const nearbyActivitiesAllCategoriesProvider =
-    NearbyActivitiesAllCategoriesFamily();
 
-/// Fetches nearby activities across **all** categories (no `categoryId`
-/// filter) so category chip counts (item 5) and the category-filtered view
-/// can both derive from one client-side-grouped fetch — mirrors web's
-/// "fetch all categories together, group client-side" approach (no new
-/// backend count endpoint).
-///
-/// Copied from [nearbyActivitiesAllCategories].
-class NearbyActivitiesAllCategoriesFamily
-    extends Family<AsyncValue<List<Activity>>> {
-  /// Fetches nearby activities across **all** categories (no `categoryId`
-  /// filter) so category chip counts (item 5) and the category-filtered view
-  /// can both derive from one client-side-grouped fetch — mirrors web's
-  /// "fetch all categories together, group client-side" approach (no new
-  /// backend count endpoint).
-  ///
-  /// Copied from [nearbyActivitiesAllCategories].
-  const NearbyActivitiesAllCategoriesFamily();
+final class NearbyActivitiesAllCategoriesFamily extends $Family
+    with
+        $FunctionalFamilyOverride<
+          FutureOr<List<Activity>>,
+          ({
+            double latitude,
+            double longitude,
+            int radiusMeters,
+            DateTime? fromDate,
+            DateTime? toDate,
+          })
+        > {
+  NearbyActivitiesAllCategoriesFamily._()
+    : super(
+        retry: null,
+        name: r'nearbyActivitiesAllCategoriesProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
 
   /// Fetches nearby activities across **all** categories (no `categoryId`
   /// filter) so category chip counts (item 5) and the category-filtered view
   /// can both derive from one client-side-grouped fetch — mirrors web's
   /// "fetch all categories together, group client-side" approach (no new
   /// backend count endpoint).
-  ///
-  /// Copied from [nearbyActivitiesAllCategories].
+
   NearbyActivitiesAllCategoriesProvider call({
     required double latitude,
     required double longitude,
     int radiusMeters = 10000,
     DateTime? fromDate,
     DateTime? toDate,
-  }) {
-    return NearbyActivitiesAllCategoriesProvider(
+  }) => NearbyActivitiesAllCategoriesProvider._(
+    argument: (
       latitude: latitude,
       longitude: longitude,
       radiusMeters: radiusMeters,
       fromDate: fromDate,
       toDate: toDate,
-    );
-  }
+    ),
+    from: this,
+  );
 
   @override
-  NearbyActivitiesAllCategoriesProvider getProviderOverride(
-    covariant NearbyActivitiesAllCategoriesProvider provider,
-  ) {
-    return call(
-      latitude: provider.latitude,
-      longitude: provider.longitude,
-      radiusMeters: provider.radiusMeters,
-      fromDate: provider.fromDate,
-      toDate: provider.toDate,
-    );
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'nearbyActivitiesAllCategoriesProvider';
+  String toString() => r'nearbyActivitiesAllCategoriesProvider';
 }
 
-/// Fetches nearby activities across **all** categories (no `categoryId`
-/// filter) so category chip counts (item 5) and the category-filtered view
-/// can both derive from one client-side-grouped fetch — mirrors web's
-/// "fetch all categories together, group client-side" approach (no new
-/// backend count endpoint).
-///
-/// Copied from [nearbyActivitiesAllCategories].
-class NearbyActivitiesAllCategoriesProvider
-    extends AutoDisposeFutureProvider<List<Activity>> {
-  /// Fetches nearby activities across **all** categories (no `categoryId`
-  /// filter) so category chip counts (item 5) and the category-filtered view
-  /// can both derive from one client-side-grouped fetch — mirrors web's
-  /// "fetch all categories together, group client-side" approach (no new
-  /// backend count endpoint).
-  ///
-  /// Copied from [nearbyActivitiesAllCategories].
-  NearbyActivitiesAllCategoriesProvider({
-    required double latitude,
-    required double longitude,
-    int radiusMeters = 10000,
-    DateTime? fromDate,
-    DateTime? toDate,
-  }) : this._internal(
-         (ref) => nearbyActivitiesAllCategories(
-           ref as NearbyActivitiesAllCategoriesRef,
-           latitude: latitude,
-           longitude: longitude,
-           radiusMeters: radiusMeters,
-           fromDate: fromDate,
-           toDate: toDate,
-         ),
-         from: nearbyActivitiesAllCategoriesProvider,
-         name: r'nearbyActivitiesAllCategoriesProvider',
-         debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-             ? null
-             : _$nearbyActivitiesAllCategoriesHash,
-         dependencies: NearbyActivitiesAllCategoriesFamily._dependencies,
-         allTransitiveDependencies:
-             NearbyActivitiesAllCategoriesFamily._allTransitiveDependencies,
-         latitude: latitude,
-         longitude: longitude,
-         radiusMeters: radiusMeters,
-         fromDate: fromDate,
-         toDate: toDate,
+/// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
+
+@ProviderFor(activityDetail)
+final activityDetailProvider = ActivityDetailFamily._();
+
+/// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
+
+final class ActivityDetailProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<ActivityDetail>,
+          ActivityDetail,
+          FutureOr<ActivityDetail>
+        >
+    with $FutureModifier<ActivityDetail>, $FutureProvider<ActivityDetail> {
+  /// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
+  ActivityDetailProvider._({
+    required ActivityDetailFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'activityDetailProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
        );
 
-  NearbyActivitiesAllCategoriesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.latitude,
-    required this.longitude,
-    required this.radiusMeters,
-    required this.fromDate,
-    required this.toDate,
-  }) : super.internal();
-
-  final double latitude;
-  final double longitude;
-  final int radiusMeters;
-  final DateTime? fromDate;
-  final DateTime? toDate;
+  @override
+  String debugGetCreateSourceHash() => _$activityDetailHash();
 
   @override
-  Override overrideWith(
-    FutureOr<List<Activity>> Function(NearbyActivitiesAllCategoriesRef provider)
-    create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: NearbyActivitiesAllCategoriesProvider._internal(
-        (ref) => create(ref as NearbyActivitiesAllCategoriesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        latitude: latitude,
-        longitude: longitude,
-        radiusMeters: radiusMeters,
-        fromDate: fromDate,
-        toDate: toDate,
-      ),
-    );
+  String toString() {
+    return r'activityDetailProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  AutoDisposeFutureProviderElement<List<Activity>> createElement() {
-    return _NearbyActivitiesAllCategoriesProviderElement(this);
+  $FutureProviderElement<ActivityDetail> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<ActivityDetail> create(Ref ref) {
+    final argument = this.argument as String;
+    return activityDetail(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is NearbyActivitiesAllCategoriesProvider &&
-        other.latitude == latitude &&
-        other.longitude == longitude &&
-        other.radiusMeters == radiusMeters &&
-        other.fromDate == fromDate &&
-        other.toDate == toDate;
+    return other is ActivityDetailProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, latitude.hashCode);
-    hash = _SystemHash.combine(hash, longitude.hashCode);
-    hash = _SystemHash.combine(hash, radiusMeters.hashCode);
-    hash = _SystemHash.combine(hash, fromDate.hashCode);
-    hash = _SystemHash.combine(hash, toDate.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
-}
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin NearbyActivitiesAllCategoriesRef
-    on AutoDisposeFutureProviderRef<List<Activity>> {
-  /// The parameter `latitude` of this provider.
-  double get latitude;
-
-  /// The parameter `longitude` of this provider.
-  double get longitude;
-
-  /// The parameter `radiusMeters` of this provider.
-  int get radiusMeters;
-
-  /// The parameter `fromDate` of this provider.
-  DateTime? get fromDate;
-
-  /// The parameter `toDate` of this provider.
-  DateTime? get toDate;
-}
-
-class _NearbyActivitiesAllCategoriesProviderElement
-    extends AutoDisposeFutureProviderElement<List<Activity>>
-    with NearbyActivitiesAllCategoriesRef {
-  _NearbyActivitiesAllCategoriesProviderElement(super.provider);
-
-  @override
-  double get latitude =>
-      (origin as NearbyActivitiesAllCategoriesProvider).latitude;
-  @override
-  double get longitude =>
-      (origin as NearbyActivitiesAllCategoriesProvider).longitude;
-  @override
-  int get radiusMeters =>
-      (origin as NearbyActivitiesAllCategoriesProvider).radiusMeters;
-  @override
-  DateTime? get fromDate =>
-      (origin as NearbyActivitiesAllCategoriesProvider).fromDate;
-  @override
-  DateTime? get toDate =>
-      (origin as NearbyActivitiesAllCategoriesProvider).toDate;
 }
 
 String _$activityDetailHash() => r'565c0e0ffb8c40d033062309367610ae932ff0cd';
 
 /// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
-///
-/// Copied from [activityDetail].
-@ProviderFor(activityDetail)
-const activityDetailProvider = ActivityDetailFamily();
 
-/// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
-///
-/// Copied from [activityDetail].
-class ActivityDetailFamily extends Family<AsyncValue<ActivityDetail>> {
-  /// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
-  ///
-  /// Copied from [activityDetail].
-  const ActivityDetailFamily();
-
-  /// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
-  ///
-  /// Copied from [activityDetail].
-  ActivityDetailProvider call(String id) {
-    return ActivityDetailProvider(id);
-  }
-
-  @override
-  ActivityDetailProvider getProviderOverride(
-    covariant ActivityDetailProvider provider,
-  ) {
-    return call(provider.id);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'activityDetailProvider';
-}
-
-/// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
-///
-/// Copied from [activityDetail].
-class ActivityDetailProvider extends AutoDisposeFutureProvider<ActivityDetail> {
-  /// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
-  ///
-  /// Copied from [activityDetail].
-  ActivityDetailProvider(String id)
-    : this._internal(
-        (ref) => activityDetail(ref as ActivityDetailRef, id),
-        from: activityDetailProvider,
+final class ActivityDetailFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<ActivityDetail>, String> {
+  ActivityDetailFamily._()
+    : super(
+        retry: null,
         name: r'activityDetailProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$activityDetailHash,
-        dependencies: ActivityDetailFamily._dependencies,
-        allTransitiveDependencies:
-            ActivityDetailFamily._allTransitiveDependencies,
-        id: id,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
       );
 
-  ActivityDetailProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.id,
-  }) : super.internal();
+  /// Mirrors `sosyolobi-web-2/src/hooks/useCreateActivity.ts`'s `useActivity`.
 
-  final String id;
+  ActivityDetailProvider call(String id) =>
+      ActivityDetailProvider._(argument: id, from: this);
 
   @override
-  Override overrideWith(
-    FutureOr<ActivityDetail> Function(ActivityDetailRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: ActivityDetailProvider._internal(
-        (ref) => create(ref as ActivityDetailRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        id: id,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<ActivityDetail> createElement() {
-    return _ActivityDetailProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is ActivityDetailProvider && other.id == id;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, id.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
+  String toString() => r'activityDetailProvider';
 }
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin ActivityDetailRef on AutoDisposeFutureProviderRef<ActivityDetail> {
-  /// The parameter `id` of this provider.
-  String get id;
-}
-
-class _ActivityDetailProviderElement
-    extends AutoDisposeFutureProviderElement<ActivityDetail>
-    with ActivityDetailRef {
-  _ActivityDetailProviderElement(super.provider);
-
-  @override
-  String get id => (origin as ActivityDetailProvider).id;
-}
-
-String _$createActivityControllerHash() =>
-    r'abecc52356f5eed659931c7e2f86c80cb39e6e91';
 
 /// Mirrors `useCreateActivity`'s mutation — on success, invalidates
 /// nearby/map activity caches the way `qc.invalidateQueries` does on web.
-///
-/// Copied from [CreateActivityController].
-@ProviderFor(CreateActivityController)
-final createActivityControllerProvider =
-    AutoDisposeAsyncNotifierProvider<CreateActivityController, void>.internal(
-      CreateActivityController.new,
-      name: r'createActivityControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$createActivityControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$CreateActivityController = AutoDisposeAsyncNotifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(CreateActivityController)
+final createActivityControllerProvider = CreateActivityControllerProvider._();
+
+/// Mirrors `useCreateActivity`'s mutation — on success, invalidates
+/// nearby/map activity caches the way `qc.invalidateQueries` does on web.
+final class CreateActivityControllerProvider
+    extends $AsyncNotifierProvider<CreateActivityController, void> {
+  /// Mirrors `useCreateActivity`'s mutation — on success, invalidates
+  /// nearby/map activity caches the way `qc.invalidateQueries` does on web.
+  CreateActivityControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'createActivityControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$createActivityControllerHash();
+
+  @$internal
+  @override
+  CreateActivityController create() => CreateActivityController();
+}
+
+String _$createActivityControllerHash() =>
+    r'bb354ddd94bf13449bd9e21d76cb3410858faf55';
+
+/// Mirrors `useCreateActivity`'s mutation — on success, invalidates
+/// nearby/map activity caches the way `qc.invalidateQueries` does on web.
+
+abstract class _$CreateActivityController extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

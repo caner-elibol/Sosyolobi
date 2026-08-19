@@ -35,7 +35,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
       _error = null;
     });
     try {
-      await ref.read(authNotifierProvider.notifier).verifyOtp(
+      await ref.read(authProvider.notifier).verifyOtp(
             phoneNumber: widget.phoneNumber,
             code: _codeController.text.trim(),
           );
@@ -50,7 +50,7 @@ class _VerifyScreenState extends ConsumerState<VerifyScreen> {
   Future<void> _resend() async {
     setState(() => _resending = true);
     try {
-      await ref.read(authNotifierProvider.notifier).sendOtp(widget.phoneNumber);
+      await ref.read(authProvider.notifier).sendOtp(widget.phoneNumber);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Kod tekrar gönderildi.')));
       }

@@ -23,18 +23,24 @@ class UserActionsController extends _$UserActionsController {
   @override
   FutureOr<void> build() {}
 
-  Future<void> block(String userId) async {
+  /// See `RequestActionsController._run`'s doc — same autoDispose-mid-flight
+  /// fix (`ref.keepAlive()` for the mutation's duration).
+  Future<void> _run(Future<void> Function() action) async {
+    final keepAliveLink = ref.keepAlive();
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() => ref.read(usersApiProvider).block(userId));
+    try {
+      state = await AsyncValue.guard(action);
+    } finally {
+      keepAliveLink.close();
+    }
   }
 
-  Future<void> report({required String reportedUserId, required String reason, String? details}) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(
-      () => ref.read(usersApiProvider).report(
-            CreateReportRequest(reportedUserId: reportedUserId, reason: reason, details: details),
-          ),
-    );
-    ref.invalidate(myReportsProvider);
-  }
+  Future<void> block(String userId) => _run(() => ref.read(usersApiProvider).block(userId));
+
+  Future<void> report({required String reportedUserId, required String reason, String? details}) => _run(() async {
+        await ref.read(usersApiProvider).report(
+              CreateReportRequest(reportedUserId: reportedUserId, reason: reason, details: details),
+            );
+        ref.invalidate(myReportsProvider);
+      });
 }

@@ -18,7 +18,7 @@ class UserLink extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final currentUserId = ref.watch(authNotifierProvider).valueOrNull?.userId;
+    final currentUserId = ref.watch(authProvider).value?.userId;
     final isSelf = currentUserId != null && currentUserId == userId;
 
     return InkWell(

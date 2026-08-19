@@ -6,399 +6,396 @@ part of 'friends_providers.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$friendsHash() => r'd1d960a683d10e729007ca09853b8a6f30828153';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
+/// Mirrors `useFriends` in `sosyolobi-web-2/src/hooks/useFriends.ts`.
+
+@ProviderFor(friends)
+final friendsProvider = FriendsProvider._();
 
 /// Mirrors `useFriends` in `sosyolobi-web-2/src/hooks/useFriends.ts`.
-///
-/// Copied from [friends].
-@ProviderFor(friends)
-final friendsProvider = AutoDisposeFutureProvider<List<Friend>>.internal(
-  friends,
-  name: r'friendsProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$friendsHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef FriendsRef = AutoDisposeFutureProviderRef<List<Friend>>;
+final class FriendsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Friend>>,
+          List<Friend>,
+          FutureOr<List<Friend>>
+        >
+    with $FutureModifier<List<Friend>>, $FutureProvider<List<Friend>> {
+  /// Mirrors `useFriends` in `sosyolobi-web-2/src/hooks/useFriends.ts`.
+  FriendsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'friendsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$friendsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Friend>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Friend>> create(Ref ref) {
+    return friends(ref);
+  }
+}
+
+String _$friendsHash() => r'd1d960a683d10e729007ca09853b8a6f30828153';
+
+/// Mirrors `useIncomingFriendRequests`.
+
+@ProviderFor(incomingFriendRequests)
+final incomingFriendRequestsProvider = IncomingFriendRequestsProvider._();
+
+/// Mirrors `useIncomingFriendRequests`.
+
+final class IncomingFriendRequestsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<FriendRequest>>,
+          List<FriendRequest>,
+          FutureOr<List<FriendRequest>>
+        >
+    with
+        $FutureModifier<List<FriendRequest>>,
+        $FutureProvider<List<FriendRequest>> {
+  /// Mirrors `useIncomingFriendRequests`.
+  IncomingFriendRequestsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'incomingFriendRequestsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$incomingFriendRequestsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<FriendRequest>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<FriendRequest>> create(Ref ref) {
+    return incomingFriendRequests(ref);
+  }
+}
+
 String _$incomingFriendRequestsHash() =>
     r'eb65354707b70d57c4c5770192fe9391b9221dba';
 
-/// Mirrors `useIncomingFriendRequests`.
-///
-/// Copied from [incomingFriendRequests].
-@ProviderFor(incomingFriendRequests)
-final incomingFriendRequestsProvider =
-    AutoDisposeFutureProvider<List<FriendRequest>>.internal(
-      incomingFriendRequests,
-      name: r'incomingFriendRequestsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$incomingFriendRequestsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// Mirrors `useSentFriendRequests`.
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef IncomingFriendRequestsRef =
-    AutoDisposeFutureProviderRef<List<FriendRequest>>;
+@ProviderFor(sentFriendRequests)
+final sentFriendRequestsProvider = SentFriendRequestsProvider._();
+
+/// Mirrors `useSentFriendRequests`.
+
+final class SentFriendRequestsProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<FriendRequest>>,
+          List<FriendRequest>,
+          FutureOr<List<FriendRequest>>
+        >
+    with
+        $FutureModifier<List<FriendRequest>>,
+        $FutureProvider<List<FriendRequest>> {
+  /// Mirrors `useSentFriendRequests`.
+  SentFriendRequestsProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'sentFriendRequestsProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$sentFriendRequestsHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<FriendRequest>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<FriendRequest>> create(Ref ref) {
+    return sentFriendRequests(ref);
+  }
+}
+
 String _$sentFriendRequestsHash() =>
     r'00f01c4b790ac1c33286c4e34821512f87616a51';
 
-/// Mirrors `useSentFriendRequests`.
-///
-/// Copied from [sentFriendRequests].
-@ProviderFor(sentFriendRequests)
-final sentFriendRequestsProvider =
-    AutoDisposeFutureProvider<List<FriendRequest>>.internal(
-      sentFriendRequests,
-      name: r'sentFriendRequestsProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$sentFriendRequestsHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
+/// Mirrors `useFriendActivities` — 200 only when the caller is friends with
+/// `userId` (or it's their own id); the API returns 401 otherwise, which
+/// surfaces as an `AsyncError` here for the caller to treat as "locked".
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef SentFriendRequestsRef =
-    AutoDisposeFutureProviderRef<List<FriendRequest>>;
+@ProviderFor(friendActivities)
+final friendActivitiesProvider = FriendActivitiesFamily._();
+
+/// Mirrors `useFriendActivities` — 200 only when the caller is friends with
+/// `userId` (or it's their own id); the API returns 401 otherwise, which
+/// surfaces as an `AsyncError` here for the caller to treat as "locked".
+
+final class FriendActivitiesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Activity>>,
+          List<Activity>,
+          FutureOr<List<Activity>>
+        >
+    with $FutureModifier<List<Activity>>, $FutureProvider<List<Activity>> {
+  /// Mirrors `useFriendActivities` — 200 only when the caller is friends with
+  /// `userId` (or it's their own id); the API returns 401 otherwise, which
+  /// surfaces as an `AsyncError` here for the caller to treat as "locked".
+  FriendActivitiesProvider._({
+    required FriendActivitiesFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'friendActivitiesProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$friendActivitiesHash();
+
+  @override
+  String toString() {
+    return r'friendActivitiesProvider'
+        ''
+        '($argument)';
+  }
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Activity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Activity>> create(Ref ref) {
+    final argument = this.argument as String;
+    return friendActivities(ref, argument);
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return other is FriendActivitiesProvider && other.argument == argument;
+  }
+
+  @override
+  int get hashCode {
+    return argument.hashCode;
+  }
+}
+
 String _$friendActivitiesHash() => r'14cbdea260bf23ed2aed511c81b74a6fdcce7175';
 
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
 /// Mirrors `useFriendActivities` — 200 only when the caller is friends with
 /// `userId` (or it's their own id); the API returns 401 otherwise, which
 /// surfaces as an `AsyncError` here for the caller to treat as "locked".
-///
-/// Copied from [friendActivities].
-@ProviderFor(friendActivities)
-const friendActivitiesProvider = FriendActivitiesFamily();
 
-/// Mirrors `useFriendActivities` — 200 only when the caller is friends with
-/// `userId` (or it's their own id); the API returns 401 otherwise, which
-/// surfaces as an `AsyncError` here for the caller to treat as "locked".
-///
-/// Copied from [friendActivities].
-class FriendActivitiesFamily extends Family<AsyncValue<List<Activity>>> {
-  /// Mirrors `useFriendActivities` — 200 only when the caller is friends with
-  /// `userId` (or it's their own id); the API returns 401 otherwise, which
-  /// surfaces as an `AsyncError` here for the caller to treat as "locked".
-  ///
-  /// Copied from [friendActivities].
-  const FriendActivitiesFamily();
-
-  /// Mirrors `useFriendActivities` — 200 only when the caller is friends with
-  /// `userId` (or it's their own id); the API returns 401 otherwise, which
-  /// surfaces as an `AsyncError` here for the caller to treat as "locked".
-  ///
-  /// Copied from [friendActivities].
-  FriendActivitiesProvider call(String userId) {
-    return FriendActivitiesProvider(userId);
-  }
-
-  @override
-  FriendActivitiesProvider getProviderOverride(
-    covariant FriendActivitiesProvider provider,
-  ) {
-    return call(provider.userId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'friendActivitiesProvider';
-}
-
-/// Mirrors `useFriendActivities` — 200 only when the caller is friends with
-/// `userId` (or it's their own id); the API returns 401 otherwise, which
-/// surfaces as an `AsyncError` here for the caller to treat as "locked".
-///
-/// Copied from [friendActivities].
-class FriendActivitiesProvider
-    extends AutoDisposeFutureProvider<List<Activity>> {
-  /// Mirrors `useFriendActivities` — 200 only when the caller is friends with
-  /// `userId` (or it's their own id); the API returns 401 otherwise, which
-  /// surfaces as an `AsyncError` here for the caller to treat as "locked".
-  ///
-  /// Copied from [friendActivities].
-  FriendActivitiesProvider(String userId)
-    : this._internal(
-        (ref) => friendActivities(ref as FriendActivitiesRef, userId),
-        from: friendActivitiesProvider,
+final class FriendActivitiesFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<List<Activity>>, String> {
+  FriendActivitiesFamily._()
+    : super(
+        retry: null,
         name: r'friendActivitiesProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$friendActivitiesHash,
-        dependencies: FriendActivitiesFamily._dependencies,
-        allTransitiveDependencies:
-            FriendActivitiesFamily._allTransitiveDependencies,
-        userId: userId,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
       );
 
-  FriendActivitiesProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.userId,
-  }) : super.internal();
+  /// Mirrors `useFriendActivities` — 200 only when the caller is friends with
+  /// `userId` (or it's their own id); the API returns 401 otherwise, which
+  /// surfaces as an `AsyncError` here for the caller to treat as "locked".
 
-  final String userId;
+  FriendActivitiesProvider call(String userId) =>
+      FriendActivitiesProvider._(argument: userId, from: this);
 
   @override
-  Override overrideWith(
-    FutureOr<List<Activity>> Function(FriendActivitiesRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: FriendActivitiesProvider._internal(
-        (ref) => create(ref as FriendActivitiesRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        userId: userId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<List<Activity>> createElement() {
-    return _FriendActivitiesProviderElement(this);
-  }
-
-  @override
-  bool operator ==(Object other) {
-    return other is FriendActivitiesProvider && other.userId == userId;
-  }
-
-  @override
-  int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, userId.hashCode);
-
-    return _SystemHash.finish(hash);
-  }
+  String toString() => r'friendActivitiesProvider';
 }
-
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin FriendActivitiesRef on AutoDisposeFutureProviderRef<List<Activity>> {
-  /// The parameter `userId` of this provider.
-  String get userId;
-}
-
-class _FriendActivitiesProviderElement
-    extends AutoDisposeFutureProviderElement<List<Activity>>
-    with FriendActivitiesRef {
-  _FriendActivitiesProviderElement(super.provider);
-
-  @override
-  String get userId => (origin as FriendActivitiesProvider).userId;
-}
-
-String _$friendStatusHash() => r'576ccab2c8ac99f826814676db44a173f7c72ed4';
 
 /// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
 /// status between two users, so it's derived client-side by scanning the
 /// friends list + both pending-request lists for `userId`.
-///
-/// Copied from [friendStatus].
+
 @ProviderFor(friendStatus)
-const friendStatusProvider = FriendStatusFamily();
+final friendStatusProvider = FriendStatusFamily._();
 
 /// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
 /// status between two users, so it's derived client-side by scanning the
 /// friends list + both pending-request lists for `userId`.
-///
-/// Copied from [friendStatus].
-class FriendStatusFamily extends Family<FriendStatusInfo> {
-  /// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
-  /// status between two users, so it's derived client-side by scanning the
-  /// friends list + both pending-request lists for `userId`.
-  ///
-  /// Copied from [friendStatus].
-  const FriendStatusFamily();
 
+final class FriendStatusProvider
+    extends
+        $FunctionalProvider<
+          FriendStatusInfo,
+          FriendStatusInfo,
+          FriendStatusInfo
+        >
+    with $Provider<FriendStatusInfo> {
   /// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
   /// status between two users, so it's derived client-side by scanning the
   /// friends list + both pending-request lists for `userId`.
-  ///
-  /// Copied from [friendStatus].
-  FriendStatusProvider call(String userId) {
-    return FriendStatusProvider(userId);
+  FriendStatusProvider._({
+    required FriendStatusFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'friendStatusProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$friendStatusHash();
+
+  @override
+  String toString() {
+    return r'friendStatusProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  FriendStatusProvider getProviderOverride(
-    covariant FriendStatusProvider provider,
-  ) {
-    return call(provider.userId);
+  $ProviderElement<FriendStatusInfo> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  FriendStatusInfo create(Ref ref) {
+    final argument = this.argument as String;
+    return friendStatus(ref, argument);
   }
 
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'friendStatusProvider';
-}
-
-/// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
-/// status between two users, so it's derived client-side by scanning the
-/// friends list + both pending-request lists for `userId`.
-///
-/// Copied from [friendStatus].
-class FriendStatusProvider extends AutoDisposeProvider<FriendStatusInfo> {
-  /// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
-  /// status between two users, so it's derived client-side by scanning the
-  /// friends list + both pending-request lists for `userId`.
-  ///
-  /// Copied from [friendStatus].
-  FriendStatusProvider(String userId)
-    : this._internal(
-        (ref) => friendStatus(ref as FriendStatusRef, userId),
-        from: friendStatusProvider,
-        name: r'friendStatusProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$friendStatusHash,
-        dependencies: FriendStatusFamily._dependencies,
-        allTransitiveDependencies:
-            FriendStatusFamily._allTransitiveDependencies,
-        userId: userId,
-      );
-
-  FriendStatusProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.userId,
-  }) : super.internal();
-
-  final String userId;
-
-  @override
-  Override overrideWith(
-    FriendStatusInfo Function(FriendStatusRef provider) create,
-  ) {
-    return ProviderOverride(
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(FriendStatusInfo value) {
+    return $ProviderOverride(
       origin: this,
-      override: FriendStatusProvider._internal(
-        (ref) => create(ref as FriendStatusRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        userId: userId,
-      ),
+      providerOverride: $SyncValueProvider<FriendStatusInfo>(value),
     );
   }
 
   @override
-  AutoDisposeProviderElement<FriendStatusInfo> createElement() {
-    return _FriendStatusProviderElement(this);
-  }
-
-  @override
   bool operator ==(Object other) {
-    return other is FriendStatusProvider && other.userId == userId;
+    return other is FriendStatusProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, userId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin FriendStatusRef on AutoDisposeProviderRef<FriendStatusInfo> {
-  /// The parameter `userId` of this provider.
-  String get userId;
-}
+String _$friendStatusHash() => r'f8f57bef82f9e91c4dbc5b5277317df2eb00bd4d';
 
-class _FriendStatusProviderElement
-    extends AutoDisposeProviderElement<FriendStatusInfo>
-    with FriendStatusRef {
-  _FriendStatusProviderElement(super.provider);
+/// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
+/// status between two users, so it's derived client-side by scanning the
+/// friends list + both pending-request lists for `userId`.
+
+final class FriendStatusFamily extends $Family
+    with $FunctionalFamilyOverride<FriendStatusInfo, String> {
+  FriendStatusFamily._()
+    : super(
+        retry: null,
+        name: r'friendStatusProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Mirrors `useFriendStatus` — no single backend endpoint reports friendship
+  /// status between two users, so it's derived client-side by scanning the
+  /// friends list + both pending-request lists for `userId`.
+
+  FriendStatusProvider call(String userId) =>
+      FriendStatusProvider._(argument: userId, from: this);
 
   @override
-  String get userId => (origin as FriendStatusProvider).userId;
+  String toString() => r'friendStatusProvider';
 }
-
-String _$friendActionsControllerHash() =>
-    r'a849eb3dbac0ebb80ccfe4640b43635145b0403f';
 
 /// Mirrors the mutations in `useFriends.ts` — grouped into one action
 /// controller (like `RequestActionsController`) since they all invalidate
 /// the same friend-list/request-list caches.
-///
-/// Copied from [FriendActionsController].
-@ProviderFor(FriendActionsController)
-final friendActionsControllerProvider =
-    AutoDisposeAsyncNotifierProvider<FriendActionsController, void>.internal(
-      FriendActionsController.new,
-      name: r'friendActionsControllerProvider',
-      debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-          ? null
-          : _$friendActionsControllerHash,
-      dependencies: null,
-      allTransitiveDependencies: null,
-    );
 
-typedef _$FriendActionsController = AutoDisposeAsyncNotifier<void>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+@ProviderFor(FriendActionsController)
+final friendActionsControllerProvider = FriendActionsControllerProvider._();
+
+/// Mirrors the mutations in `useFriends.ts` — grouped into one action
+/// controller (like `RequestActionsController`) since they all invalidate
+/// the same friend-list/request-list caches.
+final class FriendActionsControllerProvider
+    extends $AsyncNotifierProvider<FriendActionsController, void> {
+  /// Mirrors the mutations in `useFriends.ts` — grouped into one action
+  /// controller (like `RequestActionsController`) since they all invalidate
+  /// the same friend-list/request-list caches.
+  FriendActionsControllerProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'friendActionsControllerProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$friendActionsControllerHash();
+
+  @$internal
+  @override
+  FriendActionsController create() => FriendActionsController();
+}
+
+String _$friendActionsControllerHash() =>
+    r'67becad488c814d6ad49604d073b36c7efa601ca';
+
+/// Mirrors the mutations in `useFriends.ts` — grouped into one action
+/// controller (like `RequestActionsController`) since they all invalidate
+/// the same friend-list/request-list caches.
+
+abstract class _$FriendActionsController extends $AsyncNotifier<void> {
+  FutureOr<void> build();
+  @$mustCallSuper
+  @override
+  WhenComplete runBuild() {
+    final ref = this.ref as $Ref<AsyncValue<void>, void>;
+    final element =
+        ref.element
+            as $ClassProviderElement<
+              AnyNotifier<AsyncValue<void>, void>,
+              AsyncValue<void>,
+              Object?,
+              Object?
+            >;
+    return element.handleCreate(ref, build);
+  }
+}

@@ -24,7 +24,17 @@ Dio apiClient(Ref ref) {
     AuthInterceptor(ref: ref, tokenStorage: ref.watch(tokenStorageProvider)),
   );
   assert(() {
-    dio.interceptors.add(LogInterceptor(requestBody: false, responseBody: false));
+    // `requestHeader: false`: LogInterceptor'ın default'u `true`, bu da
+    // Authorization header'ındaki JWT'yi (tam token) debug loglarına
+    // basıyordu — debug APK'lar ve log dosyaları paylaşılabildiği için
+    // gerçek bir sızıntı riski.
+    dio.interceptors.add(
+      LogInterceptor(
+        requestBody: false,
+        responseBody: false,
+        requestHeader: false,
+      ),
+    );
     return true;
   }());
   return dio;

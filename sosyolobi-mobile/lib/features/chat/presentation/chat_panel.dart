@@ -58,7 +58,7 @@ class _ChatPanelState extends ConsumerState<ChatPanel> {
     _textController.clear();
     setState(() => _replyTarget = null);
     try {
-      await ref.read(chatMessagesNotifierProvider(roomId).notifier).sendMessage(
+      await ref.read(chatMessagesProvider(roomId).notifier).sendMessage(
             content: content,
             replyToMessageId: replyToMessageId,
           );
@@ -132,11 +132,11 @@ class _ChatPanelBody extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final messagesAsync = ref.watch(chatMessagesNotifierProvider(roomId));
+    final messagesAsync = ref.watch(chatMessagesProvider(roomId));
 
-    ref.listen(chatMessagesNotifierProvider(roomId), (previous, next) {
-      final prevLen = previous?.valueOrNull?.messages.length ?? 0;
-      final nextLen = next.valueOrNull?.messages.length ?? 0;
+    ref.listen(chatMessagesProvider(roomId), (previous, next) {
+      final prevLen = previous?.value?.messages.length ?? 0;
+      final nextLen = next.value?.messages.length ?? 0;
       if (nextLen > prevLen) scrollToBottom();
     });
 
@@ -231,7 +231,7 @@ class _ChatPanelBody extends ConsumerWidget {
               },
             ),
           ),
-          _buildFooter(context, ref, messagesAsync.valueOrNull?.closed ?? (initialStatus == ChatRoomStatus.closed)),
+          _buildFooter(context, ref, messagesAsync.value?.closed ?? (initialStatus == ChatRoomStatus.closed)),
         ],
       ),
     );

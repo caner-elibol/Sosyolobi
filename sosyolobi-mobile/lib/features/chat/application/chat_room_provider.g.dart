@@ -6,155 +6,83 @@ part of 'chat_room_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chatRoomHash() => r'15dc2d8d08988c2ce74faf2b59e6abfe06c7c1a8';
-
-/// Copied from Dart SDK
-class _SystemHash {
-  _SystemHash._();
-
-  static int combine(int hash, int value) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + value);
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x0007ffff & hash) << 10));
-    return hash ^ (hash >> 6);
-  }
-
-  static int finish(int hash) {
-    // ignore: parameter_assignments
-    hash = 0x1fffffff & (hash + ((0x03ffffff & hash) << 3));
-    // ignore: parameter_assignments
-    hash = hash ^ (hash >> 11);
-    return 0x1fffffff & (hash + ((0x00003fff & hash) << 15));
-  }
-}
-
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 /// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
-///
-/// Copied from [chatRoom].
+
 @ProviderFor(chatRoom)
-const chatRoomProvider = ChatRoomFamily();
+final chatRoomProvider = ChatRoomFamily._();
 
 /// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
-///
-/// Copied from [chatRoom].
-class ChatRoomFamily extends Family<AsyncValue<ChatRoom>> {
-  /// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
-  ///
-  /// Copied from [chatRoom].
-  const ChatRoomFamily();
 
+final class ChatRoomProvider
+    extends
+        $FunctionalProvider<AsyncValue<ChatRoom>, ChatRoom, FutureOr<ChatRoom>>
+    with $FutureModifier<ChatRoom>, $FutureProvider<ChatRoom> {
   /// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
-  ///
-  /// Copied from [chatRoom].
-  ChatRoomProvider call(String activityId) {
-    return ChatRoomProvider(activityId);
+  ChatRoomProvider._({
+    required ChatRoomFamily super.from,
+    required String super.argument,
+  }) : super(
+         retry: null,
+         name: r'chatRoomProvider',
+         isAutoDispose: true,
+         dependencies: null,
+         $allTransitiveDependencies: null,
+       );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatRoomHash();
+
+  @override
+  String toString() {
+    return r'chatRoomProvider'
+        ''
+        '($argument)';
   }
 
+  @$internal
   @override
-  ChatRoomProvider getProviderOverride(covariant ChatRoomProvider provider) {
-    return call(provider.activityId);
-  }
-
-  static const Iterable<ProviderOrFamily>? _dependencies = null;
+  $FutureProviderElement<ChatRoom> $createElement($ProviderPointer pointer) =>
+      $FutureProviderElement(pointer);
 
   @override
-  Iterable<ProviderOrFamily>? get dependencies => _dependencies;
-
-  static const Iterable<ProviderOrFamily>? _allTransitiveDependencies = null;
-
-  @override
-  Iterable<ProviderOrFamily>? get allTransitiveDependencies =>
-      _allTransitiveDependencies;
-
-  @override
-  String? get name => r'chatRoomProvider';
-}
-
-/// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
-///
-/// Copied from [chatRoom].
-class ChatRoomProvider extends AutoDisposeFutureProvider<ChatRoom> {
-  /// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
-  ///
-  /// Copied from [chatRoom].
-  ChatRoomProvider(String activityId)
-    : this._internal(
-        (ref) => chatRoom(ref as ChatRoomRef, activityId),
-        from: chatRoomProvider,
-        name: r'chatRoomProvider',
-        debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-            ? null
-            : _$chatRoomHash,
-        dependencies: ChatRoomFamily._dependencies,
-        allTransitiveDependencies: ChatRoomFamily._allTransitiveDependencies,
-        activityId: activityId,
-      );
-
-  ChatRoomProvider._internal(
-    super._createNotifier, {
-    required super.name,
-    required super.dependencies,
-    required super.allTransitiveDependencies,
-    required super.debugGetCreateSourceHash,
-    required super.from,
-    required this.activityId,
-  }) : super.internal();
-
-  final String activityId;
-
-  @override
-  Override overrideWith(
-    FutureOr<ChatRoom> Function(ChatRoomRef provider) create,
-  ) {
-    return ProviderOverride(
-      origin: this,
-      override: ChatRoomProvider._internal(
-        (ref) => create(ref as ChatRoomRef),
-        from: from,
-        name: null,
-        dependencies: null,
-        allTransitiveDependencies: null,
-        debugGetCreateSourceHash: null,
-        activityId: activityId,
-      ),
-    );
-  }
-
-  @override
-  AutoDisposeFutureProviderElement<ChatRoom> createElement() {
-    return _ChatRoomProviderElement(this);
+  FutureOr<ChatRoom> create(Ref ref) {
+    final argument = this.argument as String;
+    return chatRoom(ref, argument);
   }
 
   @override
   bool operator ==(Object other) {
-    return other is ChatRoomProvider && other.activityId == activityId;
+    return other is ChatRoomProvider && other.argument == argument;
   }
 
   @override
   int get hashCode {
-    var hash = _SystemHash.combine(0, runtimeType.hashCode);
-    hash = _SystemHash.combine(hash, activityId.hashCode);
-
-    return _SystemHash.finish(hash);
+    return argument.hashCode;
   }
 }
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-mixin ChatRoomRef on AutoDisposeFutureProviderRef<ChatRoom> {
-  /// The parameter `activityId` of this provider.
-  String get activityId;
-}
+String _$chatRoomHash() => r'15dc2d8d08988c2ce74faf2b59e6abfe06c7c1a8';
 
-class _ChatRoomProviderElement
-    extends AutoDisposeFutureProviderElement<ChatRoom>
-    with ChatRoomRef {
-  _ChatRoomProviderElement(super.provider);
+/// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
+
+final class ChatRoomFamily extends $Family
+    with $FunctionalFamilyOverride<FutureOr<ChatRoom>, String> {
+  ChatRoomFamily._()
+    : super(
+        retry: null,
+        name: r'chatRoomProvider',
+        dependencies: null,
+        $allTransitiveDependencies: null,
+        isAutoDispose: true,
+      );
+
+  /// Mirrors `useChatRoom` in `sosyolobi-web-2/src/hooks/useChatRoom.ts`.
+
+  ChatRoomProvider call(String activityId) =>
+      ChatRoomProvider._(argument: activityId, from: this);
 
   @override
-  String get activityId => (origin as ChatRoomProvider).activityId;
+  String toString() => r'chatRoomProvider';
 }
-
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package

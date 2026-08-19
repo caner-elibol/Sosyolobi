@@ -6,23 +6,22 @@ part of 'profile.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$UserProfileImpl _$$UserProfileImplFromJson(Map<String, dynamic> json) =>
-    _$UserProfileImpl(
-      userId: json['userId'] as String,
-      displayName: json['displayName'] as String,
-      bio: json['bio'] as String?,
-      avatarUrl: json['avatarUrl'] as String?,
-      birthDate: json['birthDate'] == null
-          ? null
-          : DateTime.parse(json['birthDate'] as String),
-      averageRating: (json['averageRating'] as num).toDouble(),
-      reviewCount: (json['reviewCount'] as num).toInt(),
-      completedActivityCount: (json['completedActivityCount'] as num).toInt(),
-      isPhoneVerified: json['isPhoneVerified'] as bool,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-    );
+_UserProfile _$UserProfileFromJson(Map<String, dynamic> json) => _UserProfile(
+  userId: json['userId'] as String,
+  displayName: json['displayName'] as String,
+  bio: json['bio'] as String?,
+  avatarUrl: json['avatarUrl'] as String?,
+  birthDate: json['birthDate'] == null
+      ? null
+      : DateTime.parse(json['birthDate'] as String),
+  averageRating: (json['averageRating'] as num).toDouble(),
+  reviewCount: (json['reviewCount'] as num).toInt(),
+  completedActivityCount: (json['completedActivityCount'] as num).toInt(),
+  isPhoneVerified: json['isPhoneVerified'] as bool,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+);
 
-Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
+Map<String, dynamic> _$UserProfileToJson(_UserProfile instance) =>
     <String, dynamic>{
       'userId': instance.userId,
       'displayName': instance.displayName,
@@ -36,8 +35,8 @@ Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
       'createdAt': instance.createdAt.toIso8601String(),
     };
 
-_$PublicProfileImpl _$$PublicProfileImplFromJson(Map<String, dynamic> json) =>
-    _$PublicProfileImpl(
+_PublicProfile _$PublicProfileFromJson(Map<String, dynamic> json) =>
+    _PublicProfile(
       userId: json['userId'] as String,
       displayName: json['displayName'] as String,
       bio: json['bio'] as String?,
@@ -47,7 +46,7 @@ _$PublicProfileImpl _$$PublicProfileImplFromJson(Map<String, dynamic> json) =>
       completedActivityCount: (json['completedActivityCount'] as num).toInt(),
     );
 
-Map<String, dynamic> _$$PublicProfileImplToJson(_$PublicProfileImpl instance) =>
+Map<String, dynamic> _$PublicProfileToJson(_PublicProfile instance) =>
     <String, dynamic>{
       'userId': instance.userId,
       'displayName': instance.displayName,

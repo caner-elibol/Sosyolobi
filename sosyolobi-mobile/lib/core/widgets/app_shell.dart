@@ -78,31 +78,25 @@ class AppShell extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         titleSpacing: 16,
-        title: Row(
-          children: [
-            Container(
-              width: 32,
-              height: 32,
-              decoration: BoxDecoration(
-                color: AppColors.accentBright,
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.place, color: Colors.white, size: 18),
-            ),
-            const SizedBox(width: 8),
-            const Text(
-              'Sosyolobi',
-              style: TextStyle(
-                color: AppColors.navy,
-                fontWeight: FontWeight.w700,
-                fontSize: 17,
-              ),
-            ),
-          ],
+        title: Image.asset(
+          'assets/branding/logo_horizontal.png',
+          height: 32,
+          fit: BoxFit.contain,
+          alignment: Alignment.centerLeft,
         ),
         actions: [
           IconButton(
-            onPressed: () => context.push(RoutePaths.profile),
+            // Guards against stacking multiple Profile screens from a fast
+            // double-tap — simply no-ops once we're already there, instead
+            // of the previous `StatefulWidget` approach (a `_navigating`
+            // flag cleared only when `context.push`'s Future resolved on
+            // pop), which could get stuck disabled even when no longer on
+            // the profile screen (confirmed live). `location` is already
+            // recomputed fresh from go_router's actual state on every
+            // rebuild, so this can't get out of sync.
+            onPressed: location == RoutePaths.profile
+                ? null
+                : () => context.push(RoutePaths.profile),
             icon: const Icon(Icons.person_outline),
           ),
           _NotificationBellButton(badgeCount: badgeCount),

@@ -6,22 +6,46 @@ part of 'users_api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$usersApiHash() => r'254ba2d5b0accbf7555073e0663daacc78535512';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [usersApi].
 @ProviderFor(usersApi)
-final usersApiProvider = AutoDisposeProvider<UsersApi>.internal(
-  usersApi,
-  name: r'usersApiProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$usersApiHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final usersApiProvider = UsersApiProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef UsersApiRef = AutoDisposeProviderRef<UsersApi>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class UsersApiProvider
+    extends $FunctionalProvider<UsersApi, UsersApi, UsersApi>
+    with $Provider<UsersApi> {
+  UsersApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'usersApiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$usersApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<UsersApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  UsersApi create(Ref ref) {
+    return usersApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(UsersApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<UsersApi>(value),
+    );
+  }
+}
+
+String _$usersApiHash() => r'254ba2d5b0accbf7555073e0663daacc78535512';

@@ -6,22 +6,46 @@ part of 'chat_api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$chatApiHash() => r'bfc931de585c0101efb63618e129fa9770bb409d';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [chatApi].
 @ProviderFor(chatApi)
-final chatApiProvider = AutoDisposeProvider<ChatApi>.internal(
-  chatApi,
-  name: r'chatApiProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$chatApiHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final chatApiProvider = ChatApiProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef ChatApiRef = AutoDisposeProviderRef<ChatApi>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class ChatApiProvider
+    extends $FunctionalProvider<ChatApi, ChatApi, ChatApi>
+    with $Provider<ChatApi> {
+  ChatApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'chatApiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$chatApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<ChatApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  ChatApi create(Ref ref) {
+    return chatApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(ChatApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<ChatApi>(value),
+    );
+  }
+}
+
+String _$chatApiHash() => r'bfc931de585c0101efb63618e129fa9770bb409d';

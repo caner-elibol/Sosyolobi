@@ -308,7 +308,7 @@ class _ProfileBodyState extends ConsumerState<_ProfileBody> {
         ],
         const SizedBox(height: 16),
         OutlinedButton.icon(
-          onPressed: () => ref.read(authNotifierProvider.notifier).logout(),
+          onPressed: () => ref.read(authProvider.notifier).logout(),
           style: OutlinedButton.styleFrom(
             foregroundColor: AppColors.destructive,
           ),

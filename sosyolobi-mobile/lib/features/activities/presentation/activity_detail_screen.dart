@@ -107,7 +107,7 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
   @override
   Widget build(BuildContext context) {
     final activity = widget.activity;
-    final authState = ref.watch(authNotifierProvider).valueOrNull;
+    final authState = ref.watch(authProvider).value;
     final currentUserId = authState?.userId;
     final color = CategoryIcons.colorFor(activity.categoryName);
     final totalSpots = activity.neededPeopleCount + 1;

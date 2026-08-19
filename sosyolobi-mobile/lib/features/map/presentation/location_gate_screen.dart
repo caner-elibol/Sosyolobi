@@ -9,7 +9,7 @@ import '../domain/current_location.dart';
 
 /// Mandatory gate shown right after login, before any /app/* route is
 /// reachable — `app_router.dart`'s redirect sends every authenticated user
-/// here until [currentLocationNotifierProvider] resolves to `granted`.
+/// here until [currentLocationProvider] resolves to `granted`.
 ///
 /// Watching the provider here triggers the OS permission prompt immediately
 /// on first arrival (`CurrentLocationNotifier.build()` requests permission
@@ -23,8 +23,8 @@ class LocationGateScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final locationAsync = ref.watch(currentLocationNotifierProvider);
-    final permissionState = locationAsync.valueOrNull?.permissionState;
+    final locationAsync = ref.watch(currentLocationProvider);
+    final permissionState = locationAsync.value?.permissionState;
     final isLoading = locationAsync.isLoading && permissionState == null;
     final deniedForever =
         permissionState == LocationPermissionState.deniedForever;
@@ -86,7 +86,7 @@ class LocationGateScreen extends ConsumerWidget {
                         Geolocator.openAppSettings();
                       } else {
                         ref
-                            .read(currentLocationNotifierProvider.notifier)
+                            .read(currentLocationProvider.notifier)
                             .refresh();
                       }
                     },
@@ -102,7 +102,7 @@ class LocationGateScreen extends ConsumerWidget {
                   width: double.infinity,
                   child: OutlinedButton.icon(
                     onPressed: () =>
-                        ref.read(authNotifierProvider.notifier).logout(),
+                        ref.read(authProvider.notifier).logout(),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: AppColors.destructive,
                     ),

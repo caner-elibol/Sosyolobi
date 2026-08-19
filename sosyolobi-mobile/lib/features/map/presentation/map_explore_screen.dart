@@ -107,7 +107,7 @@ class _MapExploreScreenState extends ConsumerState<MapExploreScreen> {
       },
       orElse: () => null,
     );
-    final filteredItems = _applyClientFilters(mapActivitiesAsync.valueOrNull ?? const []);
+    final filteredItems = _applyClientFilters(mapActivitiesAsync.value ?? const []);
 
     return Scaffold(
       body: Stack(

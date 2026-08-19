@@ -10,7 +10,7 @@ part 'profile_providers.g.dart';
 /// Mirrors `useProfile` in `sosyolobi-web-2/src/hooks/useProfile.ts`.
 ///
 /// `keepAlive: true` means this never auto-disposes, so without watching
-/// [authNotifierProvider] it would keep serving the FIRST user's profile
+/// [authProvider] it would keep serving the FIRST user's profile
 /// forever — logging out and back in as a different user (without fully
 /// restarting the app) showed the previous account's name/avatar on the
 /// Profile screen, since nothing ever re-triggered `getMe()`. Watching auth
@@ -20,7 +20,7 @@ part 'profile_providers.g.dart';
 class MyProfile extends _$MyProfile {
   @override
   Future<UserProfile> build() async {
-    await ref.watch(authNotifierProvider.future);
+    await ref.watch(authProvider.future);
     return ref.watch(profileApiProvider).getMe();
   }
 

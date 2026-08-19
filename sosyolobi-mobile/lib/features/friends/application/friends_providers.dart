@@ -44,19 +44,19 @@ FriendStatusInfo friendStatus(Ref ref, String userId) {
   final sentAsync = ref.watch(sentFriendRequestsProvider);
   final incomingAsync = ref.watch(incomingFriendRequestsProvider);
 
-  final friendsList = friendsAsync.valueOrNull ?? const <Friend>[];
+  final friendsList = friendsAsync.value ?? const <Friend>[];
   final matchedFriend = friendsList.where((f) => f.user.userId == userId).firstOrNull;
   if (matchedFriend != null) {
     return const FriendStatusInfo(status: FriendStatus.friends);
   }
 
-  final sentList = sentAsync.valueOrNull ?? const <FriendRequest>[];
+  final sentList = sentAsync.value ?? const <FriendRequest>[];
   final sentRequest = sentList.where((r) => r.user.userId == userId).firstOrNull;
   if (sentRequest != null) {
     return FriendStatusInfo(status: FriendStatus.pendingSent, request: sentRequest);
   }
 
-  final incomingList = incomingAsync.valueOrNull ?? const <FriendRequest>[];
+  final incomingList = incomingAsync.value ?? const <FriendRequest>[];
   final incomingRequest = incomingList.where((r) => r.user.userId == userId).firstOrNull;
   if (incomingRequest != null) {
     return FriendStatusInfo(status: FriendStatus.pendingIncoming, request: incomingRequest);
@@ -74,49 +74,46 @@ class FriendActionsController extends _$FriendActionsController {
   @override
   FutureOr<void> build() {}
 
-  Future<void> sendRequest(String addresseeUserId) async {
+  /// See `RequestActionsController._run`'s doc — same autoDispose-mid-flight
+  /// fix (`ref.keepAlive()` for the mutation's duration).
+  Future<void> _run(Future<void> Function() action) async {
+    final keepAliveLink = ref.keepAlive();
     state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(friendsApiProvider).sendRequest(addresseeUserId);
-      ref.invalidate(sentFriendRequestsProvider);
-      ref.invalidate(friendStatusProvider(addresseeUserId));
-    });
+    try {
+      state = await AsyncValue.guard(action);
+    } finally {
+      keepAliveLink.close();
+    }
   }
 
-  Future<void> accept(String requestId, {String? userId}) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(friendsApiProvider).accept(requestId);
-      ref.invalidate(incomingFriendRequestsProvider);
-      ref.invalidate(friendsProvider);
-      if (userId != null) ref.invalidate(friendStatusProvider(userId));
-    });
-  }
+  Future<void> sendRequest(String addresseeUserId) => _run(() async {
+        await ref.read(friendsApiProvider).sendRequest(addresseeUserId);
+        ref.invalidate(sentFriendRequestsProvider);
+        ref.invalidate(friendStatusProvider(addresseeUserId));
+      });
 
-  Future<void> reject(String requestId, {String? userId}) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(friendsApiProvider).reject(requestId);
-      ref.invalidate(incomingFriendRequestsProvider);
-      if (userId != null) ref.invalidate(friendStatusProvider(userId));
-    });
-  }
+  Future<void> accept(String requestId, {String? userId}) => _run(() async {
+        await ref.read(friendsApiProvider).accept(requestId);
+        ref.invalidate(incomingFriendRequestsProvider);
+        ref.invalidate(friendsProvider);
+        if (userId != null) ref.invalidate(friendStatusProvider(userId));
+      });
 
-  Future<void> cancel(String requestId, {String? userId}) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(friendsApiProvider).cancel(requestId);
-      ref.invalidate(sentFriendRequestsProvider);
-      if (userId != null) ref.invalidate(friendStatusProvider(userId));
-    });
-  }
+  Future<void> reject(String requestId, {String? userId}) => _run(() async {
+        await ref.read(friendsApiProvider).reject(requestId);
+        ref.invalidate(incomingFriendRequestsProvider);
+        if (userId != null) ref.invalidate(friendStatusProvider(userId));
+      });
 
-  Future<void> removeFriend(String friendUserId) async {
-    state = const AsyncLoading();
-    state = await AsyncValue.guard(() async {
-      await ref.read(friendsApiProvider).removeFriend(friendUserId);
-      ref.invalidate(friendsProvider);
-      ref.invalidate(friendStatusProvider(friendUserId));
-    });
-  }
+  Future<void> cancel(String requestId, {String? userId}) => _run(() async {
+        await ref.read(friendsApiProvider).cancel(requestId);
+        ref.invalidate(sentFriendRequestsProvider);
+        if (userId != null) ref.invalidate(friendStatusProvider(userId));
+      });
+
+  Future<void> removeFriend(String friendUserId) => _run(() async {
+        await ref.read(friendsApiProvider).removeFriend(friendUserId);
+        ref.invalidate(friendsProvider);
+        ref.invalidate(friendStatusProvider(friendUserId));
+      });
 }

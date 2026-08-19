@@ -66,6 +66,17 @@ class CreateActivityController extends _$CreateActivityController {
   FutureOr<void> build() {}
 
   Future<Activity> submit(CreateActivityRequest request) async {
+    // Bu provider autoDispose ve UI onu hiçbir yerde `watch` etmiyor (sadece
+    // `.notifier`'ı bir kerelik `read` ediyor) — yani dinleyici sayısı hep
+    // sıfır. `state = AsyncLoading()` sonrası `await` ile kontrol event
+    // loop'a döner dönmez Riverpod autoDispose bu provider'ı, HTTP isteği
+    // hâlâ uçuştayken dispose ediyordu; dispose sırasında Riverpod'un iç
+    // future completer'ı bir hatayla tamamlanıyor ama null'lanmıyor. İstek
+    // başarıyla dönünce `state = AsyncData(...)` aynı completer'ı tekrar
+    // tamamlamaya çalışınca "Bad state: Future already completed" ile
+    // çöküyordu — API her zaman 201 dönmesine rağmen (confirmed live).
+    // `ref.keepAlive()` mutation süresince disposal'ı engelliyor.
+    final keepAliveLink = ref.keepAlive();
     state = const AsyncLoading();
     try {
       final activity = await ref.read(activitiesApiProvider).create(request);
@@ -75,6 +86,8 @@ class CreateActivityController extends _$CreateActivityController {
     } catch (error, stackTrace) {
       state = AsyncError(error, stackTrace);
       rethrow;
+    } finally {
+      keepAliveLink.close();
     }
   }
 }

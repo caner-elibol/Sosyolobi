@@ -17,7 +17,7 @@ class AuthNotifier extends _$AuthNotifier {
     // failed refresh) — core/network has no dependency on this feature, so
     // it signals through the shared authSessionProvider flag instead.
     ref.listen(authSessionProvider, (previous, isAuthenticated) {
-      if (isAuthenticated == false && state.valueOrNull?.isAuthenticated == true) {
+      if (isAuthenticated == false && state.value?.isAuthenticated == true) {
         state = const AsyncData(AuthState.unauthenticated());
       }
     });

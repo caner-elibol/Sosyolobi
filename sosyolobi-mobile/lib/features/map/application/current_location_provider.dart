@@ -30,7 +30,11 @@ class CurrentLocationNotifier extends _$CurrentLocationNotifier {
   }
 
   Future<void> refresh() async {
-    state = const AsyncLoading<CurrentLocation>().copyWithPrevious(state);
+    // Riverpod 3.x merges in the previous value on every `state =`
+    // assignment automatically (see `ProviderElement.asyncTransition`), so
+    // the manual `.copyWithPrevious(state)` this used to need is now
+    // redundant (and `copyWithPrevious` itself is `@internal` as of 3.x).
+    state = const AsyncLoading<CurrentLocation>();
     state = await AsyncValue.guard(_resolveAndCache);
   }
 

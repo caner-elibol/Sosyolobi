@@ -6,22 +6,46 @@ part of 'requests_api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$requestsApiHash() => r'e75c4144d937961207c1a3112298faa1757898d2';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [requestsApi].
 @ProviderFor(requestsApi)
-final requestsApiProvider = AutoDisposeProvider<RequestsApi>.internal(
-  requestsApi,
-  name: r'requestsApiProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$requestsApiHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final requestsApiProvider = RequestsApiProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef RequestsApiRef = AutoDisposeProviderRef<RequestsApi>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class RequestsApiProvider
+    extends $FunctionalProvider<RequestsApi, RequestsApi, RequestsApi>
+    with $Provider<RequestsApi> {
+  RequestsApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'requestsApiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$requestsApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<RequestsApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  RequestsApi create(Ref ref) {
+    return requestsApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(RequestsApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<RequestsApi>(value),
+    );
+  }
+}
+
+String _$requestsApiHash() => r'e75c4144d937961207c1a3112298faa1757898d2';

@@ -29,7 +29,7 @@ class _FriendsScreenState extends ConsumerState<FriendsScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final incomingCount = ref.watch(incomingFriendRequestsProvider).valueOrNull?.length ?? 0;
+    final incomingCount = ref.watch(incomingFriendRequestsProvider).value?.length ?? 0;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Arkadaşlar')),

@@ -6,9 +6,9 @@ part of 'create_activity_request.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$CreateActivityRequestImpl _$$CreateActivityRequestImplFromJson(
+_CreateActivityRequest _$CreateActivityRequestFromJson(
   Map<String, dynamic> json,
-) => _$CreateActivityRequestImpl(
+) => _CreateActivityRequest(
   categoryId: json['categoryId'] as String,
   title: json['title'] as String,
   description: json['description'] as String?,
@@ -31,8 +31,8 @@ _$CreateActivityRequestImpl _$$CreateActivityRequestImplFromJson(
   addressDetailPrivate: json['addressDetailPrivate'] as String?,
 );
 
-Map<String, dynamic> _$$CreateActivityRequestImplToJson(
-  _$CreateActivityRequestImpl instance,
+Map<String, dynamic> _$CreateActivityRequestToJson(
+  _CreateActivityRequest instance,
 ) => <String, dynamic>{
   'categoryId': instance.categoryId,
   'title': instance.title,

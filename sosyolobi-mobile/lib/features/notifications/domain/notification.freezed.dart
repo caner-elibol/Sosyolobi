@@ -1,6 +1,6 @@
-// coverage:ignore-file
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: type=lint
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
 // ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
 
 part of 'notification.dart';
@@ -9,330 +9,291 @@ part of 'notification.dart';
 // FreezedGenerator
 // **************************************************************************
 
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
 T _$identity<T>(T value) => value;
-
-final _privateConstructorUsedError = UnsupportedError(
-  'It seems like you constructed your class using `MyClass._()`. This constructor is only meant to be used by freezed and you are not supposed to need it nor use it.\nPlease check the documentation here for more information: https://github.com/rrousselGit/freezed#adding-getters-and-methods-to-our-models',
-);
-
-AppNotification _$AppNotificationFromJson(Map<String, dynamic> json) {
-  return _AppNotification.fromJson(json);
-}
 
 /// @nodoc
 mixin _$AppNotification {
-  String get id => throw _privateConstructorUsedError;
-  @NotificationTypeConverter()
-  NotificationType get type => throw _privateConstructorUsedError;
-  String get title => throw _privateConstructorUsedError;
-  String? get message => throw _privateConstructorUsedError;
-  String? get relatedActivityId => throw _privateConstructorUsedError;
-  String? get relatedActivityTitle => throw _privateConstructorUsedError;
-  bool get isRead => throw _privateConstructorUsedError;
-  DateTime get createdAt => throw _privateConstructorUsedError;
+
+ String get id;@NotificationTypeConverter() NotificationType get type; String get title; String? get message; String? get relatedActivityId; String? get relatedActivityTitle; bool get isRead; DateTime get createdAt;
+/// Create a copy of AppNotification
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$AppNotificationCopyWith<AppNotification> get copyWith => _$AppNotificationCopyWithImpl<AppNotification>(this as AppNotification, _$identity);
 
   /// Serializes this AppNotification to a JSON map.
-  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+  Map<String, dynamic> toJson();
 
-  /// Create a copy of AppNotification
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  $AppNotificationCopyWith<AppNotification> get copyWith =>
-      throw _privateConstructorUsedError;
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppNotification&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.message, message) || other.message == message)&&(identical(other.relatedActivityId, relatedActivityId) || other.relatedActivityId == relatedActivityId)&&(identical(other.relatedActivityTitle, relatedActivityTitle) || other.relatedActivityTitle == relatedActivityTitle)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,type,title,message,relatedActivityId,relatedActivityTitle,isRead,createdAt);
+
+@override
+String toString() {
+  return 'AppNotification(id: $id, type: $type, title: $title, message: $message, relatedActivityId: $relatedActivityId, relatedActivityTitle: $relatedActivityTitle, isRead: $isRead, createdAt: $createdAt)';
+}
+
+
 }
 
 /// @nodoc
-abstract class $AppNotificationCopyWith<$Res> {
-  factory $AppNotificationCopyWith(
-    AppNotification value,
-    $Res Function(AppNotification) then,
-  ) = _$AppNotificationCopyWithImpl<$Res, AppNotification>;
-  @useResult
-  $Res call({
-    String id,
-    @NotificationTypeConverter() NotificationType type,
-    String title,
-    String? message,
-    String? relatedActivityId,
-    String? relatedActivityTitle,
-    bool isRead,
-    DateTime createdAt,
-  });
-}
+abstract mixin class $AppNotificationCopyWith<$Res>  {
+  factory $AppNotificationCopyWith(AppNotification value, $Res Function(AppNotification) _then) = _$AppNotificationCopyWithImpl;
+@useResult
+$Res call({
+ String id,@NotificationTypeConverter() NotificationType type, String title, String? message, String? relatedActivityId, String? relatedActivityTitle, bool isRead, DateTime createdAt
+});
 
+
+
+
+}
 /// @nodoc
-class _$AppNotificationCopyWithImpl<$Res, $Val extends AppNotification>
+class _$AppNotificationCopyWithImpl<$Res>
     implements $AppNotificationCopyWith<$Res> {
-  _$AppNotificationCopyWithImpl(this._value, this._then);
+  _$AppNotificationCopyWithImpl(this._self, this._then);
 
-  // ignore: unused_field
-  final $Val _value;
-  // ignore: unused_field
-  final $Res Function($Val) _then;
+  final AppNotification _self;
+  final $Res Function(AppNotification) _then;
 
-  /// Create a copy of AppNotification
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? type = null,
-    Object? title = null,
-    Object? message = freezed,
-    Object? relatedActivityId = freezed,
-    Object? relatedActivityTitle = freezed,
-    Object? isRead = null,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _value.copyWith(
-            id: null == id
-                ? _value.id
-                : id // ignore: cast_nullable_to_non_nullable
-                      as String,
-            type: null == type
-                ? _value.type
-                : type // ignore: cast_nullable_to_non_nullable
-                      as NotificationType,
-            title: null == title
-                ? _value.title
-                : title // ignore: cast_nullable_to_non_nullable
-                      as String,
-            message: freezed == message
-                ? _value.message
-                : message // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            relatedActivityId: freezed == relatedActivityId
-                ? _value.relatedActivityId
-                : relatedActivityId // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            relatedActivityTitle: freezed == relatedActivityTitle
-                ? _value.relatedActivityTitle
-                : relatedActivityTitle // ignore: cast_nullable_to_non_nullable
-                      as String?,
-            isRead: null == isRead
-                ? _value.isRead
-                : isRead // ignore: cast_nullable_to_non_nullable
-                      as bool,
-            createdAt: null == createdAt
-                ? _value.createdAt
-                : createdAt // ignore: cast_nullable_to_non_nullable
-                      as DateTime,
-          )
-          as $Val,
-    );
-  }
+/// Create a copy of AppNotification
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? title = null,Object? message = freezed,Object? relatedActivityId = freezed,Object? relatedActivityTitle = freezed,Object? isRead = null,Object? createdAt = null,}) {
+  return _then(AppNotification(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as NotificationType,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,relatedActivityId: freezed == relatedActivityId ? _self.relatedActivityId : relatedActivityId // ignore: cast_nullable_to_non_nullable
+as String?,relatedActivityTitle: freezed == relatedActivityTitle ? _self.relatedActivityTitle : relatedActivityTitle // ignore: cast_nullable_to_non_nullable
+as String?,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
 }
 
-/// @nodoc
-abstract class _$$AppNotificationImplCopyWith<$Res>
-    implements $AppNotificationCopyWith<$Res> {
-  factory _$$AppNotificationImplCopyWith(
-    _$AppNotificationImpl value,
-    $Res Function(_$AppNotificationImpl) then,
-  ) = __$$AppNotificationImplCopyWithImpl<$Res>;
-  @override
-  @useResult
-  $Res call({
-    String id,
-    @NotificationTypeConverter() NotificationType type,
-    String title,
-    String? message,
-    String? relatedActivityId,
-    String? relatedActivityTitle,
-    bool isRead,
-    DateTime createdAt,
-  });
 }
 
-/// @nodoc
-class __$$AppNotificationImplCopyWithImpl<$Res>
-    extends _$AppNotificationCopyWithImpl<$Res, _$AppNotificationImpl>
-    implements _$$AppNotificationImplCopyWith<$Res> {
-  __$$AppNotificationImplCopyWithImpl(
-    _$AppNotificationImpl _value,
-    $Res Function(_$AppNotificationImpl) _then,
-  ) : super(_value, _then);
 
-  /// Create a copy of AppNotification
-  /// with the given fields replaced by the non-null parameter values.
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? id = null,
-    Object? type = null,
-    Object? title = null,
-    Object? message = freezed,
-    Object? relatedActivityId = freezed,
-    Object? relatedActivityTitle = freezed,
-    Object? isRead = null,
-    Object? createdAt = null,
-  }) {
-    return _then(
-      _$AppNotificationImpl(
-        id: null == id
-            ? _value.id
-            : id // ignore: cast_nullable_to_non_nullable
-                  as String,
-        type: null == type
-            ? _value.type
-            : type // ignore: cast_nullable_to_non_nullable
-                  as NotificationType,
-        title: null == title
-            ? _value.title
-            : title // ignore: cast_nullable_to_non_nullable
-                  as String,
-        message: freezed == message
-            ? _value.message
-            : message // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        relatedActivityId: freezed == relatedActivityId
-            ? _value.relatedActivityId
-            : relatedActivityId // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        relatedActivityTitle: freezed == relatedActivityTitle
-            ? _value.relatedActivityTitle
-            : relatedActivityTitle // ignore: cast_nullable_to_non_nullable
-                  as String?,
-        isRead: null == isRead
-            ? _value.isRead
-            : isRead // ignore: cast_nullable_to_non_nullable
-                  as bool,
-        createdAt: null == createdAt
-            ? _value.createdAt
-            : createdAt // ignore: cast_nullable_to_non_nullable
-                  as DateTime,
-      ),
-    );
-  }
+/// Adds pattern-matching-related methods to [AppNotification].
+extension AppNotificationPatterns on AppNotification {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _AppNotification value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _AppNotification() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _AppNotification value)  $default,){
+final _that = this;
+switch (_that) {
+case _AppNotification():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _AppNotification value)?  $default,){
+final _that = this;
+switch (_that) {
+case _AppNotification() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @NotificationTypeConverter()  NotificationType type,  String title,  String? message,  String? relatedActivityId,  String? relatedActivityTitle,  bool isRead,  DateTime createdAt)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _AppNotification() when $default != null:
+return $default(_that.id,_that.type,_that.title,_that.message,_that.relatedActivityId,_that.relatedActivityTitle,_that.isRead,_that.createdAt);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @NotificationTypeConverter()  NotificationType type,  String title,  String? message,  String? relatedActivityId,  String? relatedActivityTitle,  bool isRead,  DateTime createdAt)  $default,) {final _that = this;
+switch (_that) {
+case _AppNotification():
+return $default(_that.id,_that.type,_that.title,_that.message,_that.relatedActivityId,_that.relatedActivityTitle,_that.isRead,_that.createdAt);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @NotificationTypeConverter()  NotificationType type,  String title,  String? message,  String? relatedActivityId,  String? relatedActivityTitle,  bool isRead,  DateTime createdAt)?  $default,) {final _that = this;
+switch (_that) {
+case _AppNotification() when $default != null:
+return $default(_that.id,_that.type,_that.title,_that.message,_that.relatedActivityId,_that.relatedActivityTitle,_that.isRead,_that.createdAt);case _:
+  return null;
+
+}
+}
+
 }
 
 /// @nodoc
 @JsonSerializable()
-class _$AppNotificationImpl implements _AppNotification {
-  const _$AppNotificationImpl({
-    required this.id,
-    @NotificationTypeConverter() required this.type,
-    required this.title,
-    this.message,
-    this.relatedActivityId,
-    this.relatedActivityTitle,
-    required this.isRead,
-    required this.createdAt,
-  });
 
-  factory _$AppNotificationImpl.fromJson(Map<String, dynamic> json) =>
-      _$$AppNotificationImplFromJson(json);
+class _AppNotification implements AppNotification {
+  const _AppNotification({required this.id, @NotificationTypeConverter() required this.type, required this.title, this.message, this.relatedActivityId, this.relatedActivityTitle, required this.isRead, required this.createdAt});
+  factory _AppNotification.fromJson(Map<String, dynamic> json) => _$AppNotificationFromJson(json);
 
-  @override
-  final String id;
-  @override
-  @NotificationTypeConverter()
-  final NotificationType type;
-  @override
-  final String title;
-  @override
-  final String? message;
-  @override
-  final String? relatedActivityId;
-  @override
-  final String? relatedActivityTitle;
-  @override
-  final bool isRead;
-  @override
-  final DateTime createdAt;
+@override final  String id;
+@override@NotificationTypeConverter() final  NotificationType type;
+@override final  String title;
+@override final  String? message;
+@override final  String? relatedActivityId;
+@override final  String? relatedActivityTitle;
+@override final  bool isRead;
+@override final  DateTime createdAt;
 
-  @override
-  String toString() {
-    return 'AppNotification(id: $id, type: $type, title: $title, message: $message, relatedActivityId: $relatedActivityId, relatedActivityTitle: $relatedActivityTitle, isRead: $isRead, createdAt: $createdAt)';
-  }
+/// Create a copy of AppNotification
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$AppNotificationCopyWith<_AppNotification> get copyWith => __$AppNotificationCopyWithImpl<_AppNotification>(this, _$identity);
 
-  @override
-  bool operator ==(Object other) {
-    return identical(this, other) ||
-        (other.runtimeType == runtimeType &&
-            other is _$AppNotificationImpl &&
-            (identical(other.id, id) || other.id == id) &&
-            (identical(other.type, type) || other.type == type) &&
-            (identical(other.title, title) || other.title == title) &&
-            (identical(other.message, message) || other.message == message) &&
-            (identical(other.relatedActivityId, relatedActivityId) ||
-                other.relatedActivityId == relatedActivityId) &&
-            (identical(other.relatedActivityTitle, relatedActivityTitle) ||
-                other.relatedActivityTitle == relatedActivityTitle) &&
-            (identical(other.isRead, isRead) || other.isRead == isRead) &&
-            (identical(other.createdAt, createdAt) ||
-                other.createdAt == createdAt));
-  }
-
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  int get hashCode => Object.hash(
-    runtimeType,
-    id,
-    type,
-    title,
-    message,
-    relatedActivityId,
-    relatedActivityTitle,
-    isRead,
-    createdAt,
-  );
-
-  /// Create a copy of AppNotification
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$AppNotificationImplCopyWith<_$AppNotificationImpl> get copyWith =>
-      __$$AppNotificationImplCopyWithImpl<_$AppNotificationImpl>(
-        this,
-        _$identity,
-      );
-
-  @override
-  Map<String, dynamic> toJson() {
-    return _$$AppNotificationImplToJson(this);
-  }
+@override
+Map<String, dynamic> toJson() {
+  return _$AppNotificationToJson(this, );
 }
 
-abstract class _AppNotification implements AppNotification {
-  const factory _AppNotification({
-    required final String id,
-    @NotificationTypeConverter() required final NotificationType type,
-    required final String title,
-    final String? message,
-    final String? relatedActivityId,
-    final String? relatedActivityTitle,
-    required final bool isRead,
-    required final DateTime createdAt,
-  }) = _$AppNotificationImpl;
-
-  factory _AppNotification.fromJson(Map<String, dynamic> json) =
-      _$AppNotificationImpl.fromJson;
-
-  @override
-  String get id;
-  @override
-  @NotificationTypeConverter()
-  NotificationType get type;
-  @override
-  String get title;
-  @override
-  String? get message;
-  @override
-  String? get relatedActivityId;
-  @override
-  String? get relatedActivityTitle;
-  @override
-  bool get isRead;
-  @override
-  DateTime get createdAt;
-
-  /// Create a copy of AppNotification
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
-  _$$AppNotificationImplCopyWith<_$AppNotificationImpl> get copyWith =>
-      throw _privateConstructorUsedError;
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppNotification&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.title, title) || other.title == title)&&(identical(other.message, message) || other.message == message)&&(identical(other.relatedActivityId, relatedActivityId) || other.relatedActivityId == relatedActivityId)&&(identical(other.relatedActivityTitle, relatedActivityTitle) || other.relatedActivityTitle == relatedActivityTitle)&&(identical(other.isRead, isRead) || other.isRead == isRead)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt));
 }
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => Object.hash(runtimeType,id,type,title,message,relatedActivityId,relatedActivityTitle,isRead,createdAt);
+
+@override
+String toString() {
+  return 'AppNotification(id: $id, type: $type, title: $title, message: $message, relatedActivityId: $relatedActivityId, relatedActivityTitle: $relatedActivityTitle, isRead: $isRead, createdAt: $createdAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$AppNotificationCopyWith<$Res> implements $AppNotificationCopyWith<$Res> {
+  factory _$AppNotificationCopyWith(_AppNotification value, $Res Function(_AppNotification) _then) = __$AppNotificationCopyWithImpl;
+@override @useResult
+$Res call({
+ String id,@NotificationTypeConverter() NotificationType type, String title, String? message, String? relatedActivityId, String? relatedActivityTitle, bool isRead, DateTime createdAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$AppNotificationCopyWithImpl<$Res>
+    implements _$AppNotificationCopyWith<$Res> {
+  __$AppNotificationCopyWithImpl(this._self, this._then);
+
+  final _AppNotification _self;
+  final $Res Function(_AppNotification) _then;
+
+/// Create a copy of AppNotification
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? title = null,Object? message = freezed,Object? relatedActivityId = freezed,Object? relatedActivityTitle = freezed,Object? isRead = null,Object? createdAt = null,}) {
+  return _then(_AppNotification(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as NotificationType,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
+as String,message: freezed == message ? _self.message : message // ignore: cast_nullable_to_non_nullable
+as String?,relatedActivityId: freezed == relatedActivityId ? _self.relatedActivityId : relatedActivityId // ignore: cast_nullable_to_non_nullable
+as String?,relatedActivityTitle: freezed == relatedActivityTitle ? _self.relatedActivityTitle : relatedActivityTitle // ignore: cast_nullable_to_non_nullable
+as String?,isRead: null == isRead ? _self.isRead : isRead // ignore: cast_nullable_to_non_nullable
+as bool,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
+  ));
+}
+
+
+}
+
+// dart format on

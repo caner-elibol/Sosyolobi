@@ -98,6 +98,15 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
   }
 
   Future<void> _submit() async {
+    // Senkron guard: `setState` ile tetiklenen rebuild bir sonraki frame'e
+    // kadar bu satırdan sonra çalışmaz, yani butonun `submitting ? null :
+    // onSubmit` ile devre dışı kalması gecikir. Hızlı çift tıklamada bu
+    // gecikme sırasında `_submit` ikinci kez çağrılabiliyor ve
+    // `CreateActivityController.submit` aynı anda iki kez tetiklenince
+    // Riverpod'un state completer'ı "Bad state: Future already completed"
+    // ile patlıyordu (confirmed live). Bu satır ikinci çağrıyı hemen keser.
+    if (_submitting) return;
+
     final addressOk = _addressController.text.trim().length >= 5;
     setState(
       () => _addressError = addressOk ? null : 'Adres açıklaması zorunlu',
@@ -164,7 +173,7 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
   @override
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
-    final locationAsync = ref.watch(currentLocationNotifierProvider);
+    final locationAsync = ref.watch(currentLocationProvider);
 
     return Scaffold(
       appBar: AppBar(

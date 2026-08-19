@@ -24,7 +24,7 @@ class NotificationHub extends _$NotificationHub {
 
   @override
   Future<void> build() async {
-    final authState = await ref.watch(authNotifierProvider.future);
+    final authState = await ref.watch(authProvider.future);
     ref.onDispose(_disconnect);
 
     if (!authState.isAuthenticated) {

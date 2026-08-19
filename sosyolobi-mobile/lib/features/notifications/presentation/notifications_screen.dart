@@ -83,7 +83,7 @@ class _NotificationsPanelState extends ConsumerState<NotificationsPanel> {
     final totalUnreadChatRooms = ref.watch(totalUnreadChatRoomsProvider);
     final totalUnread = unreadCount + totalUnreadChatRooms;
 
-    final loadedNotifications = notificationsAsync.valueOrNull;
+    final loadedNotifications = notificationsAsync.value;
     if (loadedNotifications != null) _maybeAutoMarkRead(loadedNotifications);
 
     return DraggableScrollableSheet(

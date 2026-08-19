@@ -65,7 +65,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final locationAsync = ref.watch(currentLocationNotifierProvider);
+    final locationAsync = ref.watch(currentLocationProvider);
     final categoriesAsync = ref.watch(categoriesProvider);
 
     return Scaffold(
@@ -127,7 +127,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
 
     final userLatLng = LatLng(location.latitude, location.longitude);
     final showPermissionCard = location.isFallback && location.permissionState != LocationPermissionState.deniedForever;
-    final filteredItems = _applyClientFilters(mapActivitiesAsync.valueOrNull ?? const []);
+    final filteredItems = _applyClientFilters(mapActivitiesAsync.value ?? const []);
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
@@ -176,13 +176,13 @@ class _MapScreenState extends ConsumerState<MapScreen> {
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 0, 16, 12),
             child: LocationPermissionCard(
-              onAllow: () => ref.read(currentLocationNotifierProvider.notifier).refresh(),
+              onAllow: () => ref.read(currentLocationProvider.notifier).refresh(),
             ),
           ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 16),
           child: MapPreviewCard(
-            activityCount: mapActivitiesAsync.valueOrNull == null ? null : filteredItems.length,
+            activityCount: mapActivitiesAsync.value == null ? null : filteredItems.length,
             onExpand: () => Navigator.of(context).push(
               MaterialPageRoute<void>(
                 builder: (_) => MapExploreScreen(

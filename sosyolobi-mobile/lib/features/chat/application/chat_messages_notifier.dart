@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 import 'package:signalr_netcore/signalr_client.dart';
 
@@ -26,8 +28,15 @@ class ChatMessagesNotifier extends _$ChatMessagesNotifier {
     // for top-to-bottom rendering with a bottom-anchored scroll.
     final messages = page.items.reversed.toList();
 
-    await _connectHub(roomId);
     ref.onDispose(_disconnectHub);
+    // Hub connect (websocket negotiate + JoinRoom) doesn't gate the initial
+    // render — it used to be awaited here, so a slow SignalR handshake on
+    // mobile networks delayed showing messages that had already arrived via
+    // REST (confirmed: chat felt slow to open even though REST calls in the
+    // logs all returned in under a second — the SignalR traffic isn't
+    // logged by Dio, so the delay was invisible there). `_connectHub` is
+    // already best-effort/error-swallowing, so it's safe to run unawaited.
+    unawaited(_connectHub(roomId));
 
     // Mark read on open, mirrors ChatPanel.tsx's mount-time markChatRead.
     ref.read(chatApiProvider).markRead(roomId);
@@ -45,7 +54,7 @@ class ChatMessagesNotifier extends _$ChatMessagesNotifier {
       if (json == null) return;
       final message = ChatMessage.fromJson(json);
       if (message.chatRoomId != roomId) return;
-      final current = state.valueOrNull;
+      final current = state.value;
       if (current == null || current.messages.any((m) => m.id == message.id)) return;
       state = AsyncData(current.copyWith(messages: [...current.messages, message]));
       ref.read(chatApiProvider).markRead(roomId);
@@ -55,7 +64,7 @@ class ChatMessagesNotifier extends _$ChatMessagesNotifier {
     connection.on('RoomClosed', (arguments) {
       final json = arguments?.first as Map<String, dynamic>?;
       if (json == null || json['id'] != roomId) return;
-      final current = state.valueOrNull;
+      final current = state.value;
       if (current == null) return;
       state = AsyncData(current.copyWith(closed: true));
     });
@@ -76,12 +85,18 @@ class ChatMessagesNotifier extends _$ChatMessagesNotifier {
     try {
       await connection.invoke('LeaveRoom', args: [roomId]);
     } catch (_) {}
-    await connection.stop();
+    // Connect no longer blocks `build()` (see above), so dispose can now
+    // race an in-progress `connection.start()` (e.g. user backs out fast) —
+    // stop() on a still-connecting connection isn't guaranteed safe by
+    // every signalr_netcore transport, so this is best-effort too.
+    try {
+      await connection.stop();
+    } catch (_) {}
   }
 
   Future<ChatMessage> sendMessage({required String content, String? replyToMessageId}) async {
     final message = await ref.read(chatApiProvider).sendMessage(roomId, content: content, replyToMessageId: replyToMessageId);
-    final current = state.valueOrNull;
+    final current = state.value;
     if (current != null && !current.messages.any((m) => m.id == message.id)) {
       state = AsyncData(current.copyWith(messages: [...current.messages, message]));
     }

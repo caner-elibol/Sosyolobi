@@ -6,19 +6,18 @@ part of 'friend.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_$FriendImpl _$$FriendImplFromJson(Map<String, dynamic> json) => _$FriendImpl(
+_Friend _$FriendFromJson(Map<String, dynamic> json) => _Friend(
   friendsSinceUtc: DateTime.parse(json['friendsSinceUtc'] as String),
   user: PublicProfile.fromJson(json['user'] as Map<String, dynamic>),
 );
 
-Map<String, dynamic> _$$FriendImplToJson(_$FriendImpl instance) =>
-    <String, dynamic>{
-      'friendsSinceUtc': instance.friendsSinceUtc.toIso8601String(),
-      'user': instance.user,
-    };
+Map<String, dynamic> _$FriendToJson(_Friend instance) => <String, dynamic>{
+  'friendsSinceUtc': instance.friendsSinceUtc.toIso8601String(),
+  'user': instance.user,
+};
 
-_$FriendRequestImpl _$$FriendRequestImplFromJson(Map<String, dynamic> json) =>
-    _$FriendRequestImpl(
+_FriendRequest _$FriendRequestFromJson(Map<String, dynamic> json) =>
+    _FriendRequest(
       id: json['id'] as String,
       status: const FriendRequestStatusConverter().fromJson(
         (json['status'] as num).toInt(),
@@ -30,7 +29,7 @@ _$FriendRequestImpl _$$FriendRequestImplFromJson(Map<String, dynamic> json) =>
       user: PublicProfile.fromJson(json['user'] as Map<String, dynamic>),
     );
 
-Map<String, dynamic> _$$FriendRequestImplToJson(_$FriendRequestImpl instance) =>
+Map<String, dynamic> _$FriendRequestToJson(_FriendRequest instance) =>
     <String, dynamic>{
       'id': instance.id,
       'status': const FriendRequestStatusConverter().toJson(instance.status),

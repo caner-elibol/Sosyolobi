@@ -6,22 +6,46 @@ part of 'categories_api.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$categoriesApiHash() => r'ad4c050925899d7a046eb8cf29cd96111c331b6f';
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// ignore_for_file: type=lint, type=warning
 
-/// See also [categoriesApi].
 @ProviderFor(categoriesApi)
-final categoriesApiProvider = AutoDisposeProvider<CategoriesApi>.internal(
-  categoriesApi,
-  name: r'categoriesApiProvider',
-  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
-      ? null
-      : _$categoriesApiHash,
-  dependencies: null,
-  allTransitiveDependencies: null,
-);
+final categoriesApiProvider = CategoriesApiProvider._();
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
-typedef CategoriesApiRef = AutoDisposeProviderRef<CategoriesApi>;
-// ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+final class CategoriesApiProvider
+    extends $FunctionalProvider<CategoriesApi, CategoriesApi, CategoriesApi>
+    with $Provider<CategoriesApi> {
+  CategoriesApiProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'categoriesApiProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$categoriesApiHash();
+
+  @$internal
+  @override
+  $ProviderElement<CategoriesApi> $createElement($ProviderPointer pointer) =>
+      $ProviderElement(pointer);
+
+  @override
+  CategoriesApi create(Ref ref) {
+    return categoriesApi(ref);
+  }
+
+  /// {@macro riverpod.override_with_value}
+  Override overrideWithValue(CategoriesApi value) {
+    return $ProviderOverride(
+      origin: this,
+      providerOverride: $SyncValueProvider<CategoriesApi>(value),
+    );
+  }
+}
+
+String _$categoriesApiHash() => r'ad4c050925899d7a046eb8cf29cd96111c331b6f';
