@@ -40,12 +40,28 @@ public class ActivitiesController : ControllerBase
         return Ok(ApiResponse<IList<ActivityResponse>>.Ok(result));
     }
 
+    [HttpGet("mine")]
+    public async Task<IActionResult> GetMineUpcoming()
+    {
+        var userId = User.GetUserId();
+        var result = await _activityService.GetMineUpcomingAsync(userId);
+        return Ok(ApiResponse<IList<ActivityResponse>>.Ok(result));
+    }
+
     [HttpGet("map")]
     [AllowAnonymous]
     public async Task<IActionResult> GetMap([FromQuery] NearbyActivitiesRequest request)
     {
         var result = await _activityService.GetMapItemsAsync(request);
         return Ok(ApiResponse<IList<ActivityMapItemResponse>>.Ok(result));
+    }
+
+    [HttpGet("map/paged")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetMapPaged([FromQuery] NearbyActivitiesRequest request, [FromQuery] PagedRequest paged)
+    {
+        var result = await _activityService.GetMapItemsPagedAsync(request, paged);
+        return Ok(ApiResponse<PagedResponse<ActivityMapItemResponse>>.Ok(result));
     }
 
     [HttpGet("{id:guid}")]

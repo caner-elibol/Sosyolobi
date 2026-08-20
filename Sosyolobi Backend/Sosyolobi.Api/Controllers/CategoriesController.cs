@@ -31,8 +31,19 @@ public class CategoriesController : ControllerBase
             .OrderBy(c => c.SortOrder)
             .ToListAsync();
 
+        var webRoot = _env.WebRootPath ?? Path.Combine(_env.ContentRootPath, "wwwroot");
+
+        // Age alone doesn't prove the file is still on disk — a fresh clone or a
+        // Docker volume reset wipes wwwroot/categories without touching the DB,
+        // leaving a "fresh" ImageFetchedAt pointing at a file that no longer
+        // exists (confirmed: a category's activity-detail image going missing
+        // with no code change and an unexpired cache).
         var stale = categories
-            .Where(c => !c.ImageIsCustom && (c.ImageUrl is null || c.ImageFetchedAt is null || c.ImageFetchedAt < DateTime.UtcNow - ImageCacheDuration))
+            .Where(c => !c.ImageIsCustom && (
+                c.ImageUrl is null ||
+                c.ImageFetchedAt is null ||
+                c.ImageFetchedAt < DateTime.UtcNow - ImageCacheDuration ||
+                !CategoryImageFileExists(c.ImageUrl, webRoot)))
             .ToList();
 
         if (stale.Count > 0)
@@ -55,6 +66,13 @@ public class CategoriesController : ControllerBase
         var result = categories.Select(c => new { c.Id, c.Name, c.Slug, c.IconName, c.Color, c.ImageUrl, c.SortOrder });
 
         return Ok(ApiResponse<object>.Ok(result));
+    }
+
+    private static bool CategoryImageFileExists(string? imageUrl, string webRoot)
+    {
+        var fileName = imageUrl?.Split('/').LastOrDefault();
+        if (string.IsNullOrEmpty(fileName)) return false;
+        return System.IO.File.Exists(Path.Combine(webRoot, "categories", fileName));
     }
 
     // Pexels'ten fotoğrafı çekip sunucuya (wwwroot/categories) indirir; Pexels URL'i hiçbir yerde

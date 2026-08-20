@@ -14,7 +14,6 @@ abstract final class RoutePaths {
   static String activityDetail(String id) => '/app/activities/$id';
   static const activityDetailPattern = '/app/activities/:id';
 
-  static const requests = '/app/requests';
   static const profile = '/app/profile';
   static String publicProfile(String userId) => '/app/profile/$userId';
   static const publicProfilePattern = '/app/profile/:userId';

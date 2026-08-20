@@ -10,10 +10,13 @@ import '../../../core/router/route_paths.dart';
 import '../../../core/theme/colors.dart';
 import '../../../core/utils/date_filters.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../activities/application/activities_providers.dart';
 import '../../activities/application/categories_provider.dart';
 import '../../activities/domain/activity.dart';
+import '../../activities/presentation/widgets/activity_card.dart';
 import '../application/current_location_provider.dart';
 import '../application/map_activities_provider.dart';
+import '../application/nearby_activities_slider_provider.dart';
 import '../domain/current_location.dart';
 import 'map_explore_screen.dart';
 import 'widgets/date_range_filter_row.dart';
@@ -50,6 +53,7 @@ class _MapScreenState extends ConsumerState<MapScreen> {
   String _search = '';
   DateFilterKey _dateFilter = DateFilterKey.all;
   bool _weekendOnly = false;
+  bool _loadingMoreNearby = false;
 
   List<ActivityMapItem> _applyClientFilters(List<ActivityMapItem> items) {
     var result = items;
@@ -125,9 +129,24 @@ class _MapScreenState extends ConsumerState<MapScreen> {
       orElse: () => null,
     );
 
+    final sliderAsync = ref.watch(
+      nearbyActivitiesSliderProvider(
+        latitude: location.latitude,
+        longitude: location.longitude,
+        radiusMeters: _radiusMeters,
+        categoryId: _selectedCategoryId,
+        genderPreference: _genderPreference,
+        isFree: _isFree,
+        fromDate: range.fromDate,
+        toDate: range.toDate,
+      ),
+    );
+    final joinedAsync = ref.watch(joinedUpcomingActivitiesProvider);
+
     final userLatLng = LatLng(location.latitude, location.longitude);
     final showPermissionCard = location.isFallback && location.permissionState != LocationPermissionState.deniedForever;
     final filteredItems = _applyClientFilters(mapActivitiesAsync.value ?? const []);
+    final filteredSliderItems = _applyClientFilters(sliderAsync.value?.items ?? const []);
 
     return ListView(
       padding: const EdgeInsets.only(bottom: 24),
@@ -199,6 +218,42 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             ),
           ),
         ),
+        // Yalnızca kullanıcının katılımı onaylanmış, yaklaşan etkinlikleri
+        // varsa gösterilir — boşsa bölüm tamamen gizlenir (boş durum yok).
+        joinedAsync.maybeWhen(
+          data: (joined) {
+            if (joined.isEmpty) return const SizedBox.shrink();
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+                  child: Text('Katıldığım Etkinlikler', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
+                ),
+                SizedBox(
+                  height: 172,
+                  child: ListView.separated(
+                    scrollDirection: Axis.horizontal,
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    itemCount: joined.length,
+                    separatorBuilder: (context, index) => const SizedBox(width: 12),
+                    itemBuilder: (context, index) {
+                      final activity = joined[index];
+                      return SizedBox(
+                        width: 260,
+                        child: ActivityCard(
+                          activity: activity,
+                          onTap: () => context.push(RoutePaths.activityDetail(activity.id)),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            );
+          },
+          orElse: () => const SizedBox.shrink(),
+        ),
         Padding(
           padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Row(
@@ -206,15 +261,18 @@ class _MapScreenState extends ConsumerState<MapScreen> {
             children: [
               const Text('Yakındaki Etkinlikler', style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700)),
               mapActivitiesAsync.maybeWhen(
-                data: (items) => Text('${filteredItems.length} etkinlik', style: const TextStyle(fontSize: 13, color: AppColors.mutedForeground)),
+                data: (items) => InkWell(
+                  onTap: () => context.push(RoutePaths.activities),
+                  child: Text('${filteredItems.length} etkinlik', style: const TextStyle(fontSize: 13, color: AppColors.mutedForeground, decoration: TextDecoration.underline)),
+                ),
                 orElse: () => const SizedBox.shrink(),
               ),
             ],
           ),
         ),
-        mapActivitiesAsync.when(
-          data: (rawItems) {
-            final items = filteredItems;
+        sliderAsync.when(
+          data: (paged) {
+            final items = filteredSliderItems;
             if (items.isEmpty) {
               return const Padding(
                 padding: EdgeInsets.symmetric(horizontal: 16),
@@ -225,15 +283,63 @@ class _MapScreenState extends ConsumerState<MapScreen> {
                 ),
               );
             }
-            return Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Column(
-                children: [
-                  for (final item in items) ...[
-                    NearbyActivityCard(item: item, onTap: () => context.push(RoutePaths.activityDetail(item.id))),
-                    const SizedBox(height: 12),
-                  ],
-                ],
+            void maybeLoadMore() {
+              if (_loadingMoreNearby || !paged.hasNextPage) return;
+              setState(() => _loadingMoreNearby = true);
+              ref
+                  .read(
+                    nearbyActivitiesSliderProvider(
+                      latitude: location.latitude,
+                      longitude: location.longitude,
+                      radiusMeters: _radiusMeters,
+                      categoryId: _selectedCategoryId,
+                      genderPreference: _genderPreference,
+                      isFree: _isFree,
+                      fromDate: range.fromDate,
+                      toDate: range.toDate,
+                    ).notifier,
+                  )
+                  .loadMore()
+                  .whenComplete(() {
+                if (mounted) setState(() => _loadingMoreNearby = false);
+              });
+            }
+
+            // Sonsuz kaydırma: kullanıcı slider'ın sonuna yaklaşınca bir
+            // sonraki sayfa otomatik yüklenir — ayrı bir "Daha Fazla Yükle"
+            // butonu yok, veri bitince (hasNextPage == false) hiçbir şey
+            // gösterilmeden liste orada sona erer.
+            return SizedBox(
+              // NearbyActivityCard's natural (unconstrained) height is
+              // ~254px (120 image + ~134 padded content) — 250 clipped it
+              // by 4px (confirmed live via Flutter's overflow banner).
+              height: 262,
+              child: NotificationListener<ScrollNotification>(
+                onNotification: (notification) {
+                  if (notification.metrics.pixels >= notification.metrics.maxScrollExtent - 300) {
+                    maybeLoadMore();
+                  }
+                  return false;
+                },
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  itemCount: items.length + (_loadingMoreNearby ? 1 : 0),
+                  separatorBuilder: (context, index) => const SizedBox(width: 12),
+                  itemBuilder: (context, index) {
+                    if (index == items.length) {
+                      return const SizedBox(
+                        width: 40,
+                        child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+                      );
+                    }
+                    final item = items[index];
+                    return SizedBox(
+                      width: 220,
+                      child: NearbyActivityCard(item: item, onTap: () => context.push(RoutePaths.activityDetail(item.id))),
+                    );
+                  },
+                ),
               ),
             );
           },

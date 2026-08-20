@@ -10,20 +10,22 @@ import { UserAvatar } from "@/components/app/UserAvatar";
 import { LoadingState } from "@/components/app/LoadingState";
 import { EmptyState } from "@/components/app/EmptyState";
 import { ChatPanel } from "@/components/app/ChatPanel";
-import { ParticipantActionsMenu } from "@/components/app/ParticipantActionsMenu";
+import { JoinActivityModal } from "@/components/app/JoinActivityModal";
+import { ParticipantsModal } from "@/components/app/ParticipantsModal";
 import { useActivity } from "@/hooks/useCreateActivity";
 import { useJoinRequest } from "@/hooks/useJoinRequest";
 import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { formatDistanceMeters } from "@/lib/format";
+import { resolveImageUrl } from "@/lib/image-url";
 import { ActivityStatus, ActivityRequestStatus } from "@/types/user";
 import { getUserFromToken } from "@/lib/user-auth";
 import {
   ArrowLeft,
   Calendar,
-  Gift,
+  ChevronRight,
+  Clock,
   Key,
   MapPin,
-  Star,
   Target,
   Users,
   Wallet,
@@ -46,6 +48,17 @@ function formatDate(iso: string) {
   return `${day} ${d.toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" })}`;
 }
 
+function formatCountdown(iso: string) {
+  const diffMs = new Date(iso).getTime() - Date.now();
+  if (diffMs <= 0) return "Başladı";
+  const minutes = Math.floor(diffMs / 60_000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+  if (days > 0) return `${days} gün${hours % 24 > 0 ? ` ${hours % 24} sa` : ""} kaldı`;
+  if (hours > 0) return `${hours} sa ${minutes % 60} dk kaldı`;
+  return `${minutes} dk kaldı`;
+}
+
 export default function ActivityDetailPage({ params }: { params: Promise<{ id: string }> }) {
   return (
     <Suspense fallback={<AppShell><LoadingState message="Etkinlik yükleniyor..." /></AppShell>}>
@@ -60,8 +73,8 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
   const searchParams = useSearchParams();
   const { data: activity, isLoading, error } = useActivity(id);
   const { join } = useJoinRequest(id);
-  const [joinMessage, setJoinMessage] = useState("");
-  const [showMessageInput, setShowMessageInput] = useState(false);
+  const [showJoinModal, setShowJoinModal] = useState(false);
+  const [showParticipantsModal, setShowParticipantsModal] = useState(false);
   const chatRef = useRef<HTMLDivElement>(null);
 
   const shouldFocusChat = searchParams.get("chat") === "1";
@@ -86,17 +99,21 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
   const currentUserId = getUserFromToken()?.sub;
   const isParticipant = !!currentUserId && activity.participants.some((p) => p.userId === currentUserId);
   const hasPendingRequest = activity.myRequestStatus === ActivityRequestStatus.Pending;
+  const priceLabel = activity.pricePerPerson && activity.pricePerPerson > 0 ? `${activity.pricePerPerson} ₺` : "Ücretsiz";
+  const spotsLabel = `${activity.currentPeopleCount} / ${totalSpots} kişi`;
+  const heroImageUrl = resolveImageUrl(activity.categoryImageUrl);
 
   async function handleJoin() {
     try {
-      await join.mutateAsync(joinMessage || undefined);
+      await join.mutateAsync(undefined);
       toast.success("Katılım isteği gönderildi!");
-      setShowMessageInput(false);
-      setJoinMessage("");
+      setShowJoinModal(false);
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : "İstek gönderilemedi.");
     }
   }
+
+  const canJoin = !isCancelled && !isFull && !isParticipant;
 
   return (
     <AppShell>
@@ -105,8 +122,8 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
         <div style={{
           position: "relative",
           height: 180,
-          background: activity.categoryImageUrl
-            ? `linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.25) 100%), url(${activity.categoryImageUrl}) center/cover no-repeat`
+          background: heroImageUrl
+            ? `linear-gradient(180deg, rgba(0,0,0,0.15) 0%, rgba(0,0,0,0.05) 40%, rgba(0,0,0,0.25) 100%), url(${heroImageUrl}) center/cover no-repeat`
             : `linear-gradient(135deg, ${categoryColor} 0%, color-mix(in srgb, ${categoryColor} 70%, black) 100%)`,
           display: "flex",
           alignItems: "center",
@@ -133,107 +150,130 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
           >
             <ArrowLeft size={18} color="var(--color-foreground)" />
           </button>
-          {!activity.categoryImageUrl && <CategoryIcon size={56} color="rgba(255,255,255,0.85)" strokeWidth={1.75} />}
+          {!heroImageUrl && <CategoryIcon size={56} color="rgba(255,255,255,0.85)" strokeWidth={1.75} />}
         </div>
 
         <div style={{ padding: "16px 16px 0" }}>
-          {/* Category + status */}
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 10 }}>
-            <span style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: 5,
-              padding: "3px 10px 3px 8px",
-              borderRadius: "var(--radius-full)",
-              background: `color-mix(in srgb, ${categoryColor} 14%, white)`,
-              color: categoryColor,
-              fontSize: 12,
-              fontWeight: 600,
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: "50%", background: categoryColor }} />
-              {activity.categoryName}
-            </span>
-            {isCancelled ? (
-              <InfoChip icon={XCircle} tone="muted">İptal edildi</InfoChip>
-            ) : isFull ? (
-              <InfoChip icon={Users} tone="muted">Dolu</InfoChip>
-            ) : (
-              <InfoChip icon={Users} tone="success">Açık</InfoChip>
-            )}
-          </div>
-
-          <h1 style={{ fontSize: 21, fontWeight: 700, color: "var(--color-foreground)", margin: "0 0 10px" }}>{activity.title}</h1>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: 7, marginBottom: 12 }}>
+          {/* Date + countdown */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10, marginBottom: 14 }}>
             <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, fontWeight: 600, color: "var(--color-accent)" }}>
               <Calendar size={14} /> {formatDate(activity.eventDate)}
             </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--color-muted-foreground)" }}>
-              <MapPin size={14} /> {activity.addressText}
-              {dist && <span>· {dist}</span>}
-            </div>
-          </div>
-
-          {/* Participants + skill/gender chips */}
-          <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 10, flexWrap: "wrap" }}>
-            {activity.participants.length > 0 && (
-              <div style={{ display: "flex", marginLeft: 4 }}>
-                {activity.participants.slice(0, 4).map((p, i) => (
-                  <span key={p.userId} style={{ marginLeft: i === 0 ? 0 : -8, border: "2px solid var(--color-background)", borderRadius: "50%" }}>
-                    <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={26} />
-                  </span>
-                ))}
+            {!isCancelled && (
+              <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 12, fontWeight: 600, color: "var(--color-muted-foreground)" }}>
+                <Clock size={13} /> {formatCountdown(activity.eventDate)}
               </div>
             )}
-            <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-foreground)" }}>
-              {activity.currentPeopleCount} / {totalSpots} katılıyor
-            </span>
           </div>
 
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 16 }}>
-            <InfoChip icon={Target}>{SKILL_LABELS[activity.skillLevel] ?? "Herkes"}</InfoChip>
-            <InfoChip icon={Users}>{GENDER_LABELS[activity.genderPreference] ?? "Herkes"}</InfoChip>
-          </div>
-
-          {/* About */}
-          {activity.description && (
-            <>
-              <SectionTitle>Hakkında</SectionTitle>
-              <p style={{ fontSize: 13, color: "#374151", lineHeight: 1.6, margin: "0 0 16px" }}>{activity.description}</p>
-            </>
-          )}
-
-          {/* Details grid */}
-          <SectionTitle>Detaylar</SectionTitle>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 10, marginBottom: 16 }}>
-            <DetailBox icon={Wallet} label="Kişi Başı Ücret" value={activity.pricePerPerson && activity.pricePerPerson > 0 ? `${activity.pricePerPerson} ₺` : "Ücretsiz"} />
-            <DetailBox icon={Users} label="Kontenjan" value={`${totalSpots} kişi`} />
-            <DetailBox icon={Users} label="Şu an" value={`${activity.currentPeopleCount} kişi`} />
-            <DetailBox icon={Target} label="Seviye" value={SKILL_LABELS[activity.skillLevel] ?? "Herkes"} />
-          </div>
-
-          {/* Owner */}
-          <SectionTitle>Etkinlik Sahibi</SectionTitle>
-          <div style={{
-            background: "var(--color-surface)",
-            borderRadius: "var(--radius-lg)",
-            padding: 14,
-            border: "1px solid var(--color-border)",
-            marginBottom: 16,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-          }}>
-            <UserAvatar displayName={activity.createdByDisplayName} avatarUrl={activity.createdByAvatarUrl} size={42} />
+          {/* Title/location/participants (left) + Katıl + badges (right) */}
+          <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 16 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)" }}>{activity.createdByDisplayName}</div>
-              <div style={{ display: "flex", alignItems: "center", gap: 3, fontSize: 12, color: "var(--color-muted-foreground)" }}>
-                <Star size={12} fill="#F59E0B" color="#F59E0B" strokeWidth={0} /> Etkinlik sahibi
+              <h1 style={{
+                fontSize: 21,
+                fontWeight: 700,
+                color: "var(--color-foreground)",
+                margin: "0 0 6px",
+                display: "-webkit-box",
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: "vertical",
+                overflow: "hidden",
+              }}>{activity.title}</h1>
+              {activity.description && (
+                <p style={{ fontSize: 15, color: "var(--color-foreground)", lineHeight: 1.4, margin: "0 0 6px" }}>{activity.description}</p>
+              )}
+              <Link
+                href={`/app/profile/${activity.createdByUserId}`}
+                style={{ display: "inline-block", fontSize: 13, color: "var(--color-muted-foreground)", marginBottom: 8, textDecoration: "none" }}
+              >
+                Düzenleyen: <span style={{ fontWeight: 600, color: "var(--color-foreground)" }}>{activity.createdByDisplayName}</span>
+              </Link>
+              <div style={{ display: "flex", alignItems: "center", gap: 6, fontSize: 13, color: "var(--color-muted-foreground)", marginBottom: 8 }}>
+                <MapPin size={14} /> {activity.addressText}
+                {dist && <span>· {dist}</span>}
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                {activity.participants.length > 0 && (
+                  <div style={{ display: "flex", marginLeft: 4 }}>
+                    {activity.participants.slice(0, 4).map((p, i) => (
+                      <span key={p.userId} style={{ marginLeft: i === 0 ? 0 : -8, border: "2px solid var(--color-background)", borderRadius: "50%" }}>
+                        <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={26} />
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <span style={{ fontSize: 13, fontWeight: 600, color: "var(--color-foreground)" }}>
+                  {activity.currentPeopleCount} / {totalSpots} katılıyor
+                </span>
               </div>
             </div>
-            {currentUserId && currentUserId !== activity.createdByUserId && (
-              <ParticipantActionsMenu userId={activity.createdByUserId} displayName={activity.createdByDisplayName} />
-            )}
+
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 8, flexShrink: 0 }}>
+              {hasPendingRequest ? (
+                <span style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                  padding: "8px 16px",
+                  background: "var(--color-muted-background, #F3F4F6)",
+                  color: "var(--color-muted-foreground)",
+                  border: "1px solid var(--color-border)",
+                  borderRadius: "var(--radius-full)",
+                  fontSize: 13,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}>
+                  <Users size={14} /> İstek Bekliyor
+                </span>
+              ) : canJoin ? (
+                <button
+                  onClick={() => setShowJoinModal(true)}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "8px 20px",
+                    background: "var(--color-accent)",
+                    color: "#fff",
+                    border: "none",
+                    borderRadius: "var(--radius-full)",
+                    fontSize: 14,
+                    fontWeight: 700,
+                    cursor: "pointer",
+                    boxShadow: "var(--shadow-sm)",
+                    whiteSpace: "nowrap",
+                  }}
+                >
+                  <Users size={15} /> Katıl
+                </button>
+              ) : null}
+
+              <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "flex-end", gap: 6, maxWidth: 200 }}>
+                <span style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  padding: "3px 10px",
+                  borderRadius: "var(--radius-full)",
+                  background: `color-mix(in srgb, ${categoryColor} 14%, white)`,
+                  color: categoryColor,
+                  fontSize: 12,
+                  fontWeight: 600,
+                  whiteSpace: "nowrap",
+                }}>
+                  {activity.categoryName}
+                </span>
+                {isCancelled ? (
+                  <InfoChip icon={XCircle} tone="muted">İptal edildi</InfoChip>
+                ) : isFull ? (
+                  <InfoChip icon={Users} tone="muted">Dolu</InfoChip>
+                ) : (
+                  <InfoChip icon={Users} tone="success">Açık</InfoChip>
+                )}
+                <InfoChip icon={Wallet}>{priceLabel}</InfoChip>
+                <InfoChip icon={Target}>{SKILL_LABELS[activity.skillLevel] ?? "Herkes"}</InfoChip>
+                <InfoChip icon={Users}>{GENDER_LABELS[activity.genderPreference] ?? "Herkes"}</InfoChip>
+              </div>
+            </div>
           </div>
 
           {/* Location */}
@@ -256,155 +296,42 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
             </>
           )}
 
-          {/* Participants list */}
+          {/* Participants — tappable summary, full list opens in a modal */}
           {activity.participants.length > 0 && (
-            <>
-              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 8 }}>
-                <SectionTitle noMargin>Katılımcılar</SectionTitle>
-                <span style={{ fontSize: 12, color: "var(--color-muted-foreground)" }}>{activity.participants.length} kişi</span>
-              </div>
-              <div style={{
+            <button
+              onClick={() => setShowParticipantsModal(true)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                width: "100%",
                 background: "var(--color-surface)",
                 borderRadius: "var(--radius-lg)",
                 border: "1px solid var(--color-border)",
+                padding: "12px 14px",
                 marginBottom: 16,
-                overflow: "hidden",
-              }}>
-                {activity.participants.map((p, i) => (
-                  <div key={p.userId} style={{
-                    display: "flex",
-                    alignItems: "center",
-                    gap: 8,
-                    padding: "10px 14px",
-                    borderTop: i === 0 ? "none" : "1px solid var(--color-border)",
-                  }}>
-                    <Link
-                      href={`/app/profile/${p.userId}`}
-                      style={{ display: "flex", alignItems: "center", gap: 8, flex: 1, minWidth: 0, textDecoration: "none" }}
-                    >
+                cursor: "pointer",
+                fontFamily: "inherit",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <div style={{ display: "flex" }}>
+                  {activity.participants.slice(0, 4).map((p, i) => (
+                    <span key={p.userId} style={{ marginLeft: i === 0 ? 0 : -8, border: "2px solid var(--color-surface)", borderRadius: "50%" }}>
                       <UserAvatar displayName={p.displayName} avatarUrl={p.avatarUrl} size={28} />
-                      <span style={{ fontSize: 13, color: "var(--color-foreground)", fontWeight: 500 }}>{p.displayName}</span>
-                    </Link>
-                    {currentUserId && currentUserId !== p.userId && (
-                      <ParticipantActionsMenu userId={p.userId} displayName={p.displayName} />
-                    )}
-                  </div>
-                ))}
+                    </span>
+                  ))}
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 600, color: "var(--color-foreground)" }}>
+                  Katılımcılar · {activity.participants.length} kişi
+                </span>
               </div>
-            </>
+              <ChevronRight size={16} color="var(--color-muted-foreground)" />
+            </button>
           )}
         </div>
 
         <div style={{ padding: "0 16px" }}>
-        {/* Join CTA */}
-        {!isCancelled && !isFull && !isParticipant && (
-          <div style={{
-            background: "var(--color-surface)",
-            borderRadius: "var(--radius-lg)",
-            padding: 16,
-            border: "1px solid var(--color-border)",
-            marginBottom: 12,
-          }}>
-            {hasPendingRequest ? (
-              <button
-                disabled
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "14px",
-                  background: "var(--color-muted-background, #F3F4F6)",
-                  color: "var(--color-muted-foreground)",
-                  border: "1px solid var(--color-border)",
-                  borderRadius: "var(--radius-md)",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "not-allowed",
-                }}
-              >
-                <Users size={17} /> İstek Bekliyor
-              </button>
-            ) : showMessageInput ? (
-              <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
-                <textarea
-                  value={joinMessage}
-                  onChange={(e) => setJoinMessage(e.target.value)}
-                  placeholder="Kendinizi tanıtın (opsiyonel)..."
-                  rows={3}
-                  style={{
-                    width: "100%",
-                    padding: "10px 14px",
-                    border: "1px solid var(--color-border)",
-                    borderRadius: "var(--radius-sm)",
-                    fontSize: 14,
-                    resize: "none",
-                    outline: "none",
-                    boxSizing: "border-box",
-                    fontFamily: "inherit",
-                  }}
-                />
-                <div style={{ display: "flex", gap: 8 }}>
-                  <button
-                    onClick={handleJoin}
-                    disabled={join.isPending}
-                    style={{
-                      flex: 1,
-                      padding: "12px",
-                      background: "var(--color-accent)",
-                      color: "#fff",
-                      border: "none",
-                      borderRadius: "var(--radius-md)",
-                      fontSize: 14,
-                      fontWeight: 600,
-                      cursor: join.isPending ? "default" : "pointer",
-                      opacity: join.isPending ? 0.7 : 1,
-                    }}
-                  >
-                    {join.isPending ? "Gönderiliyor..." : "İstek Gönder"}
-                  </button>
-                  <button
-                    onClick={() => setShowMessageInput(false)}
-                    style={{
-                      padding: "12px 16px",
-                      background: "none",
-                      border: "1px solid var(--color-border)",
-                      borderRadius: "var(--radius-md)",
-                      fontSize: 14,
-                      cursor: "pointer",
-                      color: "var(--color-muted-foreground)",
-                    }}
-                  >
-                    İptal
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <button
-                onClick={() => setShowMessageInput(true)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: 8,
-                  width: "100%",
-                  padding: "14px",
-                  background: "var(--color-accent)",
-                  color: "#fff",
-                  border: "none",
-                  borderRadius: "var(--radius-md)",
-                  fontSize: 15,
-                  fontWeight: 600,
-                  cursor: "pointer",
-                }}
-              >
-                <Users size={17} /> Katılmak İstiyorum
-              </button>
-            )}
-          </div>
-        )}
-
         {isFull && (
           <div style={{
             background: "#F3F4F6",
@@ -437,6 +364,30 @@ function ActivityDetailPageInner({ params }: { params: Promise<{ id: string }> }
         {isParticipant && <div ref={chatRef}><ChatPanel activityId={id} /></div>}
         </div>
       </div>
+
+      {showJoinModal && (
+        <JoinActivityModal
+          title={activity.title}
+          categoryName={activity.categoryName}
+          categoryColor={categoryColor}
+          CategoryIcon={CategoryIcon}
+          dateLabel={formatDate(activity.eventDate)}
+          addressText={activity.addressText}
+          priceLabel={priceLabel}
+          spotsLabel={spotsLabel}
+          isPending={join.isPending}
+          onConfirm={handleJoin}
+          onClose={() => setShowJoinModal(false)}
+        />
+      )}
+
+      {showParticipantsModal && (
+        <ParticipantsModal
+          participants={activity.participants}
+          currentUserId={currentUserId}
+          onClose={() => setShowParticipantsModal(false)}
+        />
+      )}
     </AppShell>
   );
 }
@@ -446,17 +397,6 @@ function SectionTitle({ children, noMargin }: { children: React.ReactNode; noMar
     <h2 style={{ fontSize: 15, fontWeight: 700, color: "var(--color-foreground)", margin: noMargin ? 0 : "0 0 10px" }}>
       {children}
     </h2>
-  );
-}
-
-function DetailBox({ icon: Icon, label, value }: { icon: LucideIcon; label: string; value: string }) {
-  return (
-    <div style={{ background: "#F9FAFB", borderRadius: "var(--radius-md)", padding: "12px 14px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: 5, fontSize: 11, color: "var(--color-muted-foreground)", marginBottom: 4 }}>
-        <Icon size={12} /> {label}
-      </div>
-      <div style={{ fontSize: 15, fontWeight: 700, color: "var(--color-foreground)" }}>{value}</div>
-    </div>
   );
 }
 

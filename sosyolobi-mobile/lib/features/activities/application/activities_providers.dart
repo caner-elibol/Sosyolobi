@@ -58,6 +58,16 @@ Future<ActivityDetail> activityDetail(Ref ref, String id) {
   return ref.watch(activitiesApiProvider).getById(id);
 }
 
+/// Backs the Keşfet tab's "Katıldığım Etkinlikler" slider — upcoming
+/// activities the user participates in (organizer or approved participant),
+/// via `GET /api/activities/mine`. Queried through `ActivityParticipants` on
+/// the backend, not `ActivityRequests`, so self-created activities (which
+/// never generate a join request for their own creator) are included too.
+@riverpod
+Future<List<Activity>> joinedUpcomingActivities(Ref ref) {
+  return ref.watch(activitiesApiProvider).getMineUpcoming();
+}
+
 /// Mirrors `useCreateActivity`'s mutation — on success, invalidates
 /// nearby/map activity caches the way `qc.invalidateQueries` does on web.
 @riverpod

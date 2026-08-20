@@ -8,7 +8,9 @@ public interface IActivityService
     Task<ActivityResponse> CreateAsync(Guid userId, CreateActivityRequest request);
     Task<PagedResponse<ActivityResponse>> GetListAsync(PagedRequest paged);
     Task<IList<ActivityResponse>> GetNearbyAsync(NearbyActivitiesRequest request);
+    Task<IList<ActivityResponse>> GetMineUpcomingAsync(Guid userId);
     Task<IList<ActivityMapItemResponse>> GetMapItemsAsync(NearbyActivitiesRequest request);
+    Task<PagedResponse<ActivityMapItemResponse>> GetMapItemsPagedAsync(NearbyActivitiesRequest request, PagedRequest paged);
     Task<ActivityDetailResponse?> GetByIdAsync(Guid id, Guid? requestingUserId);
     Task<ActivityResponse> UpdateAsync(Guid id, Guid userId, UpdateActivityRequest request);
     Task DeleteAsync(Guid id, Guid userId);

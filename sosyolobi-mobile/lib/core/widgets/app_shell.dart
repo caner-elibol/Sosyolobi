@@ -43,12 +43,6 @@ class AppShell extends ConsumerWidget {
       label: 'Oluştur',
     ),
     (
-      path: RoutePaths.requests,
-      icon: Icons.inbox_outlined,
-      activeIcon: Icons.inbox,
-      label: 'İstekler',
-    ),
-    (
       path: RoutePaths.friends,
       icon: Icons.people_outline,
       activeIcon: Icons.people,

@@ -75,8 +75,9 @@ abstract class ActivityDetail with _$ActivityDetail {
 
 /// Drops the detail-only fields (`addressDetailPrivate`, `participants`) so
 /// an [ActivityDetail] fetched by id can be rendered with the same
-/// [ActivityCard] used for list/summary views (e.g. the "Katıldıklarım" tab
-/// on [RequestsScreen], built client-side from per-activity detail fetches).
+/// [ActivityCard] used for list/summary views (e.g. the Keşfet tab's
+/// "Katıldığım Etkinlikler" slider, built client-side from per-activity
+/// detail fetches).
 extension ActivityDetailSummary on ActivityDetail {
   Activity toActivity() => Activity(
     id: id,

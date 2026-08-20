@@ -9,6 +9,7 @@ import { silenceMissingStyleImages } from "@/lib/map-utils";
 import { ActivityMarker } from "@/components/app/ActivityMarker";
 import { ClusterMarker } from "@/components/app/ClusterMarker";
 import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
+import { resolveImageUrl } from "@/lib/image-url";
 import type { ActivityMapItem } from "@/types/user";
 
 const OPENFREEMAP_STYLE = "https://tiles.openfreemap.org/styles/liberty";
@@ -300,13 +301,13 @@ function ActivityPreview({ activity, onGoToActivity }: { activity: ActivityMapIt
 
   return (
     <div style={{ minWidth: 220, fontFamily: "Inter, ui-sans-serif, system-ui, sans-serif" }}>
-      {activity.categoryImageUrl && (
+      {resolveImageUrl(activity.categoryImageUrl) && (
         <div
           style={{
             height: 90,
             margin: "-10px -10px 8px",
             borderRadius: "var(--radius-sm) var(--radius-sm) 0 0",
-            background: `url(${activity.categoryImageUrl}) center/cover no-repeat`,
+            background: `url(${resolveImageUrl(activity.categoryImageUrl)}) center/cover no-repeat`,
           }}
         />
       )}

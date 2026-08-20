@@ -17,7 +17,6 @@ import '../../features/map/presentation/location_gate_screen.dart';
 import '../../features/map/presentation/map_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/public_profile_screen.dart';
-import '../../features/requests/presentation/requests_screen.dart';
 import '../../features/users/presentation/my_reports_screen.dart';
 import '../widgets/app_shell.dart';
 import 'route_paths.dart';
@@ -130,10 +129,6 @@ GoRouter appRouter(Ref ref) {
             path: RoutePaths.activityDetailPattern,
             builder: (context, state) =>
                 ActivityDetailScreen(activityId: state.pathParameters['id']!),
-          ),
-          GoRoute(
-            path: RoutePaths.requests,
-            builder: (context, state) => const RequestsScreen(),
           ),
           GoRoute(
             path: RoutePaths.profile,

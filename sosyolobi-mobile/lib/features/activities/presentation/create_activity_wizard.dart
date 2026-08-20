@@ -13,6 +13,7 @@ import '../../../core/widgets/api_error_snackbar.dart';
 import '../../../core/widgets/app_snackbar.dart';
 import '../../map/application/current_location_provider.dart';
 import '../../map/presentation/widgets/pin_drop_map.dart';
+import '../../profile/application/profile_providers.dart';
 import '../application/activities_providers.dart';
 import '../application/categories_provider.dart';
 import '../domain/create_activity_request.dart';
@@ -47,6 +48,31 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
   String? _neededError;
   String? _addressError;
   bool _submitting = false;
+  bool _profileGateDialogShown = false;
+
+  void _showProfileRequiredDialog() {
+    if (_profileGateDialogShown) return;
+    _profileGateDialogShown = true;
+    showDialog<void>(
+      context: context,
+      barrierDismissible: false,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Profil adı gerekli'),
+        content: const Text(
+          'Etkinlik oluşturabilmek için önce profilinize bir isim eklemelisiniz.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(dialogContext).pop();
+              context.go(RoutePaths.profile);
+            },
+            child: const Text('Profile Git'),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   void dispose() {
@@ -174,6 +200,14 @@ class _CreateActivityWizardState extends ConsumerState<CreateActivityWizard> {
   Widget build(BuildContext context) {
     final categoriesAsync = ref.watch(categoriesProvider);
     final locationAsync = ref.watch(currentLocationProvider);
+    final profileAsync = ref.watch(myProfileProvider);
+
+    if (profileAsync.hasValue && profileAsync.value!.displayName.trim().isEmpty) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _showProfileRequiredDialog();
+      });
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
 
     return Scaffold(
       appBar: AppBar(

@@ -58,4 +58,19 @@ abstract final class Formatters {
     final local = date.toLocal();
     return '${local.day} ${_months[local.month - 1]} ${local.hour.toString().padLeft(2, '0')}:${local.minute.toString().padLeft(2, '0')}';
   }
+
+  /// Mirrors web's `formatCountdown` in `activities/[id]/page.tsx`.
+  static String countdown(DateTime date) {
+    final diff = date.difference(DateTime.now());
+    if (diff.isNegative) return 'Başladı';
+    final minutes = diff.inMinutes;
+    final hours = diff.inHours;
+    final days = diff.inDays;
+    if (days > 0) {
+      final restHours = hours % 24;
+      return '$days gün${restHours > 0 ? ' $restHours sa' : ''} kaldı';
+    }
+    if (hours > 0) return '$hours sa ${minutes % 60} dk kaldı';
+    return '$minutes dk kaldı';
+  }
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import Link from "next/link";
 import { toast } from "sonner";
 import { useBlockUser } from "@/hooks/useUserActions";
 import {
@@ -10,14 +11,16 @@ import {
   useSentFriendRequests,
 } from "@/hooks/useFriends";
 import { ReportUserModal } from "@/components/app/ReportUserModal";
-import { Flag, MoreVertical, ShieldOff, UserCheck, UserPlus, UserX } from "lucide-react";
+import { Flag, MoreVertical, ShieldOff, User, UserCheck, UserPlus, UserX } from "lucide-react";
 
 interface ParticipantActionsMenuProps {
   userId: string;
   displayName: string;
+  /** Called (e.g. to close an enclosing modal) right before the "Profiline Git" link navigates. */
+  onBeforeNavigate?: () => void;
 }
 
-export function ParticipantActionsMenu({ userId, displayName }: ParticipantActionsMenuProps) {
+export function ParticipantActionsMenu({ userId, displayName, onBeforeNavigate }: ParticipantActionsMenuProps) {
   const [menuOpen, setMenuOpen] = useState(false);
   const [reportOpen, setReportOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -87,6 +90,13 @@ export function ParticipantActionsMenu({ userId, displayName }: ParticipantActio
           overflow: "hidden",
           border: "1px solid var(--color-border)",
         }}>
+          <Link
+            href={`/app/profile/${userId}`}
+            onClick={() => { setMenuOpen(false); onBeforeNavigate?.(); }}
+            style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", textAlign: "left", padding: "10px 14px", fontSize: 13, color: "var(--color-foreground)", background: "none", border: "none", borderBottom: "1px solid var(--color-border)", cursor: "pointer", textDecoration: "none" }}
+          >
+            <User size={14} /> Profiline Git
+          </Link>
           {friendStatus === "pending-sent" && friendRequest && (
             <button
               onClick={() => handleFriendAction(() => cancelFriendRequest.mutateAsync(friendRequest.id), "İstek iptal edildi.")}

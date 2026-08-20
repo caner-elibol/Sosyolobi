@@ -1,3 +1,5 @@
+import { resolveImageUrl } from "@/lib/image-url";
+
 interface UserAvatarProps {
   displayName: string;
   avatarUrl?: string;
@@ -15,7 +17,7 @@ export function UserAvatar({ displayName, avatarUrl, size = 40 }: UserAvatarProp
   if (avatarUrl) {
     return (
       <img
-        src={avatarUrl}
+        src={resolveImageUrl(avatarUrl)}
         alt={displayName}
         style={{
           width: size,

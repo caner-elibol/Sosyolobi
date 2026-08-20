@@ -23,6 +23,17 @@ class ActivitiesApi {
     return unwrap(response, (json) => Activity.fromJson(json as Map<String, dynamic>));
   }
 
+  /// Mirrors `ActivitiesController.GetMineUpcoming()` (`GET
+  /// api/activities/mine`) — activities the current user participates in
+  /// (as organizer or approved participant), upcoming and not
+  /// cancelled/completed. Queried via `ActivityParticipants`, not
+  /// `ActivityRequests`, so self-created activities (no join request ever
+  /// exists for those) are included too.
+  Future<List<Activity>> getMineUpcoming() async {
+    final response = await guardDio(() => _dio.get<Map<String, dynamic>>('/api/activities/mine'));
+    return unwrapList(response, (json) => Activity.fromJson(json as Map<String, dynamic>));
+  }
+
   Future<List<Activity>> getNearby({
     required double latitude,
     required double longitude,

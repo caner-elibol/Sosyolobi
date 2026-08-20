@@ -30,6 +30,10 @@
 		<string>Yakındaki etkinlikleri gösterebilmek için konumunuza ihtiyacımız var.</string>
 		<key>NSPhotoLibraryUsageDescription</key>
 		<string>Profil fotoğrafı seçebilmek için fotoğraflarınıza erişim izni gerekiyor.</string>
+		<key>NSCalendarsUsageDescription</key>
+		<string>Etkinliği takviminize ekleyebilmek için takvim erişimi gerekiyor.</string>
+		<key>NSContactsUsageDescription</key>
+		<string>Takvim etkinliği eklerken oluşabilecek bir hatayı önlemek için gereklidir.</string>
 		<key>UIApplicationSceneManifest</key>
 		<dict>
 			<key>UIApplicationSupportsMultipleScenes</key>

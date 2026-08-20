@@ -44,4 +44,35 @@ class MapActivitiesApi {
         ));
     return unwrapList(response, (json) => ActivityMapItem.fromJson(json as Map<String, dynamic>));
   }
+
+  /// Mirrors `ActivitiesController.GetMapPaged()` (`GET api/activities/map/paged`).
+  Future<PagedResult<ActivityMapItem>> getMapItemsPaged({
+    required double latitude,
+    required double longitude,
+    int radiusMeters = 10000,
+    String? categoryId,
+    GenderPreference? genderPreference,
+    bool? isFree,
+    DateTime? fromDate,
+    DateTime? toDate,
+    required int page,
+    required int pageSize,
+  }) async {
+    final response = await guardDio(() => _dio.get<Map<String, dynamic>>(
+          '/api/activities/map/paged',
+          queryParameters: {
+            'latitude': latitude,
+            'longitude': longitude,
+            'radiusMeters': radiusMeters,
+            if (categoryId != null) 'categoryId': categoryId,
+            if (genderPreference != null) 'genderPreference': genderPreference.toJson(),
+            if (isFree != null) 'isFree': isFree,
+            if (fromDate != null) 'fromDate': fromDate.toUtc().toIso8601String(),
+            if (toDate != null) 'toDate': toDate.toUtc().toIso8601String(),
+            'page': page,
+            'pageSize': pageSize,
+          },
+        ));
+    return unwrapPaged(response, (json) => ActivityMapItem.fromJson(json as Map<String, dynamic>));
+  }
 }

@@ -29,6 +29,18 @@ class AuthInterceptor extends Interceptor {
 
   bool _isPublic(String path) => _publicPaths.any(path.contains);
 
+  /// A real expired/missing-token 401 from `[Authorize]` never reaches
+  /// `ExceptionHandlingMiddleware`, so it has no `message` field — unlike
+  /// business-rule 401s (e.g. `FriendService.AcceptAsync`'s "bu isteği kabul
+  /// edemezsiniz"), which do. Without this check, business 401s were treated
+  /// as stale tokens and silently refresh+retried instead of showing the
+  /// real error.
+  bool _isRealAuthChallenge(Response<dynamic>? response) {
+    final body = response?.data;
+    if (body is Map<String, dynamic>) return !body.containsKey('message');
+    return true;
+  }
+
   @override
   Future<void> onRequest(RequestOptions options, RequestInterceptorHandler handler) async {
     if (!_isPublic(options.path)) {
@@ -43,7 +55,9 @@ class AuthInterceptor extends Interceptor {
   @override
   Future<void> onError(DioException err, ErrorInterceptorHandler handler) async {
     final request = err.requestOptions;
-    if (err.response?.statusCode != 401 || _isPublic(request.path)) {
+    if (err.response?.statusCode != 401 ||
+        _isPublic(request.path) ||
+        !_isRealAuthChallenge(err.response)) {
       handler.next(err);
       return;
     }

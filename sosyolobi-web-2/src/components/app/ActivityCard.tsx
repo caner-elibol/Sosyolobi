@@ -2,6 +2,7 @@ import type { Activity } from "@/types/user";
 import { ActivityStatus } from "@/types/user";
 import { getCategoryIcon, getCategoryColor } from "@/lib/category-icons";
 import { formatDistanceMeters } from "@/lib/format";
+import { resolveImageUrl } from "@/lib/image-url";
 import { UserAvatar } from "@/components/app/UserAvatar";
 import Link from "next/link";
 import { Clock, MapPin, Users } from "lucide-react";
@@ -28,6 +29,7 @@ export function ActivityCard({ activity, compact = false, categoryColor, variant
   const dist = formatDistanceMeters(activity.distanceMeters);
   const isFull = activity.status === ActivityStatus.Full;
   const hasParticipantData = typeof activity.currentPeopleCount === "number";
+  const imageUrl = resolveImageUrl(activity.categoryImageUrl);
 
   const categoryBadge = (
     <span style={{
@@ -114,8 +116,8 @@ export function ActivityCard({ activity, compact = false, categoryColor, variant
         >
           <div style={{
             height: 120,
-            background: activity.categoryImageUrl
-              ? `linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%), url(${activity.categoryImageUrl}) center/cover no-repeat`
+            background: imageUrl
+              ? `linear-gradient(180deg, rgba(0,0,0,0) 60%, rgba(0,0,0,0.35) 100%), url(${imageUrl}) center/cover no-repeat`
               : `linear-gradient(135deg, color-mix(in srgb, ${color} 22%, white) 0%, color-mix(in srgb, ${color} 10%, white) 100%)`,
             display: "flex",
             alignItems: "center",
@@ -165,7 +167,7 @@ export function ActivityCard({ activity, compact = false, categoryColor, variant
             overflow: "hidden",
             cursor: "pointer",
             transition: "box-shadow 0.2s var(--ease-out), transform 0.2s var(--ease-out)",
-            background: `url(${activity.categoryImageUrl}) center/cover no-repeat`,
+            background: `url(${imageUrl}) center/cover no-repeat`,
           }}
         >
           <div style={{

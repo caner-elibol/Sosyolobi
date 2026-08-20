@@ -37,13 +37,17 @@ class RequestsApi {
     await guardDio(() => _dio.post<Map<String, dynamic>>('/api/activity-requests/$requestId/reject'));
   }
 
-  Future<List<ActivityJoinRequest>> incoming() async {
-    final response = await guardDio(() => _dio.get<Map<String, dynamic>>('/api/activity-requests/incoming'));
+  Future<List<ActivityJoinRequest>> sent() async {
+    final response = await guardDio(() => _dio.get<Map<String, dynamic>>('/api/activity-requests/sent'));
     return unwrapList(response, (json) => ActivityJoinRequest.fromJson(json as Map<String, dynamic>));
   }
 
-  Future<List<ActivityJoinRequest>> sent() async {
-    final response = await guardDio(() => _dio.get<Map<String, dynamic>>('/api/activity-requests/sent'));
+  /// Mirrors `ActivityRequestsController.GetRequests()` (`GET
+  /// api/activities/{activityId}/requests`, owner-only) — all requests
+  /// (any status) for one activity, used to power the owner's "Katılım
+  /// İstekleri" modal on the activity detail screen.
+  Future<List<ActivityJoinRequest>> forActivity(String activityId) async {
+    final response = await guardDio(() => _dio.get<Map<String, dynamic>>('/api/activities/$activityId/requests'));
     return unwrapList(response, (json) => ActivityJoinRequest.fromJson(json as Map<String, dynamic>));
   }
 }

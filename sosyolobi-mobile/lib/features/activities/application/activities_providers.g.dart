@@ -381,6 +381,63 @@ final class ActivityDetailFamily extends $Family
   String toString() => r'activityDetailProvider';
 }
 
+/// Backs the Keşfet tab's "Katıldığım Etkinlikler" slider — upcoming
+/// activities the user participates in (organizer or approved participant),
+/// via `GET /api/activities/mine`. Queried through `ActivityParticipants` on
+/// the backend, not `ActivityRequests`, so self-created activities (which
+/// never generate a join request for their own creator) are included too.
+
+@ProviderFor(joinedUpcomingActivities)
+final joinedUpcomingActivitiesProvider = JoinedUpcomingActivitiesProvider._();
+
+/// Backs the Keşfet tab's "Katıldığım Etkinlikler" slider — upcoming
+/// activities the user participates in (organizer or approved participant),
+/// via `GET /api/activities/mine`. Queried through `ActivityParticipants` on
+/// the backend, not `ActivityRequests`, so self-created activities (which
+/// never generate a join request for their own creator) are included too.
+
+final class JoinedUpcomingActivitiesProvider
+    extends
+        $FunctionalProvider<
+          AsyncValue<List<Activity>>,
+          List<Activity>,
+          FutureOr<List<Activity>>
+        >
+    with $FutureModifier<List<Activity>>, $FutureProvider<List<Activity>> {
+  /// Backs the Keşfet tab's "Katıldığım Etkinlikler" slider — upcoming
+  /// activities the user participates in (organizer or approved participant),
+  /// via `GET /api/activities/mine`. Queried through `ActivityParticipants` on
+  /// the backend, not `ActivityRequests`, so self-created activities (which
+  /// never generate a join request for their own creator) are included too.
+  JoinedUpcomingActivitiesProvider._()
+    : super(
+        from: null,
+        argument: null,
+        retry: null,
+        name: r'joinedUpcomingActivitiesProvider',
+        isAutoDispose: true,
+        dependencies: null,
+        $allTransitiveDependencies: null,
+      );
+
+  @override
+  String debugGetCreateSourceHash() => _$joinedUpcomingActivitiesHash();
+
+  @$internal
+  @override
+  $FutureProviderElement<List<Activity>> $createElement(
+    $ProviderPointer pointer,
+  ) => $FutureProviderElement(pointer);
+
+  @override
+  FutureOr<List<Activity>> create(Ref ref) {
+    return joinedUpcomingActivities(ref);
+  }
+}
+
+String _$joinedUpcomingActivitiesHash() =>
+    r'050d747cf2d54b59a7c913c4e5dbfcbbe0ca9494';
+
 /// Mirrors `useCreateActivity`'s mutation — on success, invalidates
 /// nearby/map activity caches the way `qc.invalidateQueries` does on web.
 

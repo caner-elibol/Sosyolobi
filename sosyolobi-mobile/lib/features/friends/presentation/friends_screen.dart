@@ -265,6 +265,7 @@ class _RequestTile extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final actions = ref.read(friendActionsControllerProvider.notifier);
+    final busy = ref.watch(friendActionsControllerProvider).isLoading;
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(color: AppColors.surface, border: Border.all(color: AppColors.border), borderRadius: BorderRadius.circular(AppRadius.lg)),
@@ -296,16 +297,16 @@ class _RequestTile extends ConsumerWidget {
           const Spacer(),
           if (mode == _RequestTileMode.incoming) ...[
             IconButton(
-              onPressed: () => _act(context, ref, () => actions.reject(request.id, userId: request.user.userId), 'İstek reddedildi.', 'Reddedilemedi.'),
+              onPressed: busy ? null : () => _act(context, ref, () => actions.reject(request.id, userId: request.user.userId), 'İstek reddedildi.', 'Reddedilemedi.'),
               icon: const Icon(Icons.close, size: 18, color: AppColors.destructive),
             ),
             IconButton(
-              onPressed: () => _act(context, ref, () => actions.accept(request.id, userId: request.user.userId), 'Arkadaşlık isteği kabul edildi.', 'Kabul edilemedi.'),
+              onPressed: busy ? null : () => _act(context, ref, () => actions.accept(request.id, userId: request.user.userId), 'Arkadaşlık isteği kabul edildi.', 'Kabul edilemedi.'),
               icon: const Icon(Icons.check, size: 18, color: AppColors.success),
             ),
           ] else
             OutlinedButton(
-              onPressed: () => _act(context, ref, () => actions.cancel(request.id, userId: request.user.userId), 'İstek iptal edildi.', 'İptal edilemedi.'),
+              onPressed: busy ? null : () => _act(context, ref, () => actions.cancel(request.id, userId: request.user.userId), 'İstek iptal edildi.', 'İptal edilemedi.'),
               child: const Text('İptal Et'),
             ),
         ],

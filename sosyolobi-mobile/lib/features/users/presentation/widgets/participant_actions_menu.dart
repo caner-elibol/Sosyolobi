@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../core/router/route_paths.dart';
 import '../../../../core/theme/colors.dart';
 import '../../../../core/widgets/api_error_snackbar.dart';
 import '../../../friends/application/friends_providers.dart';
@@ -12,10 +14,19 @@ import 'report_user_dialog.dart';
 /// adding a friend is reachable from the same one-tap menu instead of only
 /// from the full profile screen ([FriendActionButton]).
 class ParticipantActionsMenu extends ConsumerWidget {
-  const ParticipantActionsMenu({required this.userId, required this.displayName, super.key});
+  const ParticipantActionsMenu({
+    required this.userId,
+    required this.displayName,
+    this.onBeforeNavigateToProfile,
+    super.key,
+  });
 
   final String userId;
   final String displayName;
+
+  /// Called (e.g. to close an enclosing dialog/sheet) right before pushing
+  /// the profile route from the "Profiline Git" item.
+  final VoidCallback? onBeforeNavigateToProfile;
 
   Future<void> _handleFriendAction(BuildContext context, WidgetRef ref, Future<void> Function() action, String successMessage) async {
     await action();
@@ -60,7 +71,10 @@ class ParticipantActionsMenu extends ConsumerWidget {
     return PopupMenuButton<String>(
       icon: const Icon(Icons.more_vert, size: 18, color: AppColors.mutedForeground),
       onSelected: (value) {
-        if (value == 'report') {
+        if (value == 'profile') {
+          onBeforeNavigateToProfile?.call();
+          context.push(RoutePaths.publicProfile(userId));
+        } else if (value == 'report') {
           showReportUserDialog(context, userId: userId, displayName: displayName);
         } else if (value == 'block') {
           _handleBlock(context, ref);
@@ -79,6 +93,8 @@ class ParticipantActionsMenu extends ConsumerWidget {
         }
       },
       itemBuilder: (context) => [
+        const PopupMenuItem(value: 'profile', child: Row(children: [Icon(Icons.person_outline, size: 16), SizedBox(width: 8), Text('Profiline Git')])),
+        const PopupMenuDivider(),
         if (friendInfo.status == FriendStatus.none)
           const PopupMenuItem(value: 'friend-add', child: Row(children: [Icon(Icons.person_add_alt_1, size: 16), SizedBox(width: 8), Text('Arkadaş Ekle')])),
         if (friendInfo.status == FriendStatus.pendingSent)

@@ -1,3 +1,4 @@
+import 'package:add_2_calendar/add_2_calendar.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -13,9 +14,11 @@ import '../../../core/widgets/user_link.dart';
 import '../../auth/application/auth_notifier.dart';
 import '../../chat/presentation/chat_panel.dart';
 import '../../requests/application/requests_providers.dart';
-import '../../users/presentation/widgets/participant_actions_menu.dart';
 import '../application/activities_providers.dart';
 import '../domain/activity.dart';
+import 'widgets/join_activity_dialog.dart';
+import 'widgets/owner_requests_dialog.dart';
+import 'widgets/participants_dialog.dart';
 
 const _skillLabels = {
   SkillLevel.any: 'Herkes',
@@ -71,24 +74,10 @@ class _ActivityDetailBody extends ConsumerStatefulWidget {
 }
 
 class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
-  bool _showMessageInput = false;
-  final _messageController = TextEditingController();
-
-  @override
-  void dispose() {
-    _messageController.dispose();
-    super.dispose();
-  }
-
   Future<void> _handleJoin() async {
     await ref
         .read(requestActionsControllerProvider.notifier)
-        .join(
-          widget.activityId,
-          message: _messageController.text.trim().isEmpty
-              ? null
-              : _messageController.text.trim(),
-        );
+        .join(widget.activityId);
     if (!mounted) return;
     final error = ref.read(requestActionsControllerProvider).hasError;
     if (error) {
@@ -97,11 +86,44 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
       ).showSnackBar(const SnackBar(content: Text('İstek gönderilemedi.')));
       return;
     }
-    setState(() => _showMessageInput = false);
-    _messageController.clear();
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(const SnackBar(content: Text('Katılım isteği gönderildi!')));
+  }
+
+  Future<void> _openJoinDialog(ActivityDetail activity, Color color) async {
+    final totalSpots = activity.neededPeopleCount + 1;
+    final priceLabel = (activity.pricePerPerson ?? 0) > 0
+        ? '${activity.pricePerPerson} ₺'
+        : 'Ücretsiz';
+    final confirmed = await showJoinActivityDialog(
+      context,
+      title: activity.title,
+      categoryName: activity.categoryName,
+      categoryColor: color,
+      categoryIcon: CategoryIcons.iconFor(activity.categoryName),
+      dateLabel: Formatters.eventDate(activity.eventDate),
+      addressText: activity.addressText,
+      priceLabel: priceLabel,
+      spotsLabel: '${activity.currentPeopleCount} / $totalSpots kişi',
+    );
+    if (confirmed) await _handleJoin();
+  }
+
+  void _addToCalendar(ActivityDetail activity) {
+    final location = (activity.addressDetailPrivate?.isNotEmpty ?? false)
+        ? '${activity.addressText}, ${activity.addressDetailPrivate}'
+        : activity.addressText;
+    final start = activity.eventDate.toLocal();
+    Add2Calendar.addEvent2Cal(Event(
+      title: activity.title,
+      description: activity.description ?? '',
+      location: location,
+      startDate: start,
+      // Model has no explicit end time — 2h is a reasonable default for a
+      // social activity.
+      endDate: start.add(const Duration(hours: 2)),
+    ));
   }
 
   @override
@@ -119,6 +141,19 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
         activity.participants.any((p) => p.userId == currentUserId);
     final hasPendingRequest =
         activity.myRequestStatus == ActivityRequestStatus.pending;
+    final canJoin = !isCancelled && !isFull && !isParticipant;
+    final isOwner = currentUserId != null && currentUserId == activity.createdByUserId;
+    final pendingRequestsAsync = isOwner
+        ? ref.watch(activityRequestsProvider(widget.activityId))
+        : null;
+    final pendingCount = pendingRequestsAsync
+            ?.value
+            ?.where((r) => r.status == ActivityRequestStatus.pending)
+            .length ??
+        0;
+    final priceLabel = (activity.pricePerPerson ?? 0) > 0
+        ? '${activity.pricePerPerson} ₺'
+        : 'Ücretsiz';
 
     return CustomScrollView(
       slivers: [
@@ -143,257 +178,304 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Date + countdown
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _CategoryBadge(name: activity.categoryName, color: color),
-                    if (isCancelled)
-                      const _InfoChip(
-                        icon: Icons.cancel_outlined,
-                        label: 'İptal edildi',
-                        tone: _ChipTone.muted,
-                      )
-                    else if (isFull)
-                      const _InfoChip(
-                        icon: Icons.people_outline,
-                        label: 'Dolu',
-                        tone: _ChipTone.muted,
-                      )
-                    else
-                      const _InfoChip(
-                        icon: Icons.people_outline,
-                        label: 'Açık',
-                        tone: _ChipTone.success,
+                    Row(
+                      children: [
+                        const Icon(
+                          Icons.calendar_today,
+                          size: 14,
+                          color: AppColors.accent,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          Formatters.eventDate(activity.eventDate),
+                          style: const TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.accent,
+                          ),
+                        ),
+                      ],
+                    ),
+                    if (!isCancelled)
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.schedule,
+                            size: 13,
+                            color: AppColors.mutedForeground,
+                          ),
+                          const SizedBox(width: 5),
+                          Text(
+                            Formatters.countdown(activity.eventDate),
+                            style: const TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.mutedForeground,
+                            ),
+                          ),
+                        ],
                       ),
                   ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  activity.title,
-                  style: const TextStyle(
-                    fontSize: 21,
-                    fontWeight: FontWeight.w700,
-                  ),
-                ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 14),
+
+                // Title/location/participants (left) + Katıl + badges (right)
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(
-                      Icons.calendar_today,
-                      size: 14,
-                      color: AppColors.accent,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      Formatters.eventDate(activity.eventDate),
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.accent,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 6),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.place_outlined,
-                      size: 14,
-                      color: AppColors.mutedForeground,
-                    ),
-                    const SizedBox(width: 6),
                     Expanded(
-                      child: Text(
-                        dist.isNotEmpty
-                            ? '${activity.addressText} · $dist'
-                            : activity.addressText,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          color: AppColors.mutedForeground,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 12),
-                Row(
-                  children: [
-                    if (activity.participants.isNotEmpty)
-                      SizedBox(
-                        width:
-                            26.0 +
-                            (activity.participants.length.clamp(0, 4) - 1) *
-                                18.0,
-                        height: 26,
-                        child: Stack(
-                          children: [
-                            for (
-                              var i = 0;
-                              i < activity.participants.take(4).length;
-                              i++
-                            )
-                              Positioned(
-                                left: i * 18.0,
-                                child: Container(
-                                  decoration: const BoxDecoration(
-                                    shape: BoxShape.circle,
-                                    border: Border.fromBorderSide(
-                                      BorderSide(
-                                        color: AppColors.background,
-                                        width: 2,
-                                      ),
-                                    ),
-                                  ),
-                                  child: UserAvatar(
-                                    displayName:
-                                        activity.participants[i].displayName,
-                                    avatarUrl:
-                                        activity.participants[i].avatarUrl,
-                                    size: 26,
-                                  ),
-                                ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            activity.title,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              fontSize: 21,
+                              fontWeight: FontWeight.w700,
+                            ),
+                          ),
+                          if (activity.description != null &&
+                              activity.description!.isNotEmpty) ...[
+                            const SizedBox(height: 6),
+                            Text(
+                              activity.description!,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                color: AppColors.foreground,
+                                height: 1.4,
                               ),
+                            ),
                           ],
-                        ),
-                      ),
-                    const SizedBox(width: 8),
-                    Text(
-                      '${activity.currentPeopleCount} / $totalSpots katılıyor',
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 10),
-                Wrap(
-                  spacing: 6,
-                  children: [
-                    _InfoChip(
-                      icon: Icons.emoji_events_outlined,
-                      label: _skillLabels[activity.skillLevel]!,
-                    ),
-                    _InfoChip(
-                      icon: Icons.people_outline,
-                      label: _genderLabels[activity.genderPreference]!,
-                    ),
-                  ],
-                ),
-                if (activity.description != null &&
-                    activity.description!.isNotEmpty) ...[
-                  const SizedBox(height: 16),
-                  const _SectionTitle('Hakkında'),
-                  Text(
-                    activity.description!,
-                    style: const TextStyle(
-                      fontSize: 13,
-                      color: Color(0xFF374151),
-                      height: 1.5,
-                    ),
-                  ),
-                ],
-                const SizedBox(height: 16),
-                const _SectionTitle('Detaylar'),
-                GridView.count(
-                  crossAxisCount: 2,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  mainAxisSpacing: 10,
-                  crossAxisSpacing: 10,
-                  childAspectRatio: 2.6,
-                  children: [
-                    _DetailBox(
-                      icon: Icons.account_balance_wallet_outlined,
-                      label: 'Kişi Başı Ücret',
-                      value: (activity.pricePerPerson ?? 0) > 0
-                          ? '${activity.pricePerPerson} ₺'
-                          : 'Ücretsiz',
-                    ),
-                    _DetailBox(
-                      icon: Icons.people_outline,
-                      label: 'Kontenjan',
-                      value: '$totalSpots kişi',
-                    ),
-                    _DetailBox(
-                      icon: Icons.groups_outlined,
-                      label: 'Şu an',
-                      value: '${activity.currentPeopleCount} kişi',
-                    ),
-                    _DetailBox(
-                      icon: Icons.emoji_events_outlined,
-                      label: 'Seviye',
-                      value: _skillLabels[activity.skillLevel]!,
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 16),
-                const _SectionTitle('Etkinlik Sahibi'),
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppColors.surface,
-                    border: Border.all(color: AppColors.border),
-                    borderRadius: BorderRadius.circular(AppRadius.lg),
-                  ),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        child: UserLink(
-                          userId: activity.createdByUserId,
-                          child: Row(
-                            children: [
-                              UserAvatar(
-                                displayName: activity.createdByDisplayName,
-                                avatarUrl: activity.createdByAvatarUrl,
-                                size: 42,
+                          const SizedBox(height: 6),
+                          UserLink(
+                            userId: activity.createdByUserId,
+                            child: RichText(
+                              text: TextSpan(
+                                style: const TextStyle(
+                                  fontSize: 13,
+                                  color: AppColors.mutedForeground,
+                                ),
+                                children: [
+                                  const TextSpan(text: 'Düzenleyen: '),
+                                  TextSpan(
+                                    text: activity.createdByDisplayName,
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: AppColors.foreground,
+                                    ),
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 10),
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.place_outlined,
+                                size: 14,
+                                color: AppColors.mutedForeground,
+                              ),
+                              const SizedBox(width: 6),
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      activity.createdByDisplayName,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const Row(
-                                      children: [
-                                        Icon(
-                                          Icons.star,
-                                          size: 12,
-                                          color: Color(0xFFF59E0B),
-                                        ),
-                                        SizedBox(width: 3),
-                                        Text(
-                                          'Etkinlik sahibi',
-                                          style: TextStyle(
-                                            fontSize: 12,
-                                            color: AppColors.mutedForeground,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
+                                child: Text(
+                                  dist.isNotEmpty
+                                      ? '${activity.addressText} · $dist'
+                                      : activity.addressText,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    color: AppColors.mutedForeground,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
                                 ),
                               ),
                             ],
                           ),
-                        ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              if (activity.participants.isNotEmpty)
+                                SizedBox(
+                                  width:
+                                      26.0 +
+                                      (activity.participants.length.clamp(
+                                            0,
+                                            4,
+                                          ) -
+                                          1) *
+                                          18.0,
+                                  height: 26,
+                                  child: Stack(
+                                    children: [
+                                      for (
+                                        var i = 0;
+                                        i <
+                                            activity.participants
+                                                .take(4)
+                                                .length;
+                                        i++
+                                      )
+                                        Positioned(
+                                          left: i * 18.0,
+                                          child: Container(
+                                            decoration: const BoxDecoration(
+                                              shape: BoxShape.circle,
+                                              border: Border.fromBorderSide(
+                                                BorderSide(
+                                                  color: AppColors.background,
+                                                  width: 2,
+                                                ),
+                                              ),
+                                            ),
+                                            child: UserAvatar(
+                                              displayName: activity
+                                                  .participants[i]
+                                                  .displayName,
+                                              avatarUrl: activity
+                                                  .participants[i]
+                                                  .avatarUrl,
+                                              size: 26,
+                                            ),
+                                          ),
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              const SizedBox(width: 8),
+                              Flexible(
+                                child: Text(
+                                  '${activity.currentPeopleCount} / $totalSpots katılıyor',
+                                  overflow: TextOverflow.ellipsis,
+                                  style: const TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
                       ),
-                      if (currentUserId != null &&
-                          currentUserId != activity.createdByUserId)
-                        ParticipantActionsMenu(
-                          userId: activity.createdByUserId,
-                          displayName: activity.createdByDisplayName,
+                    ),
+                    const SizedBox(width: 12),
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.end,
+                      children: [
+                        if (hasPendingRequest)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8,
+                            ),
+                            decoration: BoxDecoration(
+                              color: const Color(0xFFF3F4F6),
+                              border: Border.all(color: AppColors.border),
+                              borderRadius: BorderRadius.circular(
+                                AppRadius.full,
+                              ),
+                            ),
+                            child: const Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.people_outline,
+                                  size: 14,
+                                  color: AppColors.mutedForeground,
+                                ),
+                                SizedBox(width: 6),
+                                Text(
+                                  'İstek Bekliyor',
+                                  style: TextStyle(
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.mutedForeground,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          )
+                        else if (canJoin)
+                          ElevatedButton.icon(
+                            onPressed: () => _openJoinDialog(activity, color),
+                            style: ElevatedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                            ),
+                            icon: const Icon(Icons.people_outline, size: 15),
+                            label: const Text('Katıl'),
+                          )
+                        else if (isParticipant)
+                          ElevatedButton.icon(
+                            onPressed: () => _addToCalendar(activity),
+                            style: ElevatedButton.styleFrom(
+                              shape: const StadiumBorder(),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 20,
+                                vertical: 10,
+                              ),
+                            ),
+                            icon: const Icon(Icons.event_available_outlined, size: 15),
+                            label: const Text('Takvime Ekle'),
+                          ),
+                        if (canJoin || hasPendingRequest || isParticipant)
+                          const SizedBox(height: 8),
+                        SizedBox(
+                          width: 150,
+                          child: Wrap(
+                            alignment: WrapAlignment.end,
+                            spacing: 6,
+                            runSpacing: 6,
+                            children: [
+                              _CategoryBadge(
+                                name: activity.categoryName,
+                                color: color,
+                              ),
+                              if (isCancelled)
+                                const _InfoChip(
+                                  icon: Icons.cancel_outlined,
+                                  label: 'İptal edildi',
+                                  tone: _ChipTone.muted,
+                                )
+                              else if (isFull)
+                                const _InfoChip(
+                                  icon: Icons.people_outline,
+                                  label: 'Dolu',
+                                  tone: _ChipTone.muted,
+                                )
+                              else
+                                const _InfoChip(
+                                  icon: Icons.people_outline,
+                                  label: 'Açık',
+                                  tone: _ChipTone.success,
+                                ),
+                              _InfoChip(
+                                icon: Icons.account_balance_wallet_outlined,
+                                label: priceLabel,
+                              ),
+                              _InfoChip(
+                                icon: Icons.emoji_events_outlined,
+                                label: _skillLabels[activity.skillLevel]!,
+                              ),
+                              _InfoChip(
+                                icon: Icons.people_outline,
+                                label:
+                                    _genderLabels[activity.genderPreference]!,
+                              ),
+                            ],
+                          ),
                         ),
-                    ],
-                  ),
+                      ],
+                    ),
+                  ],
                 ),
                 if (activity.addressDetailPrivate != null &&
                     activity.addressDetailPrivate!.isNotEmpty) ...[
@@ -443,49 +525,48 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
                 ],
                 if (activity.participants.isNotEmpty) ...[
                   const SizedBox(height: 16),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const _SectionTitle('Katılımcılar', noMargin: true),
-                      Text(
-                        '${activity.participants.length} kişi',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: AppColors.mutedForeground,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 8),
-                  Container(
-                    decoration: BoxDecoration(
-                      color: AppColors.surface,
-                      border: Border.all(color: AppColors.border),
-                      borderRadius: BorderRadius.circular(AppRadius.lg),
+                  InkWell(
+                    onTap: () => showParticipantsDialog(
+                      context,
+                      participants: activity.participants,
+                      currentUserId: currentUserId,
                     ),
-                    child: Column(
-                      children: [
-                        for (var i = 0; i < activity.participants.length; i++)
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 14,
-                              vertical: 10,
-                            ),
-                            decoration: BoxDecoration(
-                              border: i == 0
-                                  ? null
-                                  : const Border(
-                                      top: BorderSide(color: AppColors.border),
-                                    ),
-                            ),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: UserLink(
-                                    userId: activity.participants[i].userId,
-                                    child: Row(
-                                      children: [
-                                        UserAvatar(
+                    borderRadius: BorderRadius.circular(AppRadius.lg),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 14,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.surface,
+                        border: Border.all(color: AppColors.border),
+                        borderRadius: BorderRadius.circular(AppRadius.lg),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              SizedBox(
+                                width:
+                                    28.0 +
+                                    (activity.participants.length.clamp(
+                                          0,
+                                          4,
+                                        ) -
+                                        1) *
+                                        20.0,
+                                height: 28,
+                                child: Stack(
+                                  children: [
+                                    for (
+                                      var i = 0;
+                                      i < activity.participants.take(4).length;
+                                      i++
+                                    )
+                                      Positioned(
+                                        left: i * 20.0,
+                                        child: UserAvatar(
                                           displayName: activity
                                               .participants[i]
                                               .displayName,
@@ -494,47 +575,42 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
                                               .avatarUrl,
                                           size: 28,
                                         ),
-                                        const SizedBox(width: 8),
-                                        Expanded(
-                                          child: Text(
-                                            activity
-                                                .participants[i]
-                                                .displayName,
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
+                                      ),
+                                  ],
                                 ),
-                                if (currentUserId != null &&
-                                    currentUserId !=
-                                        activity.participants[i].userId)
-                                  ParticipantActionsMenu(
-                                    userId: activity.participants[i].userId,
-                                    displayName:
-                                        activity.participants[i].displayName,
-                                  ),
-                              ],
-                            ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                'Katılımcılar · ${activity.participants.length} kişi',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ],
                           ),
-                      ],
+                          const Icon(
+                            Icons.chevron_right,
+                            size: 18,
+                            color: AppColors.mutedForeground,
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+                if (isOwner && pendingCount > 0) ...[
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: OutlinedButton.icon(
+                      onPressed: () => showOwnerRequestsDialog(context, activityId: widget.activityId),
+                      icon: const Icon(Icons.inbox_outlined, size: 16),
+                      label: Text('Katılım İstekleri ($pendingCount)'),
                     ),
                   ),
                 ],
                 const SizedBox(height: 16),
-                if (!isCancelled && !isFull && !isParticipant)
-                  _JoinCard(
-                    showMessageInput: _showMessageInput,
-                    hasPendingRequest: hasPendingRequest,
-                    messageController: _messageController,
-                    onStart: () => setState(() => _showMessageInput = true),
-                    onCancel: () => setState(() => _showMessageInput = false),
-                    onSubmit: _handleJoin,
-                  ),
                 if (isFull && !isCancelled)
                   Container(
                     width: double.infinity,
@@ -576,148 +652,18 @@ class _ActivityDetailBodyState extends ConsumerState<_ActivityDetailBody> {
   }
 }
 
-class _JoinCard extends StatelessWidget {
-  const _JoinCard({
-    required this.showMessageInput,
-    required this.hasPendingRequest,
-    required this.messageController,
-    required this.onStart,
-    required this.onCancel,
-    required this.onSubmit,
-  });
-
-  final bool showMessageInput;
-
-  /// Backend'in `myRequestStatus` alanından türetiliyor — istek gönderildikten
-  /// sonra sayfa yenilense/yeniden açılsa bile kalıcı olarak "İstek Bekliyor"
-  /// devre dışı durumuna geçiyor (önceden istek gönderilince buton hiçbir
-  /// zaman değişmiyordu, sadece geçici bir snackbar gösteriliyordu).
-  final bool hasPendingRequest;
-  final TextEditingController messageController;
-  final VoidCallback onStart;
-  final VoidCallback onCancel;
-  final Future<void> Function() onSubmit;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 12),
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppColors.surface,
-        border: Border.all(color: AppColors.border),
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-      ),
-      child: hasPendingRequest
-          ? SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: null,
-                icon: const Icon(Icons.hourglass_empty, size: 18),
-                label: const Text('İstek Bekliyor'),
-              ),
-            )
-          : showMessageInput
-          ? Column(
-              children: [
-                TextField(
-                  controller: messageController,
-                  maxLines: 3,
-                  decoration: const InputDecoration(
-                    hintText: 'Kendinizi tanıtın (opsiyonel)...',
-                  ),
-                ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Expanded(
-                      child: ElevatedButton(
-                        onPressed: onSubmit,
-                        child: const Text('İstek Gönder'),
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    OutlinedButton(
-                      onPressed: onCancel,
-                      child: const Text('İptal'),
-                    ),
-                  ],
-                ),
-              ],
-            )
-          : SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: onStart,
-                icon: const Icon(Icons.people_outline, size: 18),
-                label: const Text('Katılmak İstiyorum'),
-              ),
-            ),
-    );
-  }
-}
-
 class _SectionTitle extends StatelessWidget {
-  const _SectionTitle(this.text, {this.noMargin = false});
+  const _SectionTitle(this.text);
 
   final String text;
-  final bool noMargin;
 
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.only(bottom: noMargin ? 0 : 10),
+      padding: const EdgeInsets.only(bottom: 10),
       child: Text(
         text,
         style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-}
-
-class _DetailBox extends StatelessWidget {
-  const _DetailBox({
-    required this.icon,
-    required this.label,
-    required this.value,
-  });
-
-  final IconData icon;
-  final String label;
-  final String value;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF9FAFB),
-        borderRadius: BorderRadius.circular(AppRadius.md),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Row(
-            children: [
-              Icon(icon, size: 12, color: AppColors.mutedForeground),
-              const SizedBox(width: 5),
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 11,
-                  color: AppColors.mutedForeground,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 4),
-          Text(
-            value,
-            style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w700),
-          ),
-        ],
       ),
     );
   }
@@ -808,29 +754,18 @@ class _CategoryBadge extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(8, 3, 10, 3),
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.14),
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 6,
-            height: 6,
-            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
-          ),
-          const SizedBox(width: 5),
-          Text(
-            name,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
-              color: color,
-            ),
-          ),
-        ],
+      child: Text(
+        name,
+        style: TextStyle(
+          fontSize: 12,
+          fontWeight: FontWeight.w600,
+          color: color,
+        ),
       ),
     );
   }

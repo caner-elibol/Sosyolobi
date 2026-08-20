@@ -138,38 +138,35 @@ public class ActivityService : IActivityService
         }).ToList();
     }
 
-    public async Task<IList<ActivityMapItemResponse>> GetMapItemsAsync(NearbyActivitiesRequest request)
-{
-    var userLocation = new Point(request.Longitude, request.Latitude) { SRID = 4326 };
+    private IQueryable<Activity> BuildMapQuery(NearbyActivitiesRequest request, Point userLocation)
+    {
+        var query = _db.Activities
+            .Include(a => a.Category)
+            .Where(a => a.Status == ActivityStatus.Open || a.Status == ActivityStatus.Full)
+            .Where(a => a.EventDate >= DateTime.UtcNow - AutoCompleteWindow)
+            .Where(a => a.Location.Distance(userLocation) <= request.RadiusMeters);
 
-    var query = _db.Activities
-        .Include(a => a.Category)
-        .Where(a => a.Status == ActivityStatus.Open || a.Status == ActivityStatus.Full)
-        .Where(a => a.EventDate >= DateTime.UtcNow - AutoCompleteWindow)
-        .Where(a => a.Location.Distance(userLocation) <= request.RadiusMeters);
+        if (request.CategoryId.HasValue)
+            query = query.Where(a => a.CategoryId == request.CategoryId.Value);
 
-    if (request.CategoryId.HasValue)
-        query = query.Where(a => a.CategoryId == request.CategoryId.Value);
+        if (request.FromDate.HasValue)
+            query = query.Where(a => a.EventDate >= request.FromDate.Value.ToUniversalTime());
 
-    if (request.FromDate.HasValue)
-        query = query.Where(a => a.EventDate >= request.FromDate.Value.ToUniversalTime());
+        if (request.ToDate.HasValue)
+            query = query.Where(a => a.EventDate <= request.ToDate.Value.ToUniversalTime());
 
-    if (request.ToDate.HasValue)
-        query = query.Where(a => a.EventDate <= request.ToDate.Value.ToUniversalTime());
+        if (request.GenderPreference.HasValue && request.GenderPreference.Value != GenderPreference.Any)
+            query = query.Where(a => a.GenderPreference == GenderPreference.Any || a.GenderPreference == request.GenderPreference.Value);
 
-    if (request.GenderPreference.HasValue && request.GenderPreference.Value != GenderPreference.Any)
-        query = query.Where(a => a.GenderPreference == GenderPreference.Any || a.GenderPreference == request.GenderPreference.Value);
+        if (request.IsFree.HasValue)
+            query = request.IsFree.Value
+                ? query.Where(a => a.PricePerPerson == null || a.PricePerPerson == 0)
+                : query.Where(a => a.PricePerPerson != null && a.PricePerPerson > 0);
 
-    if (request.IsFree.HasValue)
-        query = request.IsFree.Value
-            ? query.Where(a => a.PricePerPerson == null || a.PricePerPerson == 0)
-            : query.Where(a => a.PricePerPerson != null && a.PricePerPerson > 0);
+        return query;
+    }
 
-    var activities = await query
-        .OrderBy(a => a.Location.Distance(userLocation))
-        .ToListAsync();
-
-    var items = activities.Select(a => new ActivityMapItemResponse
+    private static ActivityMapItemResponse MapToMapItemResponse(Activity a, Point userLocation) => new()
     {
         Id = a.Id,
         Title = a.Title,
@@ -181,11 +178,57 @@ public class ActivityService : IActivityService
         EventDate = a.EventDate,
         NeededPeopleCount = a.NeededPeopleCount,
         PricePerPerson = a.PricePerPerson,
-        DistanceMeters = a.Location.Distance(userLocation)*111_320
-    }).ToList();
+        DistanceMeters = a.Location.Distance(userLocation) * 111_320
+    };
 
-    return items;
-}
+    // Etkinlik oluşturan kullanıcı otomatik olarak organizatör katılımcı
+    // olarak eklenir (bkz. CreateAsync) — hiçbir ActivityRequest satırı
+    // oluşmaz. Bu yüzden "katıldığım etkinlikler" için ActivityRequests
+    // yerine ActivityParticipants üzerinden sorgulamak gerekir, aksi halde
+    // kullanıcının kendi oluşturduğu etkinlikler bu listede hiç görünmez.
+    public async Task<IList<ActivityResponse>> GetMineUpcomingAsync(Guid userId)
+    {
+        var activities = await _db.Activities
+            .Include(a => a.Category)
+            .Include(a => a.CreatedByUser).ThenInclude(u => u.Profile)
+            .Where(a => a.Participants.Any(p => p.UserId == userId))
+            .Where(a => a.Status != ActivityStatus.Cancelled && a.Status != ActivityStatus.Completed)
+            .Where(a => a.EventDate > DateTime.UtcNow)
+            .OrderBy(a => a.EventDate)
+            .ToListAsync();
+
+        return activities.Select(MapToResponse).ToList();
+    }
+
+    public async Task<IList<ActivityMapItemResponse>> GetMapItemsAsync(NearbyActivitiesRequest request)
+    {
+        var userLocation = new Point(request.Longitude, request.Latitude) { SRID = 4326 };
+
+        var activities = await BuildMapQuery(request, userLocation)
+            .OrderBy(a => a.Location.Distance(userLocation))
+            .ToListAsync();
+
+        return activities.Select(a => MapToMapItemResponse(a, userLocation)).ToList();
+    }
+
+    public async Task<PagedResponse<ActivityMapItemResponse>> GetMapItemsPagedAsync(NearbyActivitiesRequest request, PagedRequest paged)
+    {
+        var userLocation = new Point(request.Longitude, request.Latitude) { SRID = 4326 };
+
+        var query = BuildMapQuery(request, userLocation)
+            .OrderBy(a => a.Location.Distance(userLocation));
+
+        var total = await query.CountAsync();
+        var activities = await query.Skip((paged.Page - 1) * paged.PageSize).Take(paged.PageSize).ToListAsync();
+
+        return new PagedResponse<ActivityMapItemResponse>
+        {
+            Items = activities.Select(a => MapToMapItemResponse(a, userLocation)).ToList(),
+            TotalCount = total,
+            Page = paged.Page,
+            PageSize = paged.PageSize
+        };
+    }
 
     public async Task<ActivityDetailResponse?> GetByIdAsync(Guid id, Guid? requestingUserId)
     {

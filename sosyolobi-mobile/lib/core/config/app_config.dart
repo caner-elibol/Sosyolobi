@@ -13,7 +13,7 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 abstract final class AppConfig {
   static const _override = String.fromEnvironment('API_BASE_URL');
 
-  static const _devPort = 5155;
+  static const _devPort = 5000;
 
   static String get apiBaseUrl {
     if (_override.isNotEmpty) return _override;
